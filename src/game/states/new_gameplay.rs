@@ -4,7 +4,7 @@ use super::{
     game_end::{GameEnd, GameEndReason},
     main_menu::MainMenu,
 };
-use crate::game::components::sprite_data::SpriteData;
+use crate::game::{components::{animation::Animation, sprite_data::SpriteData}, systems::animation_controller::AnimationController};
 use crate::game::{
     components::player::Player, player::PlayerState, systems::{player_controller::PlayerController, sprite_renderer::SpriteRenderer}, utils::{
         events::{Event, Events},
@@ -13,10 +13,7 @@ use crate::game::{
 };
 use hecs::World;
 use micro_games_kit::{
-    character::Character,
-    context::GameContext,
-    game::{GameObject, GameState, GameStateChange},
-    third_party::{
+    animation::{FrameAnimation, NamedAnimation}, character::Character, context::GameContext, game::{GameObject, GameState, GameStateChange}, third_party::{
         raui_core::layout::CoordsMappingScaling,
         spitfire_draw::{
             sprite::{Sprite, SpriteTexture},
@@ -27,7 +24,7 @@ use micro_games_kit::{
         typid::ID,
         vek::{Rgba, Transform},
         windowing::event::VirtualKeyCode,
-    },
+    }
 };
 
 pub struct NewGameplay {
@@ -102,6 +99,9 @@ impl GameState for NewGameplay {
 
         self.world.spawn((
             Player {},
+            Animation { 
+                animation: None
+            },
             Transform::<f32, f32, f32>::default(), 
             SpriteData {
                 texture: "player/idle/1".into(),
@@ -156,21 +156,22 @@ impl GameState for NewGameplay {
     }
 
     fn fixed_update(&mut self, mut context: GameContext, delta_time: f32) {
-        self.maintain(delta_time);
+        // self.maintain(delta_time);
 
         if self.exit.get().is_down() {
             *context.state_change = GameStateChange::Swap(Box::new(MainMenu));
         }
 
         self.player_controller.run(&self.world, &mut context, delta_time);
+        AnimationController::run(&self.world, &mut context, delta_time);
 
-        self.process_game_objects(&mut context, delta_time);
+        // self.process_game_objects(&mut context, delta_time);
 
-        self.resolve_collisions();
+        // self.resolve_collisions();
 
-        self.execute_events(&mut context);
+        // self.execute_events(&mut context);
 
-        self.update_ambient_music();
+        // self.update_ambient_music();
     }
 
     fn draw(&mut self, mut context: GameContext) {
