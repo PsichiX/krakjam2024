@@ -3,44 +3,34 @@ use super::{
     main_menu::MainMenu,
 };
 use crate::game::{
-    drawables::light::draw_sphere_light,
-    enemy::EnemyState,
-    item::{Item, ItemKind},
     player::PlayerState,
-    torch::Torch,
-    ui::{health_bar::health_bar, world_to_screen_content_layout},
     utils::{
-        audio::Audio,
         events::{Event, Events},
         space::{Space, SpaceObject, SpaceObjectId},
     },
 };
+use hecs::World;
 use micro_games_kit::{
     character::Character,
     context::GameContext,
     game::{GameObject, GameState, GameStateChange},
     third_party::{
-        kira::sound::static_sound::StaticSoundHandle,
-        rand::{thread_rng, Rng},
         raui_core::layout::CoordsMappingScaling,
-        raui_immediate_widgets::core::{
-            text_box, Color, ContentBoxItemLayout, Rect, TextBoxFont, TextBoxProps,
-        },
         spitfire_draw::{
-            canvas::Canvas,
             sprite::{Sprite, SpriteTexture},
-            utils::{Drawable, ShaderRef, TextureRef},
+            utils::{Drawable, TextureRef},
         },
         spitfire_glow::{
             graphics::CameraScaling,
-            renderer::{GlowBlending, GlowTextureFiltering, GlowTextureFormat, GlowUniformValue},
+            renderer::GlowTextureFiltering,
         },
         spitfire_input::{InputActionRef, InputConsume, InputMapping, VirtualAction},
         typid::ID,
+        vek::Rgba,
         windowing::event::VirtualKeyCode,
     },
 };
-use std::{collections::HashMap, f32::INFINITY};
+use crate::game::components::sprite_data::SpriteData;
 
 pub struct NewGameplay {
     map: Sprite,
@@ -54,6 +44,7 @@ pub struct NewGameplay {
     // map_radius: f32,
     // music_forest: StaticSoundHandle,
     // music_battle: StaticSoundHandle,
+    world: World,
 }
 
 impl Default for NewGameplay {
@@ -86,6 +77,7 @@ impl Default for NewGameplay {
             // map_radius: 800.0,
             // music_forest,
             // music_battle,
+            world: World::new()
         }
     }
 }
@@ -105,6 +97,13 @@ impl GameState for NewGameplay {
         ));
 
         self.player.activate(&mut context);
+
+        self.world.spawn((SpriteData {
+            texture: "player/idle/1".into(),
+            shader: "character".into(),
+            pivot: 0.5.into(),
+            tint: Rgba::default()
+        },));
 
         // for _ in 0..6 {
         //     let position = [

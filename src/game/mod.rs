@@ -1,3 +1,4 @@
+pub mod components;
 pub mod drawables;
 pub mod enemy;
 pub mod item;
