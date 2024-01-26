@@ -2,6 +2,7 @@ use super::{
     game_end::{GameEnd, GameEndReason},
     main_menu::MainMenu,
 };
+use crate::game::components::sprite_data::SpriteData;
 use crate::game::{
     player::PlayerState,
     utils::{
@@ -20,17 +21,13 @@ use micro_games_kit::{
             sprite::{Sprite, SpriteTexture},
             utils::{Drawable, TextureRef},
         },
-        spitfire_glow::{
-            graphics::CameraScaling,
-            renderer::GlowTextureFiltering,
-        },
+        spitfire_glow::{graphics::CameraScaling, renderer::GlowTextureFiltering},
         spitfire_input::{InputActionRef, InputConsume, InputMapping, VirtualAction},
         typid::ID,
         vek::Rgba,
         windowing::event::VirtualKeyCode,
     },
 };
-use crate::game::components::sprite_data::SpriteData;
 
 pub struct NewGameplay {
     map: Sprite,
@@ -77,7 +74,7 @@ impl Default for NewGameplay {
             // map_radius: 800.0,
             // music_forest,
             // music_battle,
-            world: World::new()
+            world: World::new(),
         }
     }
 }
@@ -102,7 +99,7 @@ impl GameState for NewGameplay {
             texture: "player/idle/1".into(),
             shader: "character".into(),
             pivot: 0.5.into(),
-            tint: Rgba::default()
+            tint: Rgba::default(),
         },));
 
         // for _ in 0..6 {
@@ -233,60 +230,60 @@ impl GameState for NewGameplay {
     }
 
     fn draw_gui(&mut self, context: GameContext) {
-    //     let health_bar_rectangle = Rect {
-    //         left: -50.0,
-    //         right: 50.0,
-    //         top: -60.0,
-    //         bottom: -40.0,
-    //     };
+        //     let health_bar_rectangle = Rect {
+        //         left: -50.0,
+        //         right: 50.0,
+        //         top: -60.0,
+        //         bottom: -40.0,
+        //     };
 
-    //     {
-    //         let state = self.player.state.read().unwrap();
-    //         let layout = world_to_screen_content_layout(
-    //             state.sprite.transform.position.xy(),
-    //             health_bar_rectangle,
-    //             &context,
-    //         );
+        //     {
+        //         let state = self.player.state.read().unwrap();
+        //         let layout = world_to_screen_content_layout(
+        //             state.sprite.transform.position.xy(),
+        //             health_bar_rectangle,
+        //             &context,
+        //         );
 
-    //         health_bar(layout, state.health);
-    //     }
+        //         health_bar(layout, state.health);
+        //     }
 
-    //     for enemy in self.enemies.values() {
-    //         let state = enemy.state.read().unwrap();
-    //         let layout = world_to_screen_content_layout(
-    //             state.sprite.transform.position.xy(),
-    //             health_bar_rectangle,
-    //             &context,
-    //         );
+        //     for enemy in self.enemies.values() {
+        //         let state = enemy.state.read().unwrap();
+        //         let layout = world_to_screen_content_layout(
+        //             state.sprite.transform.position.xy(),
+        //             health_bar_rectangle,
+        //             &context,
+        //         );
 
-    //         health_bar(layout, state.health);
-    //     }
+        //         health_bar(layout, state.health);
+        //     }
 
-    //     text_box((
-    //         ContentBoxItemLayout {
-    //             margin: 40.0.into(),
-    //             ..Default::default()
-    //         },
-    //         TextBoxProps {
-    //             text: format!(
-    //                 "Weapon: {:?}\nEnemies: {}\nItems: {}",
-    //                 self.player.state.read().unwrap().weapon,
-    //                 self.enemies.len(),
-    //                 self.items.len(),
-    //             ),
-    //             font: TextBoxFont {
-    //                 name: "roboto".to_owned(),
-    //                 size: 28.0,
-    //             },
-    //             color: Color {
-    //                 r: 1.0,
-    //                 g: 1.0,
-    //                 b: 1.0,
-    //                 a: 1.0,
-    //             },
-    //             ..Default::default()
-    //         },
-    //     ));
+        //     text_box((
+        //         ContentBoxItemLayout {
+        //             margin: 40.0.into(),
+        //             ..Default::default()
+        //         },
+        //         TextBoxProps {
+        //             text: format!(
+        //                 "Weapon: {:?}\nEnemies: {}\nItems: {}",
+        //                 self.player.state.read().unwrap().weapon,
+        //                 self.enemies.len(),
+        //                 self.items.len(),
+        //             ),
+        //             font: TextBoxFont {
+        //                 name: "roboto".to_owned(),
+        //                 size: 28.0,
+        //             },
+        //             color: Color {
+        //                 r: 1.0,
+        //                 g: 1.0,
+        //                 b: 1.0,
+        //                 a: 1.0,
+        //             },
+        //             ..Default::default()
+        //         },
+        //     ));
     }
 }
 
@@ -333,7 +330,8 @@ impl NewGameplay {
                     .position
                     .xy(),
                 collider_radius: 20.0,
-            }).collect()
+            })
+            .collect(),
         );
     }
 

@@ -1,4 +1,4 @@
-use super::spell_tag::SpellTag;
+use crate::game::utils::magic::spell_tag::SpellTag;
 use std::collections::HashSet;
 
 pub struct Spell {

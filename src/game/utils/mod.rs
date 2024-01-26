@@ -1,5 +1,6 @@
 pub mod audio;
 pub mod events;
+pub mod macros;
 pub mod magic;
 pub mod space;
 
