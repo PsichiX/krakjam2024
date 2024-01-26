@@ -5,17 +5,19 @@ pub enum SpellTag {
     Speed(SpellTagSpeed),
     Shape(SpellTagShape),
     Effect(SpellTagEffect),
+    Direction(SpellTagDirection),
     Trajectory(SpellTagTrajectory),
 }
 
 impl SpellTag {
     pub fn random() -> Self {
-        match thread_rng().gen_range(0..5) {
+        match thread_rng().gen_range(0..6) {
             0 => Self::Size(SpellTagSize::random()),
             1 => Self::Speed(SpellTagSpeed::random()),
             2 => Self::Shape(SpellTagShape::random()),
             3 => Self::Effect(SpellTagEffect::random()),
-            4 => Self::Trajectory(SpellTagTrajectory::random()),
+            4 => Self::Direction(SpellTagDirection::random()),
+            5 => Self::Trajectory(SpellTagTrajectory::random()),
             _ => unreachable!(),
         }
     }
@@ -129,6 +131,25 @@ impl SpellTagShape {
             0 => Self::Circle,
             1 => Self::Wall,
             2 => Self::Triangle,
+            _ => unreachable!(),
+        }
+    }
+}
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum SpellTagDirection {
+    #[default]
+    Forward,
+    Backward,
+    Down,
+}
+
+impl SpellTagDirection {
+    pub fn random() -> Self {
+        match thread_rng().gen_range(0..3) {
+            0 => Self::Forward,
+            1 => Self::Backward,
+            2 => Self::Down,
             _ => unreachable!(),
         }
     }
