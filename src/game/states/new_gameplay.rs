@@ -1,13 +1,14 @@
+use std::default;
+
 use super::{
     game_end::{GameEnd, GameEndReason},
     main_menu::MainMenu,
 };
 use crate::game::{
-    player::PlayerState,
-    utils::{
+    components::player::Player, player::PlayerState, systems::{player_controller::PlayerController, sprite_renderer::SpriteRenderer}, utils::{
         events::{Event, Events},
         space::{Space, SpaceObject, SpaceObjectId},
-    },
+    }
 };
 use hecs::World;
 use micro_games_kit::{
@@ -26,7 +27,7 @@ use micro_games_kit::{
         },
         spitfire_input::{InputActionRef, InputConsume, InputMapping, VirtualAction},
         typid::ID,
-        vek::Rgba,
+        vek::{Rgba, Transform},
         windowing::event::VirtualKeyCode,
     },
 };
@@ -45,6 +46,7 @@ pub struct NewGameplay {
     // music_forest: StaticSoundHandle,
     // music_battle: StaticSoundHandle,
     world: World,
+    player_controller: PlayerController,
 }
 
 impl Default for NewGameplay {
@@ -77,7 +79,8 @@ impl Default for NewGameplay {
             // map_radius: 800.0,
             // music_forest,
             // music_battle,
-            world: World::new()
+            world: World::new(),
+            player_controller: PlayerController::default()
         }
     }
 }
@@ -98,12 +101,18 @@ impl GameState for NewGameplay {
 
         self.player.activate(&mut context);
 
-        self.world.spawn((SpriteData {
-            texture: "player/idle/1".into(),
-            shader: "character".into(),
-            pivot: 0.5.into(),
-            tint: Rgba::default()
-        },));
+        self.player_controller.init(context.input);
+
+        self.world.spawn((
+            Player {},
+            Transform::<f32, f32, f32>::default(), 
+            SpriteData {
+                texture: "player/idle/1".into(),
+                shader: "character".into(),
+                pivot: 0.5.into(),
+                tint: Rgba::default()
+            },
+        ));
 
         // for _ in 0..6 {
         //     let position = [
@@ -156,6 +165,8 @@ impl GameState for NewGameplay {
             *context.state_change = GameStateChange::Swap(Box::new(MainMenu));
         }
 
+        self.player_controller.run(&self.world, &mut context, delta_time);
+
         self.process_game_objects(&mut context, delta_time);
 
         self.resolve_collisions();
@@ -168,6 +179,8 @@ impl GameState for NewGameplay {
     fn draw(&mut self, mut context: GameContext) {
         self.map.draw(context.draw, context.graphics);
 
+        SpriteRenderer::run(&self.world, &mut context);
+
         // self.torch.draw(&mut context);
 
         // for item in self.items.values_mut() {
@@ -178,7 +191,7 @@ impl GameState for NewGameplay {
         //     enemy.draw(&mut context);
         // }
 
-        self.player.draw(&mut context);
+        // self.player.draw(&mut context);
 
         // if let Some(canvas) = &mut self.darkness {
         //     let _ = canvas.match_to_screen(context.graphics);

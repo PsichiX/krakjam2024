@@ -4,6 +4,7 @@ pub mod enemy;
 pub mod item;
 pub mod player;
 pub mod states;
+pub mod systems;
 pub mod torch;
 pub mod ui;
 pub mod utils;
