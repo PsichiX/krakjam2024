@@ -875,6 +875,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "hecs"
+version = "0.10.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "08c827658bc76bcffa12334eeeb575d304c5a31b71cbabd16c5f3379a9aa68c7"
+dependencies = [
+ "hashbrown",
+ "spin",
+]
+
+[[package]]
 name = "ident_case"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1051,6 +1061,7 @@ dependencies = [
 name = "krakjam2024"
 version = "0.1.0"
 dependencies = [
+ "hecs",
  "micro-games-kit",
  "wasm-bindgen",
 ]
@@ -1176,6 +1187,8 @@ dependencies = [
 [[package]]
 name = "micro-games-kit"
 version = "0.24.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "232e77d2fd91486dbe0c0c34e4e06dac7813abfaa186cf329e46fe544f377edc"
 dependencies = [
  "emergent",
  "fontdue",
