@@ -10,10 +10,11 @@ use crate::game::{
     },
     systems::{
         animation_controller::AnimationController, collision_detector::CollisionDetector,
-        damage_dealer::DamageDealer, effects_reactions::EffectsReactions,
-        enemy_controller::EnemyController, immobility_controller::ImmobilityController,
-        particle_manager::ParticleManager, player_controller::PlayerCastAction,
-        slime_color::SlimeColor, spell_controller::SpellController,
+        damage_dealer::DamageDealer, death::Death, effects_reactions::EffectsReactions,
+        enemy_controller::EnemyController, enemy_spawn::EnemySpawn,
+        immobility_controller::ImmobilityController, particle_manager::ParticleManager,
+        player_controller::PlayerCastAction, slime_color::SlimeColor,
+        spell_controller::SpellController,
     },
     ui::{health_bar::health_bar, world_to_screen_content_layout},
     utils::magic::spell_tag::{
@@ -65,6 +66,7 @@ pub struct NewGameplay {
     // music_battle: StaticSoundHandle,
     world: World,
     player_controller: PlayerController,
+    enemy_spawn: EnemySpawn,
     particle_manager: ParticleManager,
     word_to_spell_tag_database: WordToSpellTagDatabase,
 }
@@ -101,6 +103,7 @@ impl Default for NewGameplay {
             // music_battle,
             world: World::new(),
             player_controller: PlayerController::default(),
+            enemy_spawn: EnemySpawn::new(1000.0, 3.0, 30),
             particle_manager: ParticleManager {},
             word_to_spell_tag_database: WordToSpellTagDatabase::default()
                 // Fire
@@ -242,37 +245,6 @@ impl GameState for NewGameplay {
             },
             Immobility { time_left: 0.0 },
         ));
-
-        self.world.spawn((
-            Enemy {},
-            Animation {
-                animation: Some(NamedAnimation {
-                    animation: FrameAnimation::new(0..1).fps(10.0).looping().playing(),
-                    id: "enemy".to_owned(),
-                }),
-            },
-            Transform::<f32, f32, f32>::default(),
-            Collidable {
-                space_object: Some(SpaceObject {
-                    entity: None,
-                    position: Vec2::default(),
-                    collider_radius: 30.0,
-                }),
-            },
-            SpriteData {
-                texture: "enemy/0".into(),
-                shader: "image".into(),
-                pivot: [0.25, 0.5].into(),
-                tint: Rgba::white(),
-            },
-            Effect {
-                fire: true,
-                ..Default::default()
-            },
-            Health { value: 100.0 },
-            Damage { value: 1.0 },
-            Speed::new(40.0..=100.0),
-        ));
     }
 
     fn exit(&mut self, context: GameContext) {
@@ -292,6 +264,7 @@ impl GameState for NewGameplay {
             *context.state_change = GameStateChange::Pop;
         }
 
+        self.enemy_spawn.run(&mut self.world, delta_time);
         self.player_controller.run(
             &mut self.world,
             &mut context,
@@ -308,6 +281,13 @@ impl GameState for NewGameplay {
         self.particle_manager.process(&mut self.world, delta_time);
         SlimeColor::run(&self.world);
         ImmobilityController::run(&self.world, delta_time);
+
+        // always keep death last in the frame to run!
+        Death::run(&mut self.world);
+
+        if self.world.query::<&Player>().iter().next().is_none() {
+            *context.state_change = GameStateChange::Swap(Box::new(NewGameplay::default()));
+        }
 
         // self.process_game_objects(&mut context, delta_time);
 

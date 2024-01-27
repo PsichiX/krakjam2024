@@ -7,6 +7,7 @@ use crate::game::{
         immobility::Immobility,
         particle::Particle,
         player::Player,
+        speed::Speed,
     },
     utils::{magic::spell_tag::SpellTagEffect, space::Space},
 };
@@ -52,21 +53,28 @@ impl EffectsReactions {
                     Option<&mut Health>,
                     Option<&mut Immobility>,
                     Option<&mut Transform<f32, f32, f32>>,
+                    Option<&mut Speed>,
                 )>();
                 let mut view = query.view();
                 let [entity_a_query, entity_b_query] = view.get_mut_n([entity_a, entity_b]);
 
-                if let Some((effect_a, mut health_a, mut immobility_a, mut transform_a)) =
-                    entity_a_query
+                if let Some((
+                    effect_a,
+                    mut health_a,
+                    mut immobility_a,
+                    mut transform_a,
+                    mut speed_a,
+                )) = entity_a_query
                 {
-                    if let Some((effect_b, mut health_b, mut immobility_b, mut transform_b)) =
-                        entity_b_query
+                    if let Some((
+                        effect_b,
+                        mut health_b,
+                        mut immobility_b,
+                        mut transform_b,
+                        mut speed_b,
+                    )) = entity_b_query
                     {
                         reaction = effect_a.react(effect_b);
-
-                        // println!("=== Entity A: {:?} | Effect A: {:?}", entity_a, effect_a);
-                        // println!("=== Entity B: {:?} | Effect B: {:?}", entity_b, effect_b);
-                        // println!("=== Reaction: {:?}", reaction);
                         let damage = reaction.damage();
                         let immobile_time = reaction.immobile_time();
                         let push_distance = reaction.push_distance();
@@ -93,6 +101,12 @@ impl EffectsReactions {
                             transform_b.position += direction_ab * push_distance;
 
                             reaction_transform = transform_a.clone();
+                        }
+                        if let Some(speed) = speed_a.as_mut() {
+                            speed.value = 0.0;
+                        }
+                        if let Some(speed) = speed_b.as_mut() {
+                            speed.value = 0.0;
                         }
                     }
                 }

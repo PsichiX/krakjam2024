@@ -1,8 +1,10 @@
 pub mod animation_controller;
 pub mod collision_detector;
 pub mod damage_dealer;
+pub mod death;
 pub mod effects_reactions;
 pub mod enemy_controller;
+pub mod enemy_spawn;
 pub mod immobility_controller;
 pub mod particle_manager;
 pub mod player_controller;
