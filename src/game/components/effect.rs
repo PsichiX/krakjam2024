@@ -1,3 +1,5 @@
+use micro_games_kit::third_party::vek::Rgba;
+
 use crate::game::utils::magic::spell_tag::SpellTagEffect;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
@@ -95,6 +97,18 @@ impl Effect {
             EffectReaction::Explode
         } else {
             EffectReaction::None
+        }
+    }
+
+    pub fn slime_tint(&self) -> Rgba<f32> {
+        if self.fire {
+            Rgba::new(1.0, 0.75, 0.5, 1.0)
+        } else if self.water {
+            Rgba::new(0.5, 0.5, 1.0, 1.0)
+        } else if self.electricity {
+            Rgba::new(1.0, 1.0, 0.0, 1.0)
+        } else {
+            Rgba::new(1.0, 1.0, 1.0, 1.0)
         }
     }
 }

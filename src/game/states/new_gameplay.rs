@@ -10,7 +10,7 @@ use crate::game::{
     systems::{
         animation_controller::AnimationController, collision_detector::CollisionDetector,
         effects_reactions::EffectsReactions, player_controller::PlayerCastAction,
-        spell_controller::SpellController,
+        slime_color::SlimeColor, spell_controller::SpellController,
     },
     ui::{health_bar::health_bar, world_to_screen_content_layout},
     utils::magic::spell_tag::{
@@ -173,7 +173,7 @@ impl GameState for NewGameplay {
                 space_object: Some(SpaceObject {
                     entity: None,
                     position: Vec2::default(),
-                    collider_radius: 20.0,
+                    collider_radius: 40.0,
                 }),
             },
             Health { value: 100.0 },
@@ -183,10 +183,10 @@ impl GameState for NewGameplay {
                 water: false,
             },
             SpriteData {
-                texture: "player/idle/1".into(),
-                shader: "character".into(),
+                texture: "player/idle/0".into(),
+                shader: "image".into(),
                 pivot: 0.5.into(),
-                tint: Rgba::default(),
+                tint: Rgba::white(),
             },
         ));
 
@@ -194,8 +194,8 @@ impl GameState for NewGameplay {
             Enemy {},
             Animation {
                 animation: Some(NamedAnimation {
-                    animation: FrameAnimation::new(1..6).fps(10.0).looping().playing(),
-                    id: "enemy/idle".to_owned(),
+                    animation: FrameAnimation::new(0..1).fps(10.0).looping().playing(),
+                    id: "enemy".to_owned(),
                 }),
             },
             Transform::<f32, f32, f32>::default(),
@@ -203,15 +203,20 @@ impl GameState for NewGameplay {
                 space_object: Some(SpaceObject {
                     entity: None,
                     position: Vec2::default(),
-                    collider_radius: 10.0,
+                    collider_radius: 30.0,
                 }),
             },
             SpriteData {
-                texture: "enemy/idle/1".into(),
-                shader: "character".into(),
+                texture: "enemy/0".into(),
+                shader: "image".into(),
                 pivot: [0.25, 0.5].into(),
-                tint: Rgba::default(),
+                tint: Rgba::white(),
             },
+            Effect {
+                fire: true,
+                ..Default::default()
+            },
+            Health { value: 100.0 },
         ));
 
         // for _ in 0..6 {
@@ -272,10 +277,11 @@ impl GameState for NewGameplay {
             &self.word_to_spell_tag_database,
         );
         AnimationController::run(&self.world, &mut context, delta_time);
-        ProjectileController::run(&self.world, &mut context, delta_time);
+        ProjectileController::run(&self.world, delta_time);
         CollisionDetector::run(&self.world);
         EffectsReactions::run(&self.world);
         SpellController::run(&self.world, &mut context);
+        SlimeColor::run(&self.world);
 
         // self.process_game_objects(&mut context, delta_time);
 
@@ -557,7 +563,7 @@ impl NewGameplay {
                 },
                 shader: "image".into(),
                 pivot: 0.5.into(),
-                tint: Rgba::default(),
+                tint: Rgba::white(),
             },
             cast.spell.clone(),
         ));

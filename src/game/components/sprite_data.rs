@@ -1,5 +1,4 @@
 use std::borrow::Cow;
-
 use micro_games_kit::third_party::{vek::Rgba, vek::Vec2};
 
 pub struct SpriteData {
