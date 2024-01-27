@@ -144,9 +144,17 @@ impl SpellTagSize {
 
     pub fn radius(&self) -> f32 {
         match self {
-            SpellTagSize::Large => 40.0,
-            SpellTagSize::Medium => 20.0,
-            SpellTagSize::Small => 10.0,
+            SpellTagSize::Large => 80.0,
+            SpellTagSize::Medium => 40.0,
+            SpellTagSize::Small => 20.0,
+        }
+    }
+
+    pub fn scale_offset(&self) -> f32 {
+        match self {
+            SpellTagSize::Large => 2.0,
+            SpellTagSize::Medium => 0.0,
+            SpellTagSize::Small => -0.5,
         }
     }
 }
