@@ -11,6 +11,7 @@ pub enum SpellTag {
     Shape(SpellTagShape),
     Direction(SpellTagDirection),
     Trajectory(SpellTagTrajectory),
+    Duration(SpellTagDuration),
 }
 
 impl SpellTag {
@@ -22,6 +23,7 @@ impl SpellTag {
             3 => Self::Shape(SpellTagShape::random()),
             4 => Self::Direction(SpellTagDirection::random()),
             5 => Self::Trajectory(SpellTagTrajectory::random()),
+            6 => Self::Duration(SpellTagDuration::random()),
             _ => unreachable!(),
         }
     }
@@ -64,6 +66,13 @@ impl SpellTag {
     pub fn as_trajectory(&self) -> Option<SpellTagTrajectory> {
         match self {
             Self::Trajectory(result) => Some(*result),
+            _ => None,
+        }
+    }
+
+    pub fn as_duration(&self) -> Option<SpellTagDuration> {
+        match self {
+            Self::Duration(result) => Some(*result),
             _ => None,
         }
     }
@@ -175,6 +184,14 @@ impl SpellTagDuration {
             1 => Self::Medium,
             2 => Self::Long,
             _ => unreachable!(),
+        }
+    }
+
+    pub fn time(&self) -> f32 {
+        match self {
+            SpellTagDuration::Long => 8.0,
+            SpellTagDuration::Medium => 2.0,
+            SpellTagDuration::Quick => 0.5,
         }
     }
 }

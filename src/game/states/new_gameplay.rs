@@ -12,8 +12,7 @@ use crate::game::{
         spell_controller::SpellController,
     },
     utils::magic::spell_tag::{
-        SpellTag, SpellTagDirection, SpellTagEffect, SpellTagShape, SpellTagSize, SpellTagSpeed,
-        SpellTagTrajectory,
+        SpellTag, SpellTagDirection, SpellTagDuration, SpellTagEffect, SpellTagShape, SpellTagSize, SpellTagSpeed, SpellTagTrajectory
     },
 };
 use crate::game::{
@@ -120,7 +119,10 @@ impl Default for NewGameplay {
                 .with("back", SpellTag::Direction(SpellTagDirection::Backward))
                 .with("down", SpellTag::Direction(SpellTagDirection::Down))
                 .with("wall", SpellTag::Shape(SpellTagShape::Wall))
-                .with("triangle", SpellTag::Shape(SpellTagShape::Triangle)),
+                .with("triangle", SpellTag::Shape(SpellTagShape::Triangle))
+                .with("quick", SpellTag::Duration(SpellTagDuration::Quick))
+                .with("moment", SpellTag::Duration(SpellTagDuration::Medium))
+                .with("long", SpellTag::Duration(SpellTagDuration::Medium)),
         }
     }
 }

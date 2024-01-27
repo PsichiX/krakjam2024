@@ -6,7 +6,7 @@ use micro_games_kit::{
 
 use crate::game::{
     components::{collidable::Collidable, projectile::Projectile, spell::Spell},
-    utils::magic::spell_tag::{SpellTagDirection, SpellTagSize, SpellTagSpeed, SpellTagTrajectory},
+    utils::{events::{Event, Events}, magic::spell_tag::{SpellTagDirection, SpellTagSize, SpellTagSpeed, SpellTagTrajectory}},
 };
 
 pub struct SpellController;
@@ -14,7 +14,7 @@ pub struct SpellController;
 impl SpellController {
     pub fn run(world: &World, _context: &mut GameContext) {
         // Velocity calculation
-        for (_, (projectile, spell)) in world.query::<(&mut Projectile, &Spell)>().iter() {
+        for (entity, (projectile, spell)) in world.query::<(&mut Projectile, &Spell)>().iter() {
             let time_divider = match spell.speed {
                 SpellTagSpeed::Fast => 0.5,
                 SpellTagSpeed::Medium => 1.0,
@@ -53,6 +53,10 @@ impl SpellController {
                 }
                 SpellTagDirection::Forward => {}
                 SpellTagDirection::Down => projectile.velocity = Vec2::zero(),
+            }
+
+            if projectile.alive_time > spell.duration.time() {
+                Events::write(Event::KillEntity { entity });
             }
         }
 
