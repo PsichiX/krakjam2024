@@ -79,10 +79,10 @@ mod tests {
         let database = WordToSpellTagDatabase::default()
             .with("fire", SpellTag::Effect(SpellTagEffect::Fire))
             .with("big", SpellTag::Size(SpellTagSize::Large))
-            .with("ball", SpellTag::Shape(SpellTagShape::Circle))
+            .with("ball", SpellTag::Shape(SpellTagShape::Point))
             .with("meteor", SpellTag::Effect(SpellTagEffect::Fire))
             .with("meteor", SpellTag::Size(SpellTagSize::Large))
-            .with("meteor", SpellTag::Shape(SpellTagShape::Circle));
+            .with("meteor", SpellTag::Shape(SpellTagShape::Point));
 
         let spell = database.parse("big fire ball").unwrap();
         assert_eq!(
@@ -91,7 +91,7 @@ mod tests {
                 size: SpellTagSize::Large,
                 speed: Default::default(),
                 effect: SpellTagEffect::Fire,
-                shape: SpellTagShape::Circle,
+                shape: SpellTagShape::Point,
                 direction: Default::default(),
                 trajectory: Default::default(),
             }
@@ -104,7 +104,7 @@ mod tests {
                 size: SpellTagSize::Large,
                 speed: Default::default(),
                 effect: SpellTagEffect::Fire,
-                shape: SpellTagShape::Circle,
+                shape: SpellTagShape::Point,
                 direction: Default::default(),
                 trajectory: Default::default(),
             }
