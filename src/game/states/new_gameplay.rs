@@ -399,6 +399,7 @@ impl GameState for NewGameplay {
 
 impl NewGameplay {
     pub fn cast_spell(world: &mut World, cast: PlayerCastAction) {
+        println!("=== CAST SPELL: {:#?}", cast.spell);
         let mut transform = Transform::<f32, f32, f32>::default();
         transform.position = cast.position.into();
 
