@@ -48,7 +48,7 @@ impl ParticleManager {
                 for _ in 0..generator.batch_size {
                     particles.push(Particle::new(
                         generator.texture.clone(),
-                        transform.position.xy() + Vec2::new(0.0, -22.0),
+                        transform.position.xy(),
                         velocity,
                         180.0f32.to_radians(),
                         100.0..=200.0,

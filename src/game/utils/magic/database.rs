@@ -66,7 +66,7 @@ impl WordToSpellTagDatabase {
                 duration,
             })
         } else {
-            None
+            Some(Spell::basic())
         }
     }
 }

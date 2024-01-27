@@ -95,6 +95,15 @@ impl SpellTagEffect {
             _ => unreachable!(),
         }
     }
+
+    pub fn texture(&self) -> String {
+        match self {
+            SpellTagEffect::None => "particle/smoke".into(),
+            SpellTagEffect::Fire => "particle/fire".into(),
+            SpellTagEffect::Electric => "particle/electric".into(),
+            SpellTagEffect::Water => "particle/water".into(),
+        }
+    }
 }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
