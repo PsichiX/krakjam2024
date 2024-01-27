@@ -6,7 +6,7 @@ use crate::game::components::{animation::Animation, sprite_data::SpriteData};
 pub struct AnimationController;
 
 impl AnimationController {
-    pub fn run(world: &World, context: &mut GameContext, delta_time: f32) {
+    pub fn run(world: &World, _context: &mut GameContext, delta_time: f32) {
         for (_, (animation,)) in world.query::<(&mut Animation,)>().iter() {
             if let Some(animation) = animation.animation.as_mut() {
                 animation.animation.update(delta_time);

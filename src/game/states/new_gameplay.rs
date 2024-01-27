@@ -11,7 +11,9 @@ use crate::game::{
         animation_controller::AnimationController, collision_detector::CollisionDetector,
         player_controller::PlayerCastAction,
     },
-    utils::magic::spell_tag::SpellTagTrajectory,
+    utils::magic::spell_tag::{
+        SpellTag, SpellTagEffect, SpellTagShape, SpellTagSize, SpellTagTrajectory,
+    },
 };
 use crate::game::{
     components::{player::Player, projectile::Projectile},
@@ -23,7 +25,7 @@ use crate::game::{
     utils::{
         events::{Event, Events},
         magic::database::WordToSpellTagDatabase,
-        space::{Space, SpaceObject, SpaceObjectId},
+        space::SpaceObject,
     },
 };
 use hecs::World;
@@ -99,7 +101,15 @@ impl Default for NewGameplay {
             // music_battle,
             world: World::new(),
             player_controller: PlayerController::default(),
-            word_to_spell_tag_database: WordToSpellTagDatabase::default(),
+            word_to_spell_tag_database: WordToSpellTagDatabase::default()
+                .with("fire", SpellTag::Effect(SpellTagEffect::Fire))
+                .with("big", SpellTag::Size(SpellTagSize::Large))
+                .with("ball", SpellTag::Shape(SpellTagShape::Circle))
+                .with("meteor", SpellTag::Effect(SpellTagEffect::Fire))
+                .with("meteor", SpellTag::Size(SpellTagSize::Large))
+                .with("meteor", SpellTag::Shape(SpellTagShape::Circle))
+                .with("sinus", SpellTag::Trajectory(SpellTagTrajectory::Sinus))
+                .with("circle", SpellTag::Trajectory(SpellTagTrajectory::Circle)),
         }
     }
 }
@@ -402,14 +412,12 @@ impl NewGameplay {
         let mut transform = Transform::<f32, f32, f32>::default();
         transform.position = cast.position.into();
 
+        println!("Cast spell: {:?}", cast.spell);
+
         world.spawn((
             Animation { animation: None },
             transform,
-            Projectile {
-                speed: 100.0,
-                direction: cast.direction,
-                trajectory: SpellTagTrajectory::Straight,
-            },
+            Projectile::new(100.0, cast.direction, cast.spell.trajectory),
             Collidable {
                 space_object: Some(SpaceObject {
                     entity: None,
@@ -444,7 +452,7 @@ impl NewGameplay {
 
     fn execute_events(&mut self, context: &mut GameContext) {
         Events::read(|events| {
-            self.player.state.write().unwrap().execute_events(events);
+            // self.player.state.write().unwrap().execute_events(events);
 
             // for (id, enemy) in &mut self.enemies {
             //     enemy.state.write().unwrap().execute_events(*id, events);

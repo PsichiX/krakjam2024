@@ -7,14 +7,14 @@ use crate::game::{
     components::{collidable::Collidable, enemy::Enemy, spell::Spell},
     utils::{
         events::{Event, Events},
-        space::{Space, SpaceObject, SpaceObjectId},
+        space::{Space, SpaceObject},
     },
 };
 
 pub struct CollisionDetector;
 
 impl CollisionDetector {
-    pub fn run(world: &World, context: &mut GameContext, delta_time: f32) {
+    pub fn run(world: &World, _context: &mut GameContext, _delta_time: f32) {
         // Update space oobject positions
         for (id, (collidable, transform)) in world
             .query::<(&mut Collidable, &Transform<f32, f32, f32>)>()
