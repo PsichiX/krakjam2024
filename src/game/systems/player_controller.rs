@@ -1,19 +1,23 @@
 use crate::game::{
     components::{animation::Animation, player::Player, spell::Spell},
     states::new_gameplay::NewGameplay,
-    utils::magic::{database::WordToSpellTagDatabase, spell_tag::SpellTag},
+    utils::magic::database::WordToSpellTagDatabase,
 };
 use hecs::World;
 use micro_games_kit::{
     animation::{FrameAnimation, NamedAnimation},
     context::GameContext,
     third_party::{
-        spitfire_input::{InputAxisRef, InputContext, InputMapping, VirtualAxis},
+        spitfire_input::{
+            InputActionRef, InputAxisRef, InputContext, InputMapping, VirtualAction, VirtualAxis,
+        },
         vek::{Clamp, Transform, Vec2},
+        windowing::event::MouseButton,
     },
 };
 
 pub struct PlayerInput {
+    pub attack_action: InputActionRef,
     pub mouse_x: InputAxisRef,
     pub mouse_y: InputAxisRef,
 }
@@ -50,15 +54,18 @@ impl Default for PlayerController {
 
 impl PlayerController {
     pub fn init(&mut self, context: &mut InputContext) {
+        let attack_action = InputActionRef::default();
         let mouse_x = InputAxisRef::default();
         let mouse_y = InputAxisRef::default();
 
         self.input = Some(PlayerInput {
+            attack_action: attack_action.clone(),
             mouse_x: mouse_x.clone(),
             mouse_y: mouse_y.clone(),
         });
 
         let mapping = InputMapping::default()
+            .action(VirtualAction::MouseButton(MouseButton::Left), attack_action)
             .axis(VirtualAxis::MousePositionX, mouse_x)
             .axis(VirtualAxis::MousePositionY, mouse_y);
 
@@ -116,6 +123,18 @@ impl PlayerController {
                     } else {
                         animation.animation = Some(self.idle_animation.clone());
                     }
+                }
+
+                if input.attack_action.get().is_pressed() {
+                    let basic_spell = Spell::basic();
+
+                    cast_action = Some(PlayerCastAction {
+                        position: (transform.position
+                            + movement.normalized() * basic_spell.direction.multiplier() * 30.0)
+                            .into(),
+                        direction: movement.normalized(),
+                        spell: basic_spell,
+                    });
                 }
 
                 if let Some(spell) = cast_spell.as_ref() {
