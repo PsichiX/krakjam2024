@@ -134,14 +134,14 @@ impl Preloader {
         // load_texture_series!(context, "enemy/attack", [1, 2, 3, 4, 5, 6, 7, 8]);
 
         // items
-        // load_texture(
-        //     context.draw,
-        //     context.graphics,
-        //     "item/apple",
-        //     include_bytes!("../../../assets/images/item/apple.png"),
-        //     1,
-        //     1,
-        // );
+        load_texture(
+            context.draw,
+            context.graphics,
+            "item/apple",
+            include_bytes!("../../../assets/images/item/apple.png"),
+            1,
+            1,
+        );
         // load_texture(
         //     context.draw,
         //     context.graphics,

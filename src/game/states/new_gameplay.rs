@@ -4,7 +4,7 @@ use super::{
     game_end::{GameEnd, GameEndReason},
     main_menu::MainMenu,
 };
-use crate::game::{components::{animation::Animation, sprite_data::SpriteData}, systems::animation_controller::AnimationController};
+use crate::game::{components::{animation::Animation, projectile::Projectile, sprite_data::SpriteData}, systems::{animation_controller::AnimationController, projectile_controller::ProjectileController}};
 use crate::game::{
     components::player::Player, player::PlayerState, systems::{player_controller::PlayerController, sprite_renderer::SpriteRenderer}, utils::{
         events::{Event, Events},
@@ -22,7 +22,7 @@ use micro_games_kit::{
         spitfire_glow::{graphics::CameraScaling, renderer::GlowTextureFiltering},
         spitfire_input::{InputActionRef, InputConsume, InputMapping, VirtualAction},
         typid::ID,
-        vek::{Rgba, Transform},
+        vek::{Rgba, Transform, Vec2},
         windowing::event::VirtualKeyCode,
     }
 };
@@ -162,8 +162,9 @@ impl GameState for NewGameplay {
             *context.state_change = GameStateChange::Swap(Box::new(MainMenu));
         }
 
-        self.player_controller.run(&self.world, &mut context, delta_time);
+        self.player_controller.run(&mut self.world, &mut context, delta_time);
         AnimationController::run(&self.world, &mut context, delta_time);
+        ProjectileController::run(&self.world, &mut context, delta_time);
 
         // self.process_game_objects(&mut context, delta_time);
 
@@ -302,6 +303,29 @@ impl GameState for NewGameplay {
 }
 
 impl NewGameplay {
+    pub fn cast_spell(world: &mut World, position: Vec2<f32>, direction: Vec2<f32>) {
+        let mut transform = Transform::<f32, f32, f32>::default();
+        transform.position = position.into();
+
+        world.spawn((
+            Animation { 
+                animation: None
+            },
+            transform, 
+            Projectile {
+                speed: 100.0,
+                direction,
+                trajectory: crate::game::utils::magic::spell_tag::SpellTagTrajectory::Straight,
+            },
+            SpriteData {
+                texture: "item/apple".into(),
+                shader: "image".into(),
+                pivot: 0.5.into(),
+                tint: Rgba::default()
+            },
+        ));
+    }
+
     fn maintain(&self, delta_time: f32) {
         Events::maintain(delta_time);
 
