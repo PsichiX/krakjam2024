@@ -4,5 +4,4 @@ pub mod enemy;
 pub mod player;
 pub mod projectile;
 pub mod spell;
-pub mod spell;
 pub mod sprite_data;
