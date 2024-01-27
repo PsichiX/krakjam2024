@@ -24,7 +24,6 @@ pub enum SpaceObjectId {
 
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct SpaceObject {
-    pub id: SpaceObjectId,
     pub entity: Option<Entity>,
     pub position: Vec2<f32>,
     pub collider_radius: f32,
@@ -100,14 +99,14 @@ impl Space {
             .take_while(move |object| object.position.distance_squared(position) <= range_sqr)
     }
 
-    pub fn collisions_by_id(
-        &self,
-        id: SpaceObjectId,
-        narrow: bool,
-    ) -> Option<impl Iterator<Item = &SpaceObject>> {
-        self.find_by_id(id)
-            .map(|object| self.collisions(object, narrow))
-    }
+    // pub fn collisions_by_id(
+    //     &self,
+    //     id: SpaceObjectId,
+    //     narrow: bool,
+    // ) -> Option<impl Iterator<Item = &SpaceObject>> {
+    //     self.find_by_id(id)
+    //         .map(|object| self.collisions(object, narrow))
+    // }
 
     pub fn collisions<'a>(
         &'a self,
@@ -119,9 +118,9 @@ impl Space {
             .filter(move |item| !narrow || object.does_collide_narrow(item))
     }
 
-    pub fn find_by_id(&self, id: SpaceObjectId) -> Option<&SpaceObject> {
-        self.tree.iter().find(|object| object.id == id)
-    }
+    // pub fn find_by_id(&self, id: SpaceObjectId) -> Option<&SpaceObject> {
+    //     self.tree.iter().find(|object| object.id == id)
+    // }
 
     pub fn iter(&self) -> impl Iterator<Item = &SpaceObject> {
         self.tree.iter()

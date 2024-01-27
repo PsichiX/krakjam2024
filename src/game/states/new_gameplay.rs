@@ -128,7 +128,6 @@ impl GameState for NewGameplay {
             Transform::<f32, f32, f32>::default(),
             Collidable {
                 space_object: Some(SpaceObject {
-                    id: SpaceObjectId::Player,
                     entity: None,
                     position: Vec2::default(),
                     collider_radius: 20.0,
@@ -153,7 +152,6 @@ impl GameState for NewGameplay {
             Transform::<f32, f32, f32>::default(),
             Collidable {
                 space_object: Some(SpaceObject {
-                    id: SpaceObjectId::Enemy,
                     entity: None,
                     position: Vec2::default(),
                     collider_radius: 10.0,
@@ -414,7 +412,6 @@ impl NewGameplay {
             },
             Collidable {
                 space_object: Some(SpaceObject {
-                    id: SpaceObjectId::Spell,
                     entity: None,
                     position: Vec2::default(),
                     collider_radius: 10.0,
@@ -517,31 +514,31 @@ impl NewGameplay {
         //     .set_volume((1.0 - factor) * 2.0, Default::default());
     }
 
-    fn resolve_collisions(&mut self) {
-        let space = Space::read();
-        let space = space.read().unwrap();
+    // fn resolve_collisions(&mut self) {
+    //     let space = Space::read();
+    //     let space = space.read().unwrap();
 
-        for object_item in space.iter() {
-            if let SpaceObjectId::Item(item_id) = object_item.id {
-                // if let Some(item) = self.items.get(&item_id) {
-                //     for object in space.collisions(object_item, true) {
-                //         match object.id {
-                //             SpaceObjectId::Player => {
-                //                 self.player.state.write().unwrap().consume_item(item);
-                //                 Events::write(Event::KillItem { id: item_id });
-                //                 let _ = Audio::write().write().unwrap().play("collect");
-                //             }
-                //             SpaceObjectId::Enemy(enemy_id) => {
-                //                 if let Some(enemy) = self.enemies.get_mut(&enemy_id) {
-                //                     enemy.state.write().unwrap().consume_item(item);
-                //                     Events::write(Event::KillItem { id: item_id });
-                //                 }
-                //             }
-                //             _ => {}
-                //         }
-                //     }
-                // }
-            }
-        }
-    }
+    //     for object_item in space.iter() {
+    //         if let SpaceObjectId::Item(item_id) = object_item.id {
+    //             if let Some(item) = self.items.get(&item_id) {
+    //                 for object in space.collisions(object_item, true) {
+    //                     match object.id {
+    //                         SpaceObjectId::Player => {
+    //                             self.player.state.write().unwrap().consume_item(item);
+    //                             Events::write(Event::KillItem { id: item_id });
+    //                             let _ = Audio::write().write().unwrap().play("collect");
+    //                         }
+    //                         SpaceObjectId::Enemy(enemy_id) => {
+    //                             if let Some(enemy) = self.enemies.get_mut(&enemy_id) {
+    //                                 enemy.state.write().unwrap().consume_item(item);
+    //                                 Events::write(Event::KillItem { id: item_id });
+    //                             }
+    //                         }
+    //                         _ => {}
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 }
