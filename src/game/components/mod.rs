@@ -3,6 +3,7 @@ pub mod collidable;
 pub mod damage;
 pub mod effect;
 pub mod enemy;
+pub mod follow_player;
 pub mod health;
 pub mod ignore_player;
 pub mod immobility;

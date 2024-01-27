@@ -6,6 +6,7 @@ use crate::game::{
         ignore_player::IgnorePlayer,
         immobility::Immobility,
         particle::Particle,
+        player::Player,
     },
     utils::{magic::spell_tag::SpellTagEffect, space::Space},
 };
@@ -19,21 +20,19 @@ impl EffectsReactions {
         let space = Space::read();
         let space = space.read().unwrap();
         let mut entities_to_process = Vec::<(Entity, Entity)>::new();
+        let (player_entity, _) = world.query::<()>().with::<&Player>().iter().next().unwrap();
 
-        for (entity_a, (collidable, _, ignore_player)) in world
-            .query::<(&Collidable, &Effect, Option<&IgnorePlayer>)>()
-            .iter()
-        {
+        for (entity_a, (collidable, _)) in world.query::<(&Collidable, &Effect)>().iter() {
             if let Some(space_object) = collidable.space_object.as_ref() {
                 for object in space.collisions(space_object, true) {
                     if let Some(entity_b) = object.entity {
                         if entity_b != entity_a {
-                            if let Some(ignore_player) = ignore_player {
-                                if ignore_player.should_be_ignored(entity_a)
-                                    && ignore_player.should_be_ignored(entity_b)
-                                {
-                                    continue;
-                                }
+                            if (entity_a == player_entity || entity_b == player_entity)
+                                && (IgnorePlayer::should_be_ignored(&world, entity_a)
+                                    || IgnorePlayer::should_be_ignored(&world, entity_b))
+                            {
+                                println!("Player ignored");
+                                continue;
                             }
 
                             entities_to_process.push((entity_a, entity_b));
@@ -64,9 +63,10 @@ impl EffectsReactions {
                         entity_b_query
                     {
                         reaction = effect_a.react(effect_b);
-                        println!("=== Entity A: {:?} | Effect A: {:?}", entity_a, effect_a);
-                        println!("=== Entity B: {:?} | Effect B: {:?}", entity_b, effect_b);
-                        println!("=== Reaction: {:?}", reaction);
+
+                        // println!("=== Entity A: {:?} | Effect A: {:?}", entity_a, effect_a);
+                        // println!("=== Entity B: {:?} | Effect B: {:?}", entity_b, effect_b);
+                        // println!("=== Reaction: {:?}", reaction);
                         let damage = reaction.damage();
                         let immobile_time = reaction.immobile_time();
                         let push_distance = reaction.push_distance();

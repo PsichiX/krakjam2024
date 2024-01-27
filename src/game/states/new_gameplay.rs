@@ -5,15 +5,15 @@ use super::{
 use crate::game::{
     components::{
         animation::Animation, collidable::Collidable, damage::Damage, effect::Effect, enemy::Enemy,
-        health::Health, ignore_player::IgnorePlayer, particle_generator::ParticleGenerator,
-        speed::Speed, sprite_data::SpriteData,
+        health::Health, ignore_player::IgnorePlayer, immobility::Immobility,
+        particle_generator::ParticleGenerator, speed::Speed, sprite_data::SpriteData,
     },
     systems::{
         animation_controller::AnimationController, collision_detector::CollisionDetector,
         damage_dealer::DamageDealer, effects_reactions::EffectsReactions,
-        enemy_controller::EnemyController, particle_manager::ParticleManager,
-        player_controller::PlayerCastAction, slime_color::SlimeColor,
-        spell_controller::SpellController,
+        enemy_controller::EnemyController, immobility_controller::ImmobilityController,
+        particle_manager::ParticleManager, player_controller::PlayerCastAction,
+        slime_color::SlimeColor, spell_controller::SpellController,
     },
     ui::{health_bar::health_bar, world_to_screen_content_layout},
     utils::magic::spell_tag::{
@@ -215,7 +215,10 @@ impl GameState for NewGameplay {
         self.player_controller.init(context.input);
 
         self.world.spawn((
-            Player {},
+            Player {
+                current_effect_particle_accumulator: 0.0,
+                current_effect_particle_time: 1.0,
+            },
             Animation { animation: None },
             Transform::<f32, f32, f32>::default(),
             Collidable {
@@ -237,6 +240,7 @@ impl GameState for NewGameplay {
                 pivot: 0.5.into(),
                 tint: Rgba::white(),
             },
+            Immobility { time_left: 0.0 },
         ));
 
         self.world.spawn((
@@ -303,6 +307,7 @@ impl GameState for NewGameplay {
         DamageDealer::run(&self.world);
         self.particle_manager.process(&mut self.world, delta_time);
         SlimeColor::run(&self.world);
+        ImmobilityController::run(&self.world, delta_time);
 
         // self.process_game_objects(&mut context, delta_time);
 
@@ -595,10 +600,7 @@ impl NewGameplay {
                 batch_size: 16,
             },
             Damage { value: 1.0 },
-            IgnorePlayer {
-                ignore_time: 0.5,
-                player_entity: None,
-            },
+            IgnorePlayer { ignore_time: 0.5 },
             cast.spell.clone(),
         ));
     }
