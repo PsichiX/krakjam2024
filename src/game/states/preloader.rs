@@ -142,14 +142,14 @@ impl Preloader {
             1,
             1,
         );
-        // load_texture(
-        //     context.draw,
-        //     context.graphics,
-        //     "item/banana",
-        //     include_bytes!("../../../assets/images/item/banana.png"),
-        //     1,
-        //     1,
-        // );
+        load_texture(
+            context.draw,
+            context.graphics,
+            "item/banana",
+            include_bytes!("../../../assets/images/item/banana.png"),
+            1,
+            1,
+        );
         // load_texture(
         //     context.draw,
         //     context.graphics,
@@ -178,22 +178,22 @@ impl Preloader {
         );
 
         // ui
-        // load_texture(
-        //     context.draw,
-        //     context.graphics,
-        //     "ui/panel",
-        //     include_bytes!("../../../assets/images/ui/panel.png"),
-        //     1,
-        //     1,
-        // );
-        // load_texture(
-        //     context.draw,
-        //     context.graphics,
-        //     "ui/bar",
-        //     include_bytes!("../../../assets/images/ui/bar.png"),
-        //     1,
-        //     1,
-        // );
+        load_texture(
+            context.draw,
+            context.graphics,
+            "ui/panel",
+            include_bytes!("../../../assets/images/ui/panel.png"),
+            1,
+            1,
+        );
+        load_texture(
+            context.draw,
+            context.graphics,
+            "ui/bar",
+            include_bytes!("../../../assets/images/ui/bar.png"),
+            1,
+            1,
+        );
         // load_texture(
         //     context.draw,
         //     context.graphics,

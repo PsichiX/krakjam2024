@@ -85,7 +85,7 @@ impl PlayerController {
                 if character == '\n' || character == '\r' {
                     cast_spell = word_to_spell_tag_database.parse(&self.spell_text);
                     self.spell_text.clear();
-                } else if character == ' ' || character.is_alphabetic() {
+                } else if character == ' ' || character.is_alphanumeric() {
                     self.spell_text.push(character);
                 }
             }

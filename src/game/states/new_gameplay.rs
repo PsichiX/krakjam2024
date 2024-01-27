@@ -12,6 +12,7 @@ use crate::game::{
         effects_reactions::EffectsReactions, player_controller::PlayerCastAction,
         spell_controller::SpellController,
     },
+    ui::{health_bar::health_bar, world_to_screen_content_layout},
     utils::magic::spell_tag::{
         SpellTag, SpellTagDirection, SpellTagDuration, SpellTagEffect, SpellTagShape, SpellTagSize,
         SpellTagSpeed, SpellTagTrajectory,
@@ -105,6 +106,23 @@ impl Default for NewGameplay {
             player_controller: PlayerController::default(),
             word_to_spell_tag_database: WordToSpellTagDatabase::default()
                 .with("fire", SpellTag::Effect(SpellTagEffect::Fire))
+                .with("burn", SpellTag::Effect(SpellTagEffect::Fire))
+                .with("heat", SpellTag::Effect(SpellTagEffect::Fire))
+                .with("hot", SpellTag::Effect(SpellTagEffect::Fire))
+                .with("wet", SpellTag::Effect(SpellTagEffect::Water))
+                .with("aqua", SpellTag::Effect(SpellTagEffect::Water))
+                .with("h2o", SpellTag::Effect(SpellTagEffect::Water))
+                .with("water", SpellTag::Effect(SpellTagEffect::Water))
+                .with("fluid", SpellTag::Effect(SpellTagEffect::Water))
+                .with("sprinkle", SpellTag::Effect(SpellTagEffect::Water))
+                .with("drink", SpellTag::Effect(SpellTagEffect::Water))
+                .with("zap", SpellTag::Effect(SpellTagEffect::Electric))
+                .with("power", SpellTag::Effect(SpellTagEffect::Electric))
+                .with("tingly", SpellTag::Effect(SpellTagEffect::Electric))
+                .with("charged", SpellTag::Effect(SpellTagEffect::Electric))
+                .with("electro", SpellTag::Effect(SpellTagEffect::Electric))
+                .with("electric", SpellTag::Effect(SpellTagEffect::Electric))
+                .with("thunder", SpellTag::Effect(SpellTagEffect::Electric))
                 .with("big", SpellTag::Size(SpellTagSize::Large))
                 .with("ball", SpellTag::Shape(SpellTagShape::Point))
                 .with("fine", SpellTag::Size(SpellTagSize::Medium))
@@ -338,23 +356,28 @@ impl GameState for NewGameplay {
     }
 
     fn draw_gui(&mut self, context: GameContext) {
-        // let health_bar_rectangle = Rect {
-        //     left: -50.0,
-        //     right: 50.0,
-        //     top: -60.0,
-        //     bottom: -40.0,
-        // };
+        let health_bar_rectangle = Rect {
+            left: -50.0,
+            right: 50.0,
+            top: -60.0,
+            bottom: -40.0,
+        };
 
-        // {
-        //     let state = self.player.state.read().unwrap();
-        //     let layout = world_to_screen_content_layout(
-        //         state.sprite.transform.position.xy(),
-        //         health_bar_rectangle,
-        //         &context,
-        //     );
+        {
+            for (_, (_, transform, health)) in self
+                .world
+                .query::<(&Player, &Transform<f32, f32, f32>, &Health)>()
+                .iter()
+            {
+                let layout = world_to_screen_content_layout(
+                    transform.position.xy(),
+                    health_bar_rectangle,
+                    &context,
+                );
 
-        //     health_bar(layout, state.health);
-        // }
+                health_bar(layout, health.value as usize);
+            }
+        }
 
         // for enemy in self.enemies.values() {
         //     let state = enemy.state.read().unwrap();
@@ -504,6 +527,7 @@ impl NewGameplay {
     ) {
         world.spawn((
             Animation { animation: None },
+            Effect::from(cast.spell.effect),
             transform.clone(),
             Projectile::new(
                 match cast.spell.speed {
@@ -521,7 +545,11 @@ impl NewGameplay {
                 }),
             },
             SpriteData {
-                texture: "item/apple".into(),
+                texture: match cast.spell.effect {
+                    SpellTagEffect::Fire => "particle/fire".into(),
+                    SpellTagEffect::Electric => "item/banana".into(),
+                    SpellTagEffect::Water => "item/apple".into(),
+                },
                 shader: "image".into(),
                 pivot: 0.5.into(),
                 tint: Rgba::default(),
