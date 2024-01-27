@@ -99,9 +99,7 @@ impl Default for NewGameplay {
             // music_battle,
             world: World::new(),
             player_controller: PlayerController::default(),
-            particle_manager: ParticleManager {
-                system: ParticleSystem::new(0.0, 100),
-            },
+            particle_manager: ParticleManager {},
             word_to_spell_tag_database: WordToSpellTagDatabase::default()
                 .with("fire", SpellTag::Effect(SpellTagEffect::Fire))
                 .with("burn", SpellTag::Effect(SpellTagEffect::Fire))
@@ -140,7 +138,7 @@ impl Default for NewGameplay {
                 .with("triangle", SpellTag::Shape(SpellTagShape::Triangle))
                 .with("quick", SpellTag::Duration(SpellTagDuration::Quick))
                 .with("moment", SpellTag::Duration(SpellTagDuration::Medium))
-                .with("long", SpellTag::Duration(SpellTagDuration::Medium)),
+                .with("long", SpellTag::Duration(SpellTagDuration::Long)),
         }
     }
 }
@@ -244,7 +242,7 @@ impl GameState for NewGameplay {
         CollisionDetector::run(&self.world);
         EffectsReactions::run(&self.world);
         SpellController::run(&self.world, &mut context);
-        self.particle_manager.process(&self.world, delta_time);
+        self.particle_manager.process(&mut self.world, delta_time);
         SlimeColor::run(&self.world);
 
         // self.process_game_objects(&mut context, delta_time);
@@ -520,25 +518,27 @@ impl NewGameplay {
                     collider_radius: 10.0,
                 }),
             },
-            SpriteData {
-                texture: match cast.spell.effect {
-                    SpellTagEffect::None => "particle/smoke".into(),
-                    SpellTagEffect::Fire => "particle/fire".into(),
-                    SpellTagEffect::Electric => "particle/electric".into(),
-                    SpellTagEffect::Water => "particle/water".into(),
-                },
-                shader: "image".into(),
-                pivot: 0.5.into(),
-                tint: Rgba::white(),
-            },
+            // SpriteData {
+            //     texture: match cast.spell.effect {
+            //         SpellTagEffect::None => "particle/smoke".into(),
+            //         SpellTagEffect::Fire => "particle/fire".into(),
+            //         SpellTagEffect::Electric => "particle/electric".into(),
+            //         SpellTagEffect::Water => "particle/water".into(),
+            //     },
+            //     shader: "image".into(),
+            //     pivot: 0.5.into(),
+            //     tint: Rgba::white(),
+            // },
             ParticleGenerator {
                 emmission_accumulator: 0.0,
+                emmission_time: 0.1,
                 texture: match cast.spell.effect {
                     SpellTagEffect::None => "particle/smoke".into(),
                     SpellTagEffect::Fire => "particle/fire".into(),
                     SpellTagEffect::Electric => "particle/electric".into(),
                     SpellTagEffect::Water => "particle/water".into(),
                 },
+                batch_size: 16,
             },
             cast.spell.clone(),
         ));
