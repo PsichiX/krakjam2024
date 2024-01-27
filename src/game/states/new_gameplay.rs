@@ -473,7 +473,8 @@ impl NewGameplay {
     ) {
         let perpendicular_direction = Vec2::new(-cast.direction.y, cast.direction.x);
         let count = 5;
-        let start = cast.position + perpendicular_direction * cast.spell.size.radius();
+        let start = cast.position
+            - perpendicular_direction * cast.spell.size.radius() * (count as f32) / 2.0;
 
         for i in 0..count {
             let mut new_transform = transform.clone();
@@ -503,6 +504,10 @@ impl NewGameplay {
             new_transform.position =
                 (start + left_direction * cast.spell.size.radius() * i as f32).into();
             Self::cast_point_spell(world, cast, &new_transform);
+
+            if i == 0 {
+                continue;
+            }
 
             let mut new_transform = transform.clone();
             new_transform.position =
