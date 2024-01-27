@@ -2,19 +2,27 @@ use super::{
     game_end::{GameEnd, GameEndReason},
     main_menu::MainMenu,
 };
-use crate::game::{components::{animation::Animation, sprite_data::SpriteData}, systems::animation_controller::AnimationController};
 use crate::game::{
     components::player::Player,
     player::PlayerState,
     systems::{player_controller::PlayerController, sprite_renderer::SpriteRenderer},
     utils::{
         events::{Event, Events},
+        magic::database::WordToSpellTagDatabase,
         space::{Space, SpaceObject, SpaceObjectId},
     },
 };
+use crate::game::{
+    components::{animation::Animation, sprite_data::SpriteData},
+    systems::animation_controller::AnimationController,
+};
 use hecs::World;
 use micro_games_kit::{
-    animation::{FrameAnimation, NamedAnimation}, character::Character, context::GameContext, game::{GameObject, GameState, GameStateChange}, third_party::{
+    animation::{FrameAnimation, NamedAnimation},
+    character::Character,
+    context::GameContext,
+    game::{GameObject, GameState, GameStateChange},
+    third_party::{
         raui_core::layout::CoordsMappingScaling,
         raui_immediate_widgets::core::{
             containers::nav_content_box, text_box, ContentBoxItemLayout, Rect, TextBoxFont,
@@ -29,7 +37,7 @@ use micro_games_kit::{
         typid::ID,
         vek::{Rgba, Transform},
         windowing::event::VirtualKeyCode,
-    }
+    },
 };
 
 pub struct NewGameplay {
@@ -47,6 +55,7 @@ pub struct NewGameplay {
     world: World,
     player_controller: PlayerController,
     spell_text: String,
+    word_to_spell_tag_database: WordToSpellTagDatabase,
 }
 
 impl Default for NewGameplay {
@@ -82,6 +91,7 @@ impl Default for NewGameplay {
             world: World::new(),
             player_controller: PlayerController::default(),
             spell_text: Default::default(),
+            word_to_spell_tag_database: WordToSpellTagDatabase::default(),
         }
     }
 }
@@ -106,9 +116,7 @@ impl GameState for NewGameplay {
 
         self.world.spawn((
             Player {},
-            Animation { 
-                animation: None
-            },
+            Animation { animation: None },
             Transform::<f32, f32, f32>::default(),
             SpriteData {
                 texture: "player/idle/1".into(),
@@ -164,7 +172,15 @@ impl GameState for NewGameplay {
 
     fn fixed_update(&mut self, mut context: GameContext, delta_time: f32) {
         if let Some(mut characters) = context.input.characters().write() {
-            self.spell_text.push_str(characters.take().as_str());
+            for character in characters.take().chars() {
+                if character == '\n' || character == '\r' {
+                    let tags = self.word_to_spell_tag_database.parse(&self.spell_text);
+                    // TODO: cast spell with tags here.
+                    self.spell_text.clear();
+                } else if character == ' ' || character.is_alphabetic() {
+                    self.spell_text.push(character);
+                }
+            }
         }
 
         // self.maintain(delta_time);
