@@ -130,7 +130,7 @@ impl PlayerController {
 
                     cast_action = Some(PlayerCastAction {
                         position: (transform.position
-                            + movement.normalized() * basic_spell.direction.multiplier() * 30.0)
+                            + movement.normalized() * basic_spell.direction.multiplier() * 60.0)
                             .into(),
                         direction: movement.normalized(),
                         spell: basic_spell,

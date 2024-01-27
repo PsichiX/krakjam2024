@@ -559,8 +559,8 @@ impl NewGameplay {
                 texture: match cast.spell.effect {
                     SpellTagEffect::None => "particle/smoke".into(),
                     SpellTagEffect::Fire => "particle/fire".into(),
-                    SpellTagEffect::Electric => "item/banana".into(),
-                    SpellTagEffect::Water => "item/apple".into(),
+                    SpellTagEffect::Electric => "particle/electric".into(),
+                    SpellTagEffect::Water => "particle/water".into(),
                 },
                 shader: "image".into(),
                 pivot: 0.5.into(),
