@@ -16,31 +16,8 @@ impl ProjectileController {
             .query::<(&mut Projectile, &mut Transform<f32, f32, f32>)>()
             .iter()
         {
-            projectile.trajectory_time += delta_time;
-
-            match projectile.trajectory {
-                SpellTagTrajectory::Straight => {
-                    transform.position += projectile.direction * projectile.speed * delta_time;
-                }
-                SpellTagTrajectory::Circle => {
-                    let circle_direction = Vec2::new(
-                        (projectile.trajectory_time / 1.0 * std::f32::consts::PI).cos(),
-                        (projectile.trajectory_time / 1.0 * std::f32::consts::PI).sin(),
-                    );
-
-                    transform.position +=
-                        projectile.direction * projectile.speed / 10.0 * circle_direction;
-                }
-                SpellTagTrajectory::Sinus => {
-                    let perpendicular_direction =
-                        Vec2::new(projectile.direction.y, -projectile.direction.x);
-
-                    transform.position += (projectile.direction * projectile.speed * delta_time)
-                        + projectile.speed / 10.0
-                            * (projectile.trajectory_time / 0.5 * std::f32::consts::PI).sin()
-                            * perpendicular_direction;
-                }
-            }
+            projectile.alive_time += delta_time;
+            transform.position += projectile.velocity * delta_time;
         }
     }
 }

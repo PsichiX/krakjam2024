@@ -9,10 +9,11 @@ use crate::game::{
     },
     systems::{
         animation_controller::AnimationController, collision_detector::CollisionDetector,
-        player_controller::PlayerCastAction,
+        player_controller::PlayerCastAction, spell_controller::SpellController,
     },
     utils::magic::spell_tag::{
-        SpellTag, SpellTagEffect, SpellTagShape, SpellTagSize, SpellTagTrajectory,
+        SpellTag, SpellTagDirection, SpellTagEffect, SpellTagShape, SpellTagSize, SpellTagSpeed,
+        SpellTagTrajectory,
     },
 };
 use crate::game::{
@@ -104,12 +105,20 @@ impl Default for NewGameplay {
             word_to_spell_tag_database: WordToSpellTagDatabase::default()
                 .with("fire", SpellTag::Effect(SpellTagEffect::Fire))
                 .with("big", SpellTag::Size(SpellTagSize::Large))
-                .with("ball", SpellTag::Shape(SpellTagShape::Circle))
+                .with("ball", SpellTag::Shape(SpellTagShape::Point))
+                .with("fine", SpellTag::Size(SpellTagSize::Medium))
+                .with("tiny", SpellTag::Size(SpellTagSize::Small))
                 .with("meteor", SpellTag::Effect(SpellTagEffect::Fire))
                 .with("meteor", SpellTag::Size(SpellTagSize::Large))
-                .with("meteor", SpellTag::Shape(SpellTagShape::Circle))
+                .with("meteor", SpellTag::Shape(SpellTagShape::Point))
                 .with("sinus", SpellTag::Trajectory(SpellTagTrajectory::Sinus))
-                .with("circle", SpellTag::Trajectory(SpellTagTrajectory::Circle)),
+                .with("circle", SpellTag::Trajectory(SpellTagTrajectory::Circle))
+                .with("slow", SpellTag::Speed(SpellTagSpeed::Slow))
+                .with("regular", SpellTag::Speed(SpellTagSpeed::Medium))
+                .with("fast", SpellTag::Speed(SpellTagSpeed::Fast))
+                .with("forth", SpellTag::Direction(SpellTagDirection::Forward))
+                .with("back", SpellTag::Direction(SpellTagDirection::Backward))
+                .with("down", SpellTag::Direction(SpellTagDirection::Down)),
         }
     }
 }
@@ -235,6 +244,7 @@ impl GameState for NewGameplay {
         AnimationController::run(&self.world, &mut context, delta_time);
         ProjectileController::run(&self.world, &mut context, delta_time);
         CollisionDetector::run(&self.world, &mut context, delta_time);
+        SpellController::run(&self.world, &mut context);
 
         // self.process_game_objects(&mut context, delta_time);
 
@@ -413,12 +423,17 @@ impl NewGameplay {
         let mut transform = Transform::<f32, f32, f32>::default();
         transform.position = cast.position.into();
 
-        println!("Cast spell: {:?}", cast.spell);
-
         world.spawn((
             Animation { animation: None },
             transform,
-            Projectile::new(100.0, cast.direction, cast.spell.trajectory),
+            Projectile::new(
+                match cast.spell.speed {
+                    SpellTagSpeed::Fast => 1000.0,
+                    SpellTagSpeed::Medium => 500.0,
+                    SpellTagSpeed::Slow => 100.0,
+                },
+                cast.direction,
+            ),
             Collidable {
                 space_object: Some(SpaceObject {
                     entity: None,
