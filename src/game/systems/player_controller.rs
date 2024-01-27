@@ -106,7 +106,6 @@ impl PlayerController {
 
                 if movement.magnitude() > 0.5 {
                     transform.position += movement * delta_time * 150.0;
-                    
 
                     if let Some(named_animation) = animation.animation.as_ref() {
                         if named_animation.id != self.run_animation.id {
@@ -127,7 +126,9 @@ impl PlayerController {
 
                 if let Some(spell) = cast_spell.as_ref() {
                     cast_action = Some(PlayerCastAction {
-                        position: (transform.position + movement.normalized() * spell.direction.multiplier() * 30.0).into(),
+                        position: (transform.position
+                            + movement.normalized() * spell.direction.multiplier() * 30.0)
+                            .into(),
                         direction: movement.normalized(),
                         spell: spell.clone(),
                     });

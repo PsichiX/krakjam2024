@@ -237,7 +237,7 @@ impl SpellTagDirection {
         match self {
             Self::Forward => 1.0,
             Self::Backward => -1.0,
-            Self::Down => 0.0
+            Self::Down => 0.0,
         }
     }
 }
