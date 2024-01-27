@@ -71,7 +71,10 @@ impl EnemySpawn {
             };
 
             let _ = world.spawn((
-                Enemy {},
+                Enemy {
+                    acceleration: 50.0,
+                    speed_limit: 200.0,
+                },
                 Animation {
                     animation: Some(NamedAnimation {
                         animation: FrameAnimation::new(0..1).fps(10.0).looping().playing(),
