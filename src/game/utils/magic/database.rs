@@ -1,4 +1,4 @@
-use super::spell_tag::SpellTag;
+use super::spell_tag::{SpellTag, SpellTagSize};
 use crate::hash_set;
 use std::collections::{HashMap, HashSet};
 
@@ -16,8 +16,10 @@ impl WordToSpellTagDatabase {
         self
     }
 
-    pub fn parse(&self, text: &str) -> HashSet<SpellTag> {
-        text.split_whitespace()
+    pub fn parse(&self, text: &str) -> Option<HashSet<SpellTag>> {
+        // convert words to tags (or generate random ones in their place).
+        let tags = text
+            .split_whitespace()
             .map(|word| {
                 self.records
                     .get(word)
@@ -25,7 +27,49 @@ impl WordToSpellTagDatabase {
                     .unwrap_or_else(|| hash_set![SpellTag::random()])
             })
             .flatten()
-            .collect()
+            .collect::<HashSet<_>>();
+        // construct structured spell tags with required categories or use defaults.
+        let mut result = HashSet::with_capacity(6);
+        result.insert(
+            tags.iter()
+                .find(|tag| matches!(tag, SpellTag::Size(_)))
+                .copied()
+                .unwrap_or_else(|| SpellTag::Size(Default::default())),
+        );
+        result.insert(
+            tags.iter()
+                .find(|tag| matches!(tag, SpellTag::Speed(_)))
+                .copied()
+                .unwrap_or_else(|| SpellTag::Speed(Default::default())),
+        );
+        result.insert(
+            tags.iter()
+                .find(|tag| matches!(tag, SpellTag::Shape(_)))
+                .copied()
+                .unwrap_or_else(|| SpellTag::Shape(Default::default())),
+        );
+        result.insert(
+            tags.iter()
+                .find(|tag| matches!(tag, SpellTag::Direction(_)))
+                .copied()
+                .unwrap_or_else(|| SpellTag::Direction(Default::default())),
+        );
+        result.insert(
+            tags.iter()
+                .find(|tag| matches!(tag, SpellTag::Trajectory(_)))
+                .copied()
+                .unwrap_or_else(|| SpellTag::Trajectory(Default::default())),
+        );
+        if let Some(tag) = tags
+            .iter()
+            .find(|tag| matches!(tag, SpellTag::Effect(_)))
+            .copied()
+        {
+            result.insert(tag);
+            Some(result)
+        } else {
+            None
+        }
     }
 }
 
@@ -48,6 +92,7 @@ mod tests {
 
         let mut tags = database
             .parse("big fire ball")
+            .unwrap()
             .into_iter()
             .collect::<Vec<_>>();
         tags.sort();
@@ -55,24 +100,48 @@ mod tests {
             tags,
             vec![
                 SpellTag::Size(SpellTagSize::Large),
-                SpellTag::Shape(SpellTagShape::Circle),
+                SpellTag::Speed(Default::default()),
                 SpellTag::Effect(SpellTagEffect::Fire),
+                SpellTag::Shape(SpellTagShape::Circle),
+                SpellTag::Direction(Default::default()),
+                SpellTag::Trajectory(Default::default()),
             ]
         );
 
-        let mut tags = database.parse("meteor").into_iter().collect::<Vec<_>>();
+        let mut tags = database
+            .parse("meteor")
+            .unwrap()
+            .into_iter()
+            .collect::<Vec<_>>();
         tags.sort();
         assert_eq!(
             tags,
             vec![
                 SpellTag::Size(SpellTagSize::Large),
-                SpellTag::Shape(SpellTagShape::Circle),
+                SpellTag::Speed(Default::default()),
                 SpellTag::Effect(SpellTagEffect::Fire),
+                SpellTag::Shape(SpellTagShape::Circle),
+                SpellTag::Direction(Default::default()),
+                SpellTag::Trajectory(Default::default()),
             ]
         );
 
-        let mut tags = database.parse("fire").into_iter().collect::<Vec<_>>();
+        let mut tags = database
+            .parse("fire")
+            .unwrap()
+            .into_iter()
+            .collect::<Vec<_>>();
         tags.sort();
-        assert_eq!(tags, vec![SpellTag::Effect(SpellTagEffect::Fire),]);
+        assert_eq!(
+            tags,
+            vec![
+                SpellTag::Size(Default::default()),
+                SpellTag::Speed(Default::default()),
+                SpellTag::Effect(SpellTagEffect::Fire),
+                SpellTag::Shape(Default::default()),
+                SpellTag::Direction(Default::default()),
+                SpellTag::Trajectory(Default::default()),
+            ]
+        );
     }
 }

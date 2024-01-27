@@ -7,7 +7,7 @@ use crate::game::{
     components::{collidable::Collidable, enemy::Enemy, spell::Spell},
     utils::{
         events::{Event, Events},
-        space::{self, Space, SpaceObject, SpaceObjectId},
+        space::{Space, SpaceObject, SpaceObjectId},
     },
 };
 

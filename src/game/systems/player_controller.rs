@@ -1,17 +1,13 @@
-use std::collections::HashSet;
-
 use hecs::World;
 use micro_games_kit::{
-    animation::{self, FrameAnimation, NamedAnimation},
+    animation::{FrameAnimation, NamedAnimation},
     context::GameContext,
     third_party::{
-        spitfire_input::{
-            InputActionRef, InputAxisRef, InputContext, InputMapping, VirtualAction, VirtualAxis,
-        },
+        spitfire_input::{InputAxisRef, InputContext, InputMapping, VirtualAxis},
         vek::{Clamp, Transform, Vec2},
-        windowing::event::VirtualKeyCode,
     },
 };
+use std::collections::HashSet;
 
 use crate::game::{
     components::{animation::Animation, player::Player},
@@ -86,7 +82,7 @@ impl PlayerController {
         if let Some(mut characters) = context.input.characters().write() {
             for character in characters.take().chars() {
                 if character == '\n' || character == '\r' {
-                    cast_spell_tags = Some(word_to_spell_tag_database.parse(&self.spell_text));
+                    cast_spell_tags = word_to_spell_tag_database.parse(&self.spell_text);
                     self.spell_text.clear();
                 } else if character == ' ' || character.is_alphabetic() {
                     self.spell_text.push(character);
