@@ -11,9 +11,12 @@ use crate::game::{
         animation_controller::AnimationController, collision_detector::CollisionDetector,
         player_controller::PlayerCastAction, spell_controller::SpellController,
     },
-    utils::magic::spell_tag::{
-        SpellTag, SpellTagDirection, SpellTagEffect, SpellTagShape, SpellTagSize, SpellTagSpeed,
-        SpellTagTrajectory,
+    utils::{
+        magic::spell_tag::{
+            SpellTag, SpellTagDirection, SpellTagEffect, SpellTagShape, SpellTagSize,
+            SpellTagSpeed, SpellTagTrajectory,
+        },
+        space::{CircleCollider, Collider},
     },
 };
 use crate::game::{
@@ -149,7 +152,10 @@ impl GameState for NewGameplay {
                 space_object: Some(SpaceObject {
                     entity: None,
                     position: Vec2::default(),
-                    collider_radius: 20.0,
+                    collider: Collider::Circle(CircleCollider {
+                        position: Vec2::default(),
+                        radius: 20.0,
+                    }),
                 }),
             },
             SpriteData {
@@ -172,8 +178,11 @@ impl GameState for NewGameplay {
             Collidable {
                 space_object: Some(SpaceObject {
                     entity: None,
-                    position: Vec2::default(),
-                    collider_radius: 10.0,
+                    collider: CircleCollider {
+                        position: Vec2::default(),
+                        position: todo!(),
+                        radius: todo!(),
+                    },
                 }),
             },
             SpriteData {

@@ -1,10 +1,16 @@
+use std::default;
+
 use crate::game::{enemy::EnemyState, item::Item};
 use hecs::Entity;
 use micro_games_kit::third_party::{
     raui_core::{Managed, ManagedRef, ManagedRefMut},
     rstar::{Envelope, Point, PointDistance, RTree, RTreeObject, AABB},
     typid::ID,
-    vek::Vec2,
+    vek::{Transform, Vec2},
+};
+use parry2d::{
+    math::Isometry,
+    shape::{Ball, Cuboid},
 };
 
 thread_local! {
@@ -23,10 +29,61 @@ pub enum SpaceObjectId {
 }
 
 #[derive(Debug, Default, Clone, PartialEq)]
+pub struct Collider {
+    transform: Transform<f32, f32, f32>,
+    shape: ColliderShape,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ColliderShape {
+    None,
+    Circle(Ball),
+    Rect(Cuboid),
+}
+
+impl Default for ColliderShape {
+    fn default() -> Self {
+        ColliderShape::None
+    }
+}
+
+fn transform_to_isometry(transform: Transform<f32, f32, f32>) -> Isometry<f32> {}
+
+impl Collider {
+    pub fn detect(&self, other: &Collider) -> bool {
+        match self.shape {
+            ColliderShape::None => false,
+            ColliderShape::Circle(circle) => {
+                match other.shape {
+                    ColliderShape::None => false,
+                    ColliderShape::Circle(other_circle) => circle.detect(other_circle),
+                    ColliderShape::Rect(other_rect) => false, //circle.detect(other_aabb),
+                }
+            }
+            ColliderShape::Rect(aabb) => {
+                match other.shape {
+                    ColliderShape::None => false,
+                    ColliderShape::Circle(other_circle) => false, //aabb.detect(other_circle),
+                    ColliderShape::Rect(other_rect) => false,     //aabb.detect(other_rect),
+                }
+            }
+        }
+    }
+
+    pub fn bounding_box(&self) -> AABB<[f32; 2]> {
+        match self.shape {
+            ColliderShape::None => AABB::<[f32; 2]>::new_empty(),
+            ColliderShape::Circle(circle) => circle.aabb(self.transform.into()).into(),
+            ColliderShape::AABB(aabb) => aabb.aabb(),
+        }
+    }
+}
+
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct SpaceObject {
     pub entity: Option<Entity>,
     pub position: Vec2<f32>,
-    pub collider_radius: f32,
+    pub collider: Collider,
 }
 
 impl SpaceObject {
@@ -35,9 +92,7 @@ impl SpaceObject {
     }
 
     pub fn does_collide_narrow(&self, other: &Self) -> bool {
-        let a = self.collider_radius * self.collider_radius;
-        let b = other.collider_radius * other.collider_radius;
-        self.position.distance_squared(other.position) <= a + b
+        self.collider.detect(&other.collider)
     }
 }
 
@@ -45,16 +100,7 @@ impl RTreeObject for SpaceObject {
     type Envelope = AABB<[f32; 2]>;
 
     fn envelope(&self) -> Self::Envelope {
-        AABB::from_corners(
-            [
-                self.position.x - self.collider_radius,
-                self.position.y - self.collider_radius,
-            ],
-            [
-                self.position.x + self.collider_radius,
-                self.position.y + self.collider_radius,
-            ],
-        )
+        self.collider.bounding_box()
     }
 }
 
