@@ -126,7 +126,7 @@ impl Preloader {
         );
 
         // enemy character
-        load_texture_series!(context, "enemy/idle", [1, 2, 3, 4, 5]);
+        // load_texture_series!(context, "enemy/idle", [1, 2, 3, 4, 5]);
 
         // items
         load_texture(

@@ -3,10 +3,10 @@ use super::{
     main_menu::MainMenu,
 };
 use crate::game::{
-    drawables::light::draw_sphere_light,
+    // drawables::light::draw_sphere_light,
     enemy::EnemyState,
     item::{Item, ItemKind},
-    player::PlayerState,
+    // player::PlayerState,
     torch::Torch,
     ui::{health_bar::health_bar, world_to_screen_content_layout},
     utils::{
@@ -44,7 +44,7 @@ use std::{collections::HashMap, f32::INFINITY};
 
 pub struct Gameplay {
     map: Sprite,
-    player: Character<PlayerState>,
+    // player: Character<PlayerState>,
     enemies: HashMap<ID<EnemyState>, Character<EnemyState>>,
     items: HashMap<ID<Item>, Item>,
     torch: Torch,
@@ -76,7 +76,7 @@ impl Default for Gameplay {
                 filtering: GlowTextureFiltering::Linear,
             })
             .pivot(0.5.into()),
-            player: PlayerState::new_character([0.0, 0.0, 0.0]),
+            // player: PlayerState::new_character([0.0, 0.0, 0.0]),
             enemies: Default::default(),
             items: Default::default(),
             torch: Torch::new([0.0, 0.0]),
@@ -104,7 +104,7 @@ impl GameState for Gameplay {
             ),
         ));
 
-        self.player.activate(&mut context);
+        // self.player.activate(&mut context);
 
         for _ in 0..6 {
             let position = [
@@ -135,7 +135,7 @@ impl GameState for Gameplay {
     }
 
     fn exit(&mut self, mut context: GameContext) {
-        self.player.deactivate(&mut context);
+        // self.player.deactivate(&mut context);
 
         for (_, mut enemy) in self.enemies.drain() {
             enemy.deactivate(&mut context);
@@ -177,36 +177,36 @@ impl GameState for Gameplay {
             enemy.draw(&mut context);
         }
 
-        self.player.draw(&mut context);
+        // self.player.draw(&mut context);
 
         if let Some(canvas) = &mut self.darkness {
             let _ = canvas.match_to_screen(context.graphics);
 
             canvas.with(context.draw, context.graphics, true, |draw, graphics| {
-                draw_sphere_light(
-                    self.player
-                        .state
-                        .read()
-                        .unwrap()
-                        .sprite
-                        .transform
-                        .position
-                        .xy(),
-                    200.0,
-                    0.0..=1.0,
-                    1.0,
-                    draw,
-                    graphics,
-                );
+                // draw_sphere_light(
+                //     self.player
+                //         .state
+                //         .read()
+                //         .unwrap()
+                //         .sprite
+                //         .transform
+                //         .position
+                //         .xy(),
+                //     200.0,
+                //     0.0..=1.0,
+                //     1.0,
+                //     draw,
+                //     graphics,
+                // );
 
-                draw_sphere_light(
-                    self.torch.sprite.transform.position.xy(),
-                    350.0,
-                    0.0..=1.0,
-                    1.0,
-                    draw,
-                    graphics,
-                );
+                // draw_sphere_light(
+                //     self.torch.sprite.transform.position.xy(),
+                //     350.0,
+                //     0.0..=1.0,
+                //     1.0,
+                //     draw,
+                //     graphics,
+                // );
             });
 
             Sprite::single(
@@ -240,14 +240,14 @@ impl GameState for Gameplay {
         };
 
         {
-            let state = self.player.state.read().unwrap();
-            let layout = world_to_screen_content_layout(
-                state.sprite.transform.position.xy(),
-                health_bar_rectangle,
-                &context,
-            );
+            // let state = self.player.state.read().unwrap();
+            // let layout = world_to_screen_content_layout(
+            //     state.sprite.transform.position.xy(),
+            //     health_bar_rectangle,
+            //     &context,
+            // );
 
-            health_bar(layout, state.health);
+            // health_bar(layout, state.health);
         }
 
         for enemy in self.enemies.values() {
@@ -266,25 +266,25 @@ impl GameState for Gameplay {
                 margin: 40.0.into(),
                 ..Default::default()
             },
-            TextBoxProps {
-                text: format!(
-                    "Weapon: {:?}\nEnemies: {}\nItems: {}",
-                    self.player.state.read().unwrap().weapon,
-                    self.enemies.len(),
-                    self.items.len(),
-                ),
-                font: TextBoxFont {
-                    name: "roboto".to_owned(),
-                    size: 28.0,
-                },
-                color: Color {
-                    r: 1.0,
-                    g: 1.0,
-                    b: 1.0,
-                    a: 1.0,
-                },
-                ..Default::default()
-            },
+            // TextBoxProps {
+            //     text: format!(
+            //         "Weapon: {:?}\nEnemies: {}\nItems: {}",
+            //         self.player.state.read().unwrap().weapon,
+            //         self.enemies.len(),
+            //         self.items.len(),
+            //     ),
+            //     font: TextBoxFont {
+            //         name: "roboto".to_owned(),
+            //         size: 28.0,
+            //     },
+            //     color: Color {
+            //         r: 1.0,
+            //         g: 1.0,
+            //         b: 1.0,
+            //         a: 1.0,
+            //     },
+            //     ..Default::default()
+            // },
         ));
     }
 }
@@ -306,19 +306,19 @@ impl Gameplay {
                     position: item.sprite.transform.position.xy(),
                     collider_radius: 10.0,
                 }))
-                .chain(std::iter::once(SpaceObject {
-                    entity: None,
-                    position: self
-                        .player
-                        .state
-                        .read()
-                        .unwrap()
-                        .sprite
-                        .transform
-                        .position
-                        .xy(),
-                    collider_radius: 20.0,
-                }))
+                // .chain(std::iter::once(SpaceObject {
+                //     entity: None,
+                //     position: self
+                //         .player
+                //         .state
+                //         .read()
+                //         .unwrap()
+                //         .sprite
+                //         .transform
+                //         .position
+                //         .xy(),
+                //     collider_radius: 20.0,
+                // }))
                 .collect(),
         );
     }
@@ -326,21 +326,21 @@ impl Gameplay {
     fn process_game_objects(&mut self, context: &mut GameContext, delta_time: f32) {
         self.torch.process(context, delta_time);
 
-        self.player.process(context, delta_time);
+        // self.player.process(context, delta_time);
 
-        for enemy in self.enemies.values_mut() {
-            enemy.process(context, delta_time);
-            enemy
-                .state
-                .write()
-                .unwrap()
-                .sense_player(&self.player.state.read().unwrap());
-        }
+        // for enemy in self.enemies.values_mut() {
+        //     enemy.process(context, delta_time);
+        //     enemy
+        //         .state
+        //         .write()
+        //         .unwrap()
+        //         .sense_player(&self.player.state.read().unwrap());
+        // }
     }
 
     fn execute_events(&mut self, context: &mut GameContext) {
         Events::read(|events| {
-            self.player.state.write().unwrap().execute_events(events);
+            // self.player.state.write().unwrap().execute_events(events);
 
             for (id, enemy) in &mut self.enemies {
                 enemy.state.write().unwrap().execute_events(*id, events);
@@ -372,38 +372,38 @@ impl Gameplay {
     }
 
     fn update_ambient_music(&mut self) {
-        let player_position = self
-            .player
-            .state
-            .read()
-            .unwrap()
-            .sprite
-            .transform
-            .position
-            .xy();
-        let factor = self
-            .enemies
-            .values()
-            .map(|enemy| {
-                enemy
-                    .state
-                    .read()
-                    .unwrap()
-                    .sprite
-                    .transform
-                    .position
-                    .xy()
-                    .distance(player_position)
-            })
-            .min_by(|a, b| a.partial_cmp(b).unwrap())
-            .unwrap_or(INFINITY)
-            .min(300.0) as f64
-            / 300.0;
-        let _ = self
-            .music_forest
-            .set_volume(factor * 2.0, Default::default());
-        let _ = self
-            .music_battle
-            .set_volume((1.0 - factor) * 2.0, Default::default());
+        // let player_position = self
+        //     .player
+        //     .state
+        //     .read()
+        //     .unwrap()
+        //     .sprite
+        //     .transform
+        //     .position
+        //     .xy();
+        // let factor = self
+        //     .enemies
+        //     .values()
+        //     .map(|enemy| {
+        //         enemy
+        //             .state
+        //             .read()
+        //             .unwrap()
+        //             .sprite
+        //             .transform
+        //             .position
+        //             .xy()
+        //             .distance(player_position)
+        //     })
+        //     .min_by(|a, b| a.partial_cmp(b).unwrap())
+        //     .unwrap_or(INFINITY)
+        //     .min(300.0) as f64
+        //     / 300.0;
+        // let _ = self
+        //     .music_forest
+        //     .set_volume(factor * 2.0, Default::default());
+        // let _ = self
+        //     .music_battle
+        //     .set_volume((1.0 - factor) * 2.0, Default::default());
     }
 }
