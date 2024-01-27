@@ -333,9 +333,9 @@ impl GameState for NewGameplay {
         };
 
         {
-            for (_, (_, transform, health)) in self
+            for (_, (transform, health)) in self
                 .world
-                .query::<(&Player, &Transform<f32, f32, f32>, &Health)>()
+                .query::<(&Transform<f32, f32, f32>, &Health)>()
                 .iter()
             {
                 let layout = world_to_screen_content_layout(
