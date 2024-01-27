@@ -15,7 +15,8 @@ pub enum SpaceObjectId {
     #[default]
     None,
     Player,
-    Enemy(ID<EnemyState>),
+    Enemy,
+    EnemyOld(ID<EnemyState>),
     Item(ID<Item>),
 }
 

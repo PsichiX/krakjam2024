@@ -299,7 +299,7 @@ impl Gameplay {
             self.enemies
                 .iter()
                 .map(|(id, enemy)| SpaceObject {
-                    id: SpaceObjectId::Enemy(*id),
+                    id: SpaceObjectId::EnemyOld(*id),
                     position: enemy.state.read().unwrap().sprite.transform.position.xy(),
                     collider_radius: 20.0,
                 })
@@ -423,7 +423,7 @@ impl Gameplay {
                                 Events::write(Event::KillItem { id: item_id });
                                 let _ = Audio::write().write().unwrap().play("collect");
                             }
-                            SpaceObjectId::Enemy(enemy_id) => {
+                            SpaceObjectId::EnemyOld(enemy_id) => {
                                 if let Some(enemy) = self.enemies.get_mut(&enemy_id) {
                                     enemy.state.write().unwrap().consume_item(item);
                                     Events::write(Event::KillItem { id: item_id });
