@@ -13,3 +13,17 @@ pub struct Spell {
     pub trajectory: SpellTagTrajectory,
     pub duration: SpellTagDuration,
 }
+
+impl Spell {
+    pub fn basic() -> Self {
+        Self {
+            direction: SpellTagDirection::Forward,
+            duration: SpellTagDuration::Instant,
+            effect: SpellTagEffect::None,
+            shape: SpellTagShape::Point,
+            size: SpellTagSize::Medium,
+            speed: SpellTagSpeed::Medium,
+            trajectory: SpellTagTrajectory::Straight,
+        }
+    }
+}

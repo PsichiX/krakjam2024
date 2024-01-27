@@ -551,6 +551,7 @@ impl NewGameplay {
             },
             SpriteData {
                 texture: match cast.spell.effect {
+                    SpellTagEffect::None => "particle/smoke".into(),
                     SpellTagEffect::Fire => "particle/fire".into(),
                     SpellTagEffect::Electric => "item/banana".into(),
                     SpellTagEffect::Water => "item/apple".into(),

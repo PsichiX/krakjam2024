@@ -80,6 +80,7 @@ impl SpellTag {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum SpellTagEffect {
+    None,
     Fire,
     Water,
     Electric,
@@ -171,6 +172,7 @@ impl SpellTagSpeed {
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum SpellTagDuration {
+    Instant,
     Quick,
     #[default]
     Medium,
@@ -192,6 +194,7 @@ impl SpellTagDuration {
             SpellTagDuration::Long => 8.0,
             SpellTagDuration::Medium => 2.0,
             SpellTagDuration::Quick => 0.5,
+            SpellTagDuration::Instant => 0.2,
         }
     }
 }
