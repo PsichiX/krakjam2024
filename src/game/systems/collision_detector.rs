@@ -3,14 +3,23 @@ use std::vec;
 use hecs::World;
 use micro_games_kit::{context::GameContext, third_party::vek::Transform};
 
-use crate::game::{components::{collidable::Collidable, enemy::Enemy, spell::Spell}, utils::{events::{Event, Events}, space::{self, Space, SpaceObject, SpaceObjectId}}};
+use crate::game::{
+    components::{collidable::Collidable, enemy::Enemy, spell::Spell},
+    utils::{
+        events::{Event, Events},
+        space::{self, Space, SpaceObject, SpaceObjectId},
+    },
+};
 
 pub struct CollisionDetector;
 
 impl CollisionDetector {
     pub fn run(world: &World, context: &mut GameContext, delta_time: f32) {
         // Update space oobject positions
-        for (id, (collidable, transform)) in world.query::<(&mut Collidable, &Transform<f32, f32, f32>)>().iter() {
+        for (id, (collidable, transform)) in world
+            .query::<(&mut Collidable, &Transform<f32, f32, f32>)>()
+            .iter()
+        {
             if let Some(space_object) = collidable.space_object.as_mut() {
                 space_object.entity = Some(id);
                 space_object.position = transform.position.into();

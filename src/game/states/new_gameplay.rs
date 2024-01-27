@@ -3,8 +3,14 @@ use super::{
     main_menu::MainMenu,
 };
 use crate::game::{
-    components::{animation::Animation, collidable::Collidable, enemy::Enemy, spell::Spell, sprite_data::SpriteData},
-    systems::{animation_controller::AnimationController, collision_detector::CollisionDetector, player_controller::PlayerCastAction},
+    components::{
+        animation::Animation, collidable::Collidable, enemy::Enemy, spell::Spell,
+        sprite_data::SpriteData,
+    },
+    systems::{
+        animation_controller::AnimationController, collision_detector::CollisionDetector,
+        player_controller::PlayerCastAction,
+    },
     utils::magic::spell_tag::SpellTagTrajectory,
 };
 use crate::game::{
@@ -126,7 +132,7 @@ impl GameState for NewGameplay {
                     entity: None,
                     position: Vec2::default(),
                     collider_radius: 20.0,
-                })
+                }),
             },
             SpriteData {
                 texture: "player/idle/1".into(),
@@ -151,7 +157,7 @@ impl GameState for NewGameplay {
                     entity: None,
                     position: Vec2::default(),
                     collider_radius: 10.0,
-                })
+                }),
             },
             SpriteData {
                 texture: "enemy/idle/1".into(),
@@ -412,7 +418,7 @@ impl NewGameplay {
                     entity: None,
                     position: Vec2::default(),
                     collider_radius: 10.0,
-                })
+                }),
             },
             SpriteData {
                 texture: "item/apple".into(),
