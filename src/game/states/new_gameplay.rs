@@ -10,7 +10,7 @@ use crate::game::{
     },
     systems::{
         animation_controller::AnimationController, collision_detector::CollisionDetector,
-        damage_dealer::DamageDealer, effects_reactions::EffectsReactions,
+        damage_dealer::DamageDealer, death::Death, effects_reactions::EffectsReactions,
         enemy_controller::EnemyController, enemy_spawn::EnemySpawn,
         particle_manager::ParticleManager, player_controller::PlayerCastAction,
         slime_color::SlimeColor, spell_controller::SpellController,
@@ -102,7 +102,7 @@ impl Default for NewGameplay {
             // music_battle,
             world: World::new(),
             player_controller: PlayerController::default(),
-            enemy_spawn: EnemySpawn::new(1000.0, 1.0, 50),
+            enemy_spawn: EnemySpawn::new(1000.0, 3.0, 30),
             particle_manager: ParticleManager {},
             word_to_spell_tag_database: WordToSpellTagDatabase::default()
                 // Fire
@@ -275,6 +275,13 @@ impl GameState for NewGameplay {
         DamageDealer::run(&self.world);
         self.particle_manager.process(&mut self.world, delta_time);
         SlimeColor::run(&self.world);
+
+        // always keep death last in the frame to run!
+        Death::run(&mut self.world);
+
+        if self.world.query::<&Player>().iter().next().is_none() {
+            *context.state_change = GameStateChange::Swap(Box::new(NewGameplay::default()));
+        }
 
         // self.process_game_objects(&mut context, delta_time);
 
