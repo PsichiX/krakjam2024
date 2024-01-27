@@ -3,6 +3,7 @@ use crate::game::{
         collidable::Collidable,
         effect::{Effect, EffectReaction},
         health::Health,
+        ignore_player::IgnorePlayer,
         immobility::Immobility,
         particle::Particle,
     },
@@ -19,11 +20,22 @@ impl EffectsReactions {
         let space = space.read().unwrap();
         let mut entities_to_process = Vec::<(Entity, Entity)>::new();
 
-        for (entity_a, (collidable, _)) in world.query::<(&Collidable, &Effect)>().iter() {
+        for (entity_a, (collidable, _, ignore_player)) in world
+            .query::<(&Collidable, &Effect, Option<&IgnorePlayer>)>()
+            .iter()
+        {
             if let Some(space_object) = collidable.space_object.as_ref() {
                 for object in space.collisions(space_object, true) {
                     if let Some(entity_b) = object.entity {
                         if entity_b != entity_a {
+                            if let Some(ignore_player) = ignore_player {
+                                if ignore_player.should_be_ignored(entity_a)
+                                    && ignore_player.should_be_ignored(entity_b)
+                                {
+                                    continue;
+                                }
+                            }
+
                             entities_to_process.push((entity_a, entity_b));
                         }
                     }
