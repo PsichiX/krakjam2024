@@ -4,7 +4,8 @@ use super::{
 };
 use crate::game::{
     components::{
-        animation::Animation, collidable::Collidable, enemy::Enemy, sprite_data::SpriteData,
+        animation::Animation, collidable::Collidable, effect::Effect, enemy::Enemy, health::Health,
+        sprite_data::SpriteData,
     },
     systems::{
         animation_controller::AnimationController, collision_detector::CollisionDetector,
@@ -156,6 +157,12 @@ impl GameState for NewGameplay {
                     position: Vec2::default(),
                     collider_radius: 20.0,
                 }),
+            },
+            Health { value: 100.0 },
+            Effect {
+                electricity: false,
+                fire: false,
+                water: false,
             },
             SpriteData {
                 texture: "player/idle/1".into(),

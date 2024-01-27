@@ -12,7 +12,7 @@ impl EffectsReactions {
         let space = Space::read();
         let space = space.read().unwrap();
 
-        for (_, (collidable, effect_a, mut health_a, mut immobility_a, mut transform_a)) in world
+        for (id, (collidable, effect_a, mut health_a, mut immobility_a, mut transform_a)) in world
             .query::<(
                 &Collidable,
                 &mut Effect,
@@ -25,6 +25,10 @@ impl EffectsReactions {
             if let Some(space_object) = collidable.space_object.as_ref() {
                 for object in space.collisions(space_object, true) {
                     if let Some(entity) = object.entity {
+                        if entity == id {
+                            continue;
+                        }
+
                         if let Ok(query) = world
                             .query_one::<(
                                 &mut Effect,
