@@ -12,7 +12,8 @@ use crate::game::{
         spell_controller::SpellController,
     },
     utils::magic::spell_tag::{
-        SpellTag, SpellTagDirection, SpellTagDuration, SpellTagEffect, SpellTagShape, SpellTagSize, SpellTagSpeed, SpellTagTrajectory
+        SpellTag, SpellTagDirection, SpellTagDuration, SpellTagEffect, SpellTagShape, SpellTagSize,
+        SpellTagSpeed, SpellTagTrajectory,
     },
 };
 use crate::game::{

@@ -6,7 +6,10 @@ use micro_games_kit::{
 
 use crate::game::{
     components::{collidable::Collidable, projectile::Projectile, spell::Spell},
-    utils::{events::{Event, Events}, magic::spell_tag::{SpellTagDirection, SpellTagSize, SpellTagSpeed, SpellTagTrajectory}},
+    utils::{
+        events::{Event, Events},
+        magic::spell_tag::{SpellTagDirection, SpellTagSize, SpellTagSpeed, SpellTagTrajectory},
+    },
 };
 
 pub struct SpellController;

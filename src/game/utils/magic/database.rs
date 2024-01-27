@@ -63,7 +63,7 @@ impl WordToSpellTagDatabase {
                 shape,
                 direction,
                 trajectory,
-                duration
+                duration,
             })
         } else {
             None

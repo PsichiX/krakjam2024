@@ -1,5 +1,6 @@
 use crate::game::utils::magic::spell_tag::{
-    SpellTagDirection, SpellTagDuration, SpellTagEffect, SpellTagShape, SpellTagSize, SpellTagSpeed, SpellTagTrajectory
+    SpellTagDirection, SpellTagDuration, SpellTagEffect, SpellTagShape, SpellTagSize,
+    SpellTagSpeed, SpellTagTrajectory,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
