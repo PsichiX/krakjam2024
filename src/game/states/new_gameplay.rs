@@ -3,8 +3,8 @@ use super::{
     main_menu::MainMenu,
 };
 use crate::game::{
-    components::{animation::Animation, spell::Spell, sprite_data::SpriteData},
-    systems::{animation_controller::AnimationController, player_controller::PlayerCastAction},
+    components::{animation::Animation, collidable::Collidable, enemy::Enemy, spell::Spell, sprite_data::SpriteData},
+    systems::{animation_controller::AnimationController, collision_detector::CollisionDetector, player_controller::PlayerCastAction},
     utils::magic::spell_tag::SpellTagTrajectory,
 };
 use crate::game::{
@@ -22,6 +22,7 @@ use crate::game::{
 };
 use hecs::World;
 use micro_games_kit::{
+    animation::{FrameAnimation, NamedAnimation},
     character::Character,
     context::GameContext,
     game::{GameObject, GameState, GameStateChange},
@@ -38,7 +39,7 @@ use micro_games_kit::{
         spitfire_glow::{graphics::CameraScaling, renderer::GlowTextureFiltering},
         spitfire_input::{InputActionRef, InputConsume, InputMapping, VirtualAction},
         typid::ID,
-        vek::{Rgba, Transform},
+        vek::{Rgba, Transform, Vec2},
         windowing::event::VirtualKeyCode,
     },
 };
@@ -119,10 +120,41 @@ impl GameState for NewGameplay {
             Player {},
             Animation { animation: None },
             Transform::<f32, f32, f32>::default(),
+            Collidable {
+                space_object: Some(SpaceObject {
+                    id: SpaceObjectId::Player,
+                    position: Vec2::default(),
+                    collider_radius: 20.0,
+                })
+            },
             SpriteData {
                 texture: "player/idle/1".into(),
                 shader: "character".into(),
                 pivot: 0.5.into(),
+                tint: Rgba::default(),
+            },
+        ));
+
+        self.world.spawn((
+            Enemy {},
+            Animation {
+                animation: Some(NamedAnimation {
+                    animation: FrameAnimation::new(1..6).fps(10.0).looping().playing(),
+                    id: "enemy/idle".to_owned(),
+                }),
+            },
+            Transform::<f32, f32, f32>::default(),
+            Collidable {
+                space_object: Some(SpaceObject {
+                    id: SpaceObjectId::Enemy,
+                    position: Vec2::default(),
+                    collider_radius: 10.0,
+                })
+            },
+            SpriteData {
+                texture: "enemy/idle/1".into(),
+                shader: "character".into(),
+                pivot: [0.25, 0.5].into(),
                 tint: Rgba::default(),
             },
         ));
@@ -186,6 +218,7 @@ impl GameState for NewGameplay {
         );
         AnimationController::run(&self.world, &mut context, delta_time);
         ProjectileController::run(&self.world, &mut context, delta_time);
+        CollisionDetector::run(&self.world, &mut context, delta_time)
 
         // self.process_game_objects(&mut context, delta_time);
 

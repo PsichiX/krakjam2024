@@ -129,7 +129,7 @@ impl Preloader {
         load_texture_series!(context, "player/sword", [1, 2, 3, 4, 5, 6, 7]);
 
         // enemy character
-        // load_texture_series!(context, "enemy/idle", [1, 2, 3, 4, 5]);
+        load_texture_series!(context, "enemy/idle", [1, 2, 3, 4, 5]);
         // load_texture_series!(context, "enemy/run", [1, 2, 3, 4, 5, 6, 7, 8]);
         // load_texture_series!(context, "enemy/attack", [1, 2, 3, 4, 5, 6, 7, 8]);
 
