@@ -163,7 +163,7 @@ impl SpellTagDuration {
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum SpellTagShape {
     #[default]
-    Circle,
+    Point,
     Wall,
     Triangle,
 }
@@ -171,7 +171,7 @@ pub enum SpellTagShape {
 impl SpellTagShape {
     pub fn random() -> Self {
         match thread_rng().gen_range(0..3) {
-            0 => Self::Circle,
+            0 => Self::Point,
             1 => Self::Wall,
             2 => Self::Triangle,
             _ => unreachable!(),
