@@ -262,7 +262,7 @@ impl GameState for NewGameplay {
         Events::maintain(delta_time);
 
         if self.exit.get().is_down() {
-            *context.state_change = GameStateChange::Swap(Box::new(NewGameplay::default()));
+            *context.state_change = GameStateChange::Pop;
         }
 
         self.player_controller.run(
