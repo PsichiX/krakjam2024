@@ -1,10 +1,11 @@
 use micro_games_kit::third_party::rand::{thread_rng, Rng};
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum SpellTag {
     Size(SpellTagSize),
     Speed(SpellTagSpeed),
-    Shape(SpellTagShape),
     Effect(SpellTagEffect),
+    Shape(SpellTagShape),
     Direction(SpellTagDirection),
     Trajectory(SpellTagTrajectory),
 }
@@ -14,8 +15,8 @@ impl SpellTag {
         match thread_rng().gen_range(0..6) {
             0 => Self::Size(SpellTagSize::random()),
             1 => Self::Speed(SpellTagSpeed::random()),
-            2 => Self::Shape(SpellTagShape::random()),
-            3 => Self::Effect(SpellTagEffect::random()),
+            2 => Self::Effect(SpellTagEffect::random()),
+            3 => Self::Shape(SpellTagShape::random()),
             4 => Self::Direction(SpellTagDirection::random()),
             5 => Self::Trajectory(SpellTagTrajectory::random()),
             _ => unreachable!(),

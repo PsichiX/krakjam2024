@@ -1,3 +1,1 @@
-pub struct Player {
-
-}
+pub struct Player {}

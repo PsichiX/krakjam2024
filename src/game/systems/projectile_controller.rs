@@ -7,7 +7,10 @@ pub struct ProjectileController;
 
 impl ProjectileController {
     pub fn run(world: &World, context: &mut GameContext, delta_time: f32) {
-        for (_, (projectile, transform)) in world.query::<(&Projectile, &mut Transform<f32, f32, f32>)>().iter() {
+        for (_, (projectile, transform)) in world
+            .query::<(&Projectile, &mut Transform<f32, f32, f32>)>()
+            .iter()
+        {
             transform.position += projectile.direction * projectile.speed * delta_time;
         }
     }

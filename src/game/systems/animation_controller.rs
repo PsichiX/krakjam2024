@@ -13,7 +13,7 @@ impl AnimationController {
             }
         }
 
-        for (_, (animation, sprite_data,)) in world.query::<(&Animation, &mut SpriteData,)>().iter() {
+        for (_, (animation, sprite_data)) in world.query::<(&Animation, &mut SpriteData)>().iter() {
             if let Some(animation) = animation.animation.as_ref() {
                 if let Some(frame) = animation.animation.current_frame() {
                     sprite_data.texture = format!("{}/{}", animation.id, frame).into();
