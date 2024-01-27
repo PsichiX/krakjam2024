@@ -1,8 +1,6 @@
 pub mod components;
-pub mod drawables;
 pub mod enemy;
 pub mod item;
-pub mod player;
 pub mod states;
 pub mod systems;
 pub mod torch;

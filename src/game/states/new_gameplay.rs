@@ -5,12 +5,13 @@ use super::{
 use crate::game::{
     components::{
         animation::Animation, collidable::Collidable, effect::Effect, enemy::Enemy, health::Health,
-        sprite_data::SpriteData,
+        particle_generator::ParticleGenerator, sprite_data::SpriteData,
     },
     systems::{
         animation_controller::AnimationController, collision_detector::CollisionDetector,
-        effects_reactions::EffectsReactions, player_controller::PlayerCastAction,
-        slime_color::SlimeColor, spell_controller::SpellController,
+        effects_reactions::EffectsReactions, particle_manager::ParticleManager,
+        player_controller::PlayerCastAction, slime_color::SlimeColor,
+        spell_controller::SpellController,
     },
     ui::{health_bar::health_bar, world_to_screen_content_layout},
     utils::magic::spell_tag::{
@@ -20,7 +21,6 @@ use crate::game::{
 };
 use crate::game::{
     components::{player::Player, projectile::Projectile},
-    player::PlayerState,
     systems::{
         player_controller::PlayerController, projectile_controller::ProjectileController,
         sprite_renderer::SpriteRenderer,
@@ -34,9 +34,8 @@ use crate::game::{
 use hecs::World;
 use micro_games_kit::{
     animation::{FrameAnimation, NamedAnimation},
-    character::Character,
     context::GameContext,
-    game::{GameObject, GameState, GameStateChange},
+    game::{GameState, GameStateChange},
     third_party::{
         raui_core::layout::CoordsMappingScaling,
         raui_immediate_widgets::core::{
@@ -44,6 +43,7 @@ use micro_games_kit::{
             TextBoxHorizontalAlign, TextBoxProps, TextBoxVerticalAlign,
         },
         spitfire_draw::{
+            particles::ParticleSystem,
             sprite::{Sprite, SpriteTexture},
             utils::{Drawable, TextureRef},
         },
@@ -57,18 +57,13 @@ use micro_games_kit::{
 
 pub struct NewGameplay {
     map: Sprite,
-    player: Character<PlayerState>,
-    // enemies: HashMap<ID<EnemyState>, Character<EnemyState>>,
-    // items: HashMap<ID<Item>, Item>,
-    // torch: Torch,
-    // darkness: Option<Canvas>,
     exit: InputActionRef,
     exit_handle: Option<ID<InputMapping>>,
-    // map_radius: f32,
     // music_forest: StaticSoundHandle,
     // music_battle: StaticSoundHandle,
     world: World,
     player_controller: PlayerController,
+    particle_manager: ParticleManager,
     word_to_spell_tag_database: WordToSpellTagDatabase,
 }
 
@@ -92,7 +87,7 @@ impl Default for NewGameplay {
                 filtering: GlowTextureFiltering::Linear,
             })
             .pivot(0.5.into()),
-            player: PlayerState::new_character([0.0, 0.0, 0.0]),
+            // player: PlayerState::new_character([0.0, 0.0, 0.0]),
             // enemies: Default::default(),
             // items: Default::default(),
             // torch: Torch::new([0.0, 0.0]),
@@ -104,6 +99,9 @@ impl Default for NewGameplay {
             // music_battle,
             world: World::new(),
             player_controller: PlayerController::default(),
+            particle_manager: ParticleManager {
+                system: ParticleSystem::new(0.0, 100),
+            },
             word_to_spell_tag_database: WordToSpellTagDatabase::default()
                 .with("fire", SpellTag::Effect(SpellTagEffect::Fire))
                 .with("burn", SpellTag::Effect(SpellTagEffect::Fire))
@@ -161,8 +159,6 @@ impl GameState for NewGameplay {
             ),
         ));
 
-        self.player.activate(&mut context);
-
         self.player_controller.init(context.input);
 
         self.world.spawn((
@@ -218,42 +214,9 @@ impl GameState for NewGameplay {
             },
             Health { value: 100.0 },
         ));
-
-        // for _ in 0..6 {
-        //     let position = [
-        //         thread_rng().gen_range((-self.map_radius)..=self.map_radius),
-        //         thread_rng().gen_range((-self.map_radius)..=self.map_radius),
-        //         0.0,
-        //     ];
-        //     self.enemies.insert(
-        //         ID::new(),
-        //         EnemyState::new_character(position).activated(&mut context),
-        //     );
-        // }
-
-        // for _ in 0..20 {
-        //     let position = [
-        //         thread_rng().gen_range((-self.map_radius)..=self.map_radius),
-        //         thread_rng().gen_range((-self.map_radius)..=self.map_radius),
-        //     ];
-        //     self.items
-        //         .insert(ID::new(), Item::new(ItemKind::random(), position));
-        // }
-
-        // self.darkness = Some(
-        //     Canvas::from_screen(vec![GlowTextureFormat::Monochromatic], context.graphics)
-        //         .unwrap()
-        //         .color([0.0, 0.0, 0.0, 0.0]),
-        // );
     }
 
     fn exit(&mut self, mut context: GameContext) {
-        self.player.deactivate(&mut context);
-
-        // for (_, mut enemy) in self.enemies.drain() {
-        //     enemy.deactivate(&mut context);
-        // }
-
         if let Some(id) = self.exit_handle {
             context.input.remove_mapping(id);
             self.exit_handle = None;
@@ -281,6 +244,7 @@ impl GameState for NewGameplay {
         CollisionDetector::run(&self.world);
         EffectsReactions::run(&self.world);
         SpellController::run(&self.world, &mut context);
+        self.particle_manager.process(&self.world, delta_time);
         SlimeColor::run(&self.world);
 
         // self.process_game_objects(&mut context, delta_time);
@@ -296,6 +260,7 @@ impl GameState for NewGameplay {
         self.map.draw(context.draw, context.graphics);
 
         SpriteRenderer::run(&self.world, &mut context);
+        self.particle_manager.draw(&self.world, &mut context);
 
         // self.torch.draw(&mut context);
 
@@ -565,6 +530,15 @@ impl NewGameplay {
                 shader: "image".into(),
                 pivot: 0.5.into(),
                 tint: Rgba::white(),
+            },
+            ParticleGenerator {
+                emmission_accumulator: 0.0,
+                texture: match cast.spell.effect {
+                    SpellTagEffect::None => "particle/smoke".into(),
+                    SpellTagEffect::Fire => "particle/fire".into(),
+                    SpellTagEffect::Electric => "particle/electric".into(),
+                    SpellTagEffect::Water => "particle/water".into(),
+                },
             },
             cast.spell.clone(),
         ));

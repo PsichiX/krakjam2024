@@ -18,7 +18,7 @@ pub enum EffectReaction {
 impl EffectReaction {
     pub fn damage(&self) -> f32 {
         match self {
-            Self::None => 0.0,
+            Self::None => 1.0,
             Self::Steam => 10.0,
             Self::Paralize => 0.0,
             Self::Explode => 50.0,

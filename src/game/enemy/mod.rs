@@ -12,7 +12,6 @@ use self::{
 };
 use super::{
     item::Item,
-    player::PlayerState,
     utils::events::{Event, Events, Instigator},
 };
 use micro_games_kit::{
@@ -146,15 +145,15 @@ impl EnemyState {
         }
     }
 
-    pub fn sense_player(&mut self, player: &PlayerState) {
-        let direction = player.sprite.transform.position.xy() - self.sprite.transform.position.xy();
+    // pub fn sense_player(&mut self, player: &PlayerState) {
+    //     let direction = player.sprite.transform.position.xy() - self.sprite.transform.position.xy();
 
-        if direction.magnitude() < self.ai.target_in_range_distance_threshold {
-            self.ai.target_in_range_position = Some(player.sprite.transform.position.xy());
-        } else {
-            self.ai.target_in_range_position = None;
-        }
-    }
+    //     if direction.magnitude() < self.ai.target_in_range_distance_threshold {
+    //         self.ai.target_in_range_position = Some(player.sprite.transform.position.xy());
+    //     } else {
+    //         self.ai.target_in_range_position = None;
+    //     }
+    // }
 
     pub fn execute_events(&mut self, id: ID<EnemyState>, events: &[Event]) {
         for event in events {
