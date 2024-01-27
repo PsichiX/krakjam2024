@@ -1,20 +1,32 @@
-use std::default;
-
 use super::{
     game_end::{GameEnd, GameEndReason},
     main_menu::MainMenu,
 };
-use crate::game::{components::{animation::Animation, projectile::Projectile, sprite_data::SpriteData}, systems::{animation_controller::AnimationController, projectile_controller::ProjectileController}};
 use crate::game::{
-    components::player::Player, player::PlayerState, systems::{player_controller::PlayerController, sprite_renderer::SpriteRenderer}, utils::{
+    components::{player::Player, projectile::Projectile},
+    player::PlayerState,
+    systems::{player_controller::PlayerController, projectile_controller::ProjectileController, sprite_renderer::SpriteRenderer},
+    utils::{
         events::{Event, Events},
+        magic::database::WordToSpellTagDatabase,
         space::{Space, SpaceObject, SpaceObjectId},
-    }
+    },
+};
+use crate::game::{
+    components::{animation::Animation, sprite_data::SpriteData},
+    systems::animation_controller::AnimationController,
 };
 use hecs::World;
 use micro_games_kit::{
-    animation::{FrameAnimation, NamedAnimation}, character::Character, context::GameContext, game::{GameObject, GameState, GameStateChange}, third_party::{
+    character::Character,
+    context::GameContext,
+    game::{GameObject, GameState, GameStateChange},
+    third_party::{
         raui_core::layout::CoordsMappingScaling,
+        raui_immediate_widgets::core::{
+            containers::nav_content_box, text_box, ContentBoxItemLayout, Rect, TextBoxFont,
+            TextBoxHorizontalAlign, TextBoxProps, TextBoxVerticalAlign,
+        },
         spitfire_draw::{
             sprite::{Sprite, SpriteTexture},
             utils::{Drawable, TextureRef},
@@ -24,7 +36,7 @@ use micro_games_kit::{
         typid::ID,
         vek::{Rgba, Transform, Vec2},
         windowing::event::VirtualKeyCode,
-    }
+    },
 };
 
 pub struct NewGameplay {
@@ -41,6 +53,8 @@ pub struct NewGameplay {
     // music_battle: StaticSoundHandle,
     world: World,
     player_controller: PlayerController,
+    spell_text: String,
+    word_to_spell_tag_database: WordToSpellTagDatabase,
 }
 
 impl Default for NewGameplay {
@@ -74,7 +88,9 @@ impl Default for NewGameplay {
             // music_forest,
             // music_battle,
             world: World::new(),
-            player_controller: PlayerController::default()
+            player_controller: PlayerController::default(),
+            spell_text: Default::default(),
+            word_to_spell_tag_database: WordToSpellTagDatabase::default(),
         }
     }
 }
@@ -99,15 +115,13 @@ impl GameState for NewGameplay {
 
         self.world.spawn((
             Player {},
-            Animation { 
-                animation: None
-            },
-            Transform::<f32, f32, f32>::default(), 
+            Animation { animation: None },
+            Transform::<f32, f32, f32>::default(),
             SpriteData {
                 texture: "player/idle/1".into(),
                 shader: "character".into(),
                 pivot: 0.5.into(),
-                tint: Rgba::default()
+                tint: Rgba::default(),
             },
         ));
 
@@ -156,13 +170,26 @@ impl GameState for NewGameplay {
     }
 
     fn fixed_update(&mut self, mut context: GameContext, delta_time: f32) {
+        if let Some(mut characters) = context.input.characters().write() {
+            for character in characters.take().chars() {
+                if character == '\n' || character == '\r' {
+                    let tags = self.word_to_spell_tag_database.parse(&self.spell_text);
+                    // TODO: cast spell with tags here.
+                    self.spell_text.clear();
+                } else if character == ' ' || character.is_alphabetic() {
+                    self.spell_text.push(character);
+                }
+            }
+        }
+
         // self.maintain(delta_time);
 
         if self.exit.get().is_down() {
             *context.state_change = GameStateChange::Swap(Box::new(MainMenu));
         }
 
-        self.player_controller.run(&mut self.world, &mut context, delta_time);
+        self.player_controller
+            .run(&mut self.world, &mut context, delta_time);
         AnimationController::run(&self.world, &mut context, delta_time);
         ProjectileController::run(&self.world, &mut context, delta_time);
 
@@ -245,60 +272,92 @@ impl GameState for NewGameplay {
     }
 
     fn draw_gui(&mut self, context: GameContext) {
-        //     let health_bar_rectangle = Rect {
-        //         left: -50.0,
-        //         right: 50.0,
-        //         top: -60.0,
-        //         bottom: -40.0,
-        //     };
+        // let health_bar_rectangle = Rect {
+        //     left: -50.0,
+        //     right: 50.0,
+        //     top: -60.0,
+        //     bottom: -40.0,
+        // };
 
-        //     {
-        //         let state = self.player.state.read().unwrap();
-        //         let layout = world_to_screen_content_layout(
-        //             state.sprite.transform.position.xy(),
-        //             health_bar_rectangle,
-        //             &context,
-        //         );
+        // {
+        //     let state = self.player.state.read().unwrap();
+        //     let layout = world_to_screen_content_layout(
+        //         state.sprite.transform.position.xy(),
+        //         health_bar_rectangle,
+        //         &context,
+        //     );
 
-        //         health_bar(layout, state.health);
-        //     }
+        //     health_bar(layout, state.health);
+        // }
 
-        //     for enemy in self.enemies.values() {
-        //         let state = enemy.state.read().unwrap();
-        //         let layout = world_to_screen_content_layout(
-        //             state.sprite.transform.position.xy(),
-        //             health_bar_rectangle,
-        //             &context,
-        //         );
+        // for enemy in self.enemies.values() {
+        //     let state = enemy.state.read().unwrap();
+        //     let layout = world_to_screen_content_layout(
+        //         state.sprite.transform.position.xy(),
+        //         health_bar_rectangle,
+        //         &context,
+        //     );
 
-        //         health_bar(layout, state.health);
-        //     }
+        //     health_bar(layout, state.health);
+        // }
 
-        //     text_box((
-        //         ContentBoxItemLayout {
-        //             margin: 40.0.into(),
-        //             ..Default::default()
+        // text_box((
+        //     ContentBoxItemLayout {
+        //         margin: 40.0.into(),
+        //         ..Default::default()
+        //     },
+        //     TextBoxProps {
+        //         text: format!(
+        //             "Weapon: {:?}\nEnemies: {}\nItems: {}",
+        //             self.player.state.read().unwrap().weapon,
+        //             self.enemies.len(),
+        //             self.items.len(),
+        //         ),
+        //         font: TextBoxFont {
+        //             name: "roboto".to_owned(),
+        //             size: 28.0,
         //         },
-        //         TextBoxProps {
-        //             text: format!(
-        //                 "Weapon: {:?}\nEnemies: {}\nItems: {}",
-        //                 self.player.state.read().unwrap().weapon,
-        //                 self.enemies.len(),
-        //                 self.items.len(),
-        //             ),
-        //             font: TextBoxFont {
-        //                 name: "roboto".to_owned(),
-        //                 size: 28.0,
-        //             },
-        //             color: Color {
-        //                 r: 1.0,
-        //                 g: 1.0,
-        //                 b: 1.0,
-        //                 a: 1.0,
-        //             },
-        //             ..Default::default()
+        //         color: Color {
+        //             r: 1.0,
+        //             g: 1.0,
+        //             b: 1.0,
+        //             a: 1.0,
         //         },
-        //     ));
+        //         ..Default::default()
+        //     },
+        // ));
+
+        nav_content_box(
+            ContentBoxItemLayout {
+                anchors: Rect {
+                    left: 0.0,
+                    right: 1.0,
+                    top: 1.0,
+                    bottom: 1.0,
+                },
+                margin: Rect {
+                    left: 50.0,
+                    right: 50.0,
+                    top: -100.0,
+                    bottom: 50.0,
+                },
+                align: micro_games_kit::third_party::raui_immediate_widgets::core::Vec2 { x: 0.5, y: 1.0 },
+                ..Default::default()
+            },
+            || {
+                text_box(TextBoxProps {
+                    text: format!("> {}", self.spell_text),
+                    horizontal_align: TextBoxHorizontalAlign::Center,
+                    vertical_align: TextBoxVerticalAlign::Middle,
+                    font: TextBoxFont {
+                        name: "roboto".to_owned(),
+                        size: 48.0,
+                    },
+                    color: Default::default(),
+                    ..Default::default()
+                });
+            },
+        );
     }
 }
 
