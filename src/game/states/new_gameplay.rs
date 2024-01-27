@@ -3,25 +3,30 @@ use super::{
     main_menu::MainMenu,
 };
 use crate::game::{
+    components::{animation::Animation, enemy::Enemy, sprite_data::SpriteData},
+    systems::animation_controller::AnimationController,
+};
+use crate::game::{
     components::{player::Player, projectile::Projectile},
     player::PlayerState,
-    systems::{player_controller::PlayerController, projectile_controller::ProjectileController, sprite_renderer::SpriteRenderer},
+    systems::{
+        player_controller::PlayerController, projectile_controller::ProjectileController,
+        sprite_renderer::SpriteRenderer,
+    },
     utils::{
         events::{Event, Events},
         magic::database::WordToSpellTagDatabase,
         space::{Space, SpaceObject, SpaceObjectId},
     },
 };
-use crate::game::{
-    components::{animation::Animation, sprite_data::SpriteData},
-    systems::animation_controller::AnimationController,
-};
 use hecs::World;
 use micro_games_kit::{
+    animation::{FrameAnimation, NamedAnimation},
     character::Character,
     context::GameContext,
     game::{GameObject, GameState, GameStateChange},
     third_party::{
+        emergent::{builders::behavior_tree::BehaviorTree, combinators::all::CombinatorAll},
         raui_core::layout::CoordsMappingScaling,
         raui_immediate_widgets::core::{
             containers::nav_content_box, text_box, ContentBoxItemLayout, Rect, TextBoxFont,
@@ -119,6 +124,23 @@ impl GameState for NewGameplay {
             Transform::<f32, f32, f32>::default(),
             SpriteData {
                 texture: "player/idle/1".into(),
+                shader: "character".into(),
+                pivot: 0.5.into(),
+                tint: Rgba::default(),
+            },
+        ));
+
+        self.world.spawn((
+            Animation {
+                animation: Some(NamedAnimation {
+                    animation: FrameAnimation::new(1..6).fps(10.0).looping().playing(),
+                    id: "enemy/idle".to_owned(),
+                }),
+            },
+            Enemy {},
+            Transform::<f32, f32, f32>::default(),
+            SpriteData {
+                texture: "enemy/idle/1".into(),
                 shader: "character".into(),
                 pivot: 0.5.into(),
                 tint: Rgba::default(),
@@ -341,7 +363,10 @@ impl GameState for NewGameplay {
                     top: -100.0,
                     bottom: 50.0,
                 },
-                align: micro_games_kit::third_party::raui_immediate_widgets::core::Vec2 { x: 0.5, y: 1.0 },
+                align: micro_games_kit::third_party::raui_immediate_widgets::core::Vec2 {
+                    x: 0.5,
+                    y: 1.0,
+                },
                 ..Default::default()
             },
             || {
@@ -367,10 +392,8 @@ impl NewGameplay {
         transform.position = position.into();
 
         world.spawn((
-            Animation { 
-                animation: None
-            },
-            transform, 
+            Animation { animation: None },
+            transform,
             Projectile {
                 speed: 100.0,
                 direction,
@@ -380,7 +403,7 @@ impl NewGameplay {
                 texture: "item/apple".into(),
                 shader: "image".into(),
                 pivot: 0.5.into(),
-                tint: Rgba::default()
+                tint: Rgba::default(),
             },
         ));
     }
