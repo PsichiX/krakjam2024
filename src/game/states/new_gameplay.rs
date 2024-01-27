@@ -423,9 +423,7 @@ impl NewGameplay {
                 pivot: 0.5.into(),
                 tint: Rgba::default(),
             },
-            Spell {
-                description: cast.tags,
-            },
+            cast.spell,
         ));
     }
 

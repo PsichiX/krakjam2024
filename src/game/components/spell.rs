@@ -1,6 +1,14 @@
-use crate::game::utils::magic::spell_tag::SpellTag;
-use std::collections::HashSet;
+use crate::game::utils::magic::spell_tag::{
+    SpellTagDirection, SpellTagEffect, SpellTagShape, SpellTagSize, SpellTagSpeed,
+    SpellTagTrajectory,
+};
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Spell {
-    pub description: HashSet<SpellTag>,
+    pub size: SpellTagSize,
+    pub speed: SpellTagSpeed,
+    pub effect: SpellTagEffect,
+    pub shape: SpellTagShape,
+    pub direction: SpellTagDirection,
+    pub trajectory: SpellTagTrajectory,
 }

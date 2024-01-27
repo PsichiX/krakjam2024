@@ -10,7 +10,7 @@ use micro_games_kit::{
 use std::collections::HashSet;
 
 use crate::game::{
-    components::{animation::Animation, player::Player},
+    components::{animation::Animation, player::Player, spell::Spell},
     states::new_gameplay::NewGameplay,
     utils::magic::{database::WordToSpellTagDatabase, spell_tag::SpellTag},
 };
@@ -30,7 +30,7 @@ pub struct PlayerController {
 pub struct PlayerCastAction {
     pub position: Vec2<f32>,
     pub direction: Vec2<f32>,
-    pub tags: HashSet<SpellTag>,
+    pub spell: Spell,
 }
 
 impl Default for PlayerController {
@@ -78,11 +78,12 @@ impl PlayerController {
         delta_time: f32,
         word_to_spell_tag_database: &WordToSpellTagDatabase,
     ) {
-        let mut cast_spell_tags = None;
+        let mut cast_spell = None;
+
         if let Some(mut characters) = context.input.characters().write() {
             for character in characters.take().chars() {
                 if character == '\n' || character == '\r' {
-                    cast_spell_tags = word_to_spell_tag_database.parse(&self.spell_text);
+                    cast_spell = word_to_spell_tag_database.parse(&self.spell_text);
                     self.spell_text.clear();
                 } else if character == ' ' || character.is_alphabetic() {
                     self.spell_text.push(character);
@@ -124,11 +125,11 @@ impl PlayerController {
                     }
                 }
 
-                if let Some(tags) = cast_spell_tags.as_ref() {
+                if let Some(spell) = cast_spell.as_ref() {
                     cast_action = Some(PlayerCastAction {
                         position: transform.position.into(),
                         direction: movement.normalized(),
-                        tags: tags.to_owned(),
+                        spell: spell.clone(),
                     });
                 }
             }

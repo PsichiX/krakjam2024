@@ -22,6 +22,48 @@ impl SpellTag {
             _ => unreachable!(),
         }
     }
+
+    pub fn as_size(&self) -> Option<SpellTagSize> {
+        match self {
+            Self::Size(result) => Some(*result),
+            _ => None,
+        }
+    }
+
+    pub fn as_speed(&self) -> Option<SpellTagSpeed> {
+        match self {
+            Self::Speed(result) => Some(*result),
+            _ => None,
+        }
+    }
+
+    pub fn as_effect(&self) -> Option<SpellTagEffect> {
+        match self {
+            Self::Effect(result) => Some(*result),
+            _ => None,
+        }
+    }
+
+    pub fn as_shape(&self) -> Option<SpellTagShape> {
+        match self {
+            Self::Shape(result) => Some(*result),
+            _ => None,
+        }
+    }
+
+    pub fn as_direction(&self) -> Option<SpellTagDirection> {
+        match self {
+            Self::Direction(result) => Some(*result),
+            _ => None,
+        }
+    }
+
+    pub fn as_trajectory(&self) -> Option<SpellTagTrajectory> {
+        match self {
+            Self::Trajectory(result) => Some(*result),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
