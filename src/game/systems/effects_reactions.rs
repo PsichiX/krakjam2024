@@ -69,8 +69,9 @@ impl EffectsReactions {
                     if let (Some(transform_a), Some(transform_b)) =
                         (transform_a.as_mut(), transform_b.as_mut())
                     {
-                        let direction_ab =
-                            (transform_b.position.xy() - transform_a.position.xy()).normalized();
+                        let direction_ab = (transform_b.position.xy() - transform_a.position.xy())
+                            .try_normalized()
+                            .unwrap_or_default();
                         transform_a.position -= direction_ab * push_distance;
                         transform_b.position += direction_ab * push_distance;
                     }
