@@ -12,7 +12,7 @@ use crate::game::{
     utils::{
         audio::Audio,
         events::{Event, Events},
-        space::{Space, SpaceObject, SpaceObjectId},
+        space::{Space, SpaceObject},
     },
 };
 use micro_games_kit::{
@@ -159,8 +159,6 @@ impl GameState for Gameplay {
 
         self.process_game_objects(&mut context, delta_time);
 
-        self.resolve_collisions();
-
         self.execute_events(&mut context);
 
         self.update_ambient_music();
@@ -298,12 +296,12 @@ impl Gameplay {
         Space::write().write().unwrap().maintain(
             self.enemies
                 .iter()
-                .map(|(id, enemy)| SpaceObject {
+                .map(|(_, enemy)| SpaceObject {
                     entity: None,
                     position: enemy.state.read().unwrap().sprite.transform.position.xy(),
                     collider_radius: 20.0,
                 })
-                .chain(self.items.iter().map(|(id, item)| SpaceObject {
+                .chain(self.items.iter().map(|(_, item)| SpaceObject {
                     entity: None,
                     position: item.sprite.transform.position.xy(),
                     collider_radius: 10.0,
@@ -407,33 +405,5 @@ impl Gameplay {
         let _ = self
             .music_battle
             .set_volume((1.0 - factor) * 2.0, Default::default());
-    }
-
-    fn resolve_collisions(&mut self) {
-        let space = Space::read();
-        let space = space.read().unwrap();
-
-        // for object_item in space.iter() {
-        //     if let SpaceObjectId::Item(item_id) = object_item.id {
-        //         if let Some(item) = self.items.get(&item_id) {
-        //             for object in space.collisions(object_item, true) {
-        //                 match object.id {
-        //                     SpaceObjectId::Player => {
-        //                         self.player.state.write().unwrap().consume_item(item);
-        //                         Events::write(Event::KillItem { id: item_id });
-        //                         let _ = Audio::write().write().unwrap().play("collect");
-        //                     }
-        //                     SpaceObjectId::EnemyOld(enemy_id) => {
-        //                         if let Some(enemy) = self.enemies.get_mut(&enemy_id) {
-        //                             enemy.state.write().unwrap().consume_item(item);
-        //                             Events::write(Event::KillItem { id: item_id });
-        //                         }
-        //                     }
-        //                     _ => {}
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
     }
 }

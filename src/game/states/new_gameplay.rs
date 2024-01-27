@@ -4,12 +4,12 @@ use super::{
 };
 use crate::game::{
     components::{
-        animation::Animation, collidable::Collidable, enemy::Enemy, spell::Spell,
-        sprite_data::SpriteData,
+        animation::Animation, collidable::Collidable, enemy::Enemy, sprite_data::SpriteData,
     },
     systems::{
         animation_controller::AnimationController, collision_detector::CollisionDetector,
-        player_controller::PlayerCastAction, spell_controller::SpellController,
+        effects_reactions::EffectsReactions, player_controller::PlayerCastAction,
+        spell_controller::SpellController,
     },
     utils::{
         magic::spell_tag::{
@@ -252,7 +252,8 @@ impl GameState for NewGameplay {
         );
         AnimationController::run(&self.world, &mut context, delta_time);
         ProjectileController::run(&self.world, &mut context, delta_time);
-        CollisionDetector::run(&self.world, &mut context, delta_time);
+        CollisionDetector::run(&self.world);
+        EffectsReactions::run(&self.world);
         SpellController::run(&self.world, &mut context);
 
         // self.process_game_objects(&mut context, delta_time);

@@ -1,3 +1,4 @@
+use crate::game::utils::magic::spell_tag::SpellTagTrajectory;
 use micro_games_kit::third_party::vek::Vec2;
 
 pub struct Projectile {

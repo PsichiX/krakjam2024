@@ -11,7 +11,36 @@ pub enum EffectReaction {
     Explode,
 }
 
-#[derive(Debug, Default, Clone, Copy)]
+impl EffectReaction {
+    pub fn damage(&self) -> f32 {
+        match self {
+            Self::None => 0.0,
+            Self::Steam => 10.0,
+            Self::Paralize => 0.0,
+            Self::Explode => 50.0,
+        }
+    }
+
+    pub fn immobile_time(&self) -> f32 {
+        match self {
+            Self::None => 0.0,
+            Self::Steam => 0.0,
+            Self::Paralize => 5.0,
+            Self::Explode => 0.0,
+        }
+    }
+
+    pub fn push_distance(&self) -> f32 {
+        match self {
+            Self::None => 0.0,
+            Self::Steam => 50.0,
+            Self::Paralize => 0.0,
+            Self::Explode => 10.0,
+        }
+    }
+}
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub struct Effect {
     pub fire: bool,
     pub water: bool,
@@ -19,17 +48,29 @@ pub struct Effect {
 }
 
 impl Effect {
-    pub fn reaction(self, other: Self) -> EffectReaction {
+    pub fn react(&mut self, other: &mut Self) -> EffectReaction {
         let fire = self.fire || other.fire;
         let water = self.water || other.water;
         let electricity = self.electricity || other.electricity;
         if fire && water && electricity {
             EffectReaction::None
         } else if fire && water {
+            self.fire = false;
+            other.fire = false;
+            self.water = false;
+            other.water = false;
             EffectReaction::Steam
         } else if water && electricity {
+            self.water = false;
+            other.water = false;
+            self.electricity = false;
+            other.electricity = false;
             EffectReaction::Paralize
         } else if electricity && fire {
+            self.electricity = false;
+            other.electricity = false;
+            self.fire = false;
+            other.fire = false;
             EffectReaction::Explode
         } else {
             EffectReaction::None
@@ -43,44 +84,122 @@ mod tests {
 
     #[test]
     fn test_effect_reactions() {
-        let a = Effect {
+        let mut a = Effect {
             fire: true,
             ..Default::default()
         };
-        let b = Effect {
+        let mut b = Effect {
             fire: true,
             ..Default::default()
         };
-        assert_eq!(a.reaction(b), EffectReaction::None);
+        assert_eq!(a.react(&mut b), EffectReaction::None);
+        assert_eq!(
+            a,
+            Effect {
+                fire: true,
+                ..Default::default()
+            }
+        );
+        assert_eq!(
+            b,
+            Effect {
+                fire: true,
+                ..Default::default()
+            }
+        );
 
-        let b = Effect {
+        let mut a = Effect {
+            fire: true,
+            ..Default::default()
+        };
+        let mut b = Effect {
             water: true,
             ..Default::default()
         };
-        assert_eq!(a.reaction(b), EffectReaction::Steam);
+        assert_eq!(a.react(&mut b), EffectReaction::Steam);
+        assert_eq!(
+            a,
+            Effect {
+                ..Default::default()
+            }
+        );
+        assert_eq!(
+            b,
+            Effect {
+                ..Default::default()
+            }
+        );
 
-        let b = Effect {
+        let mut a = Effect {
+            fire: true,
+            ..Default::default()
+        };
+        let mut b = Effect {
             electricity: true,
             ..Default::default()
         };
-        assert_eq!(a.reaction(b), EffectReaction::Explode);
+        assert_eq!(a.react(&mut b), EffectReaction::Explode);
+        assert_eq!(
+            a,
+            Effect {
+                ..Default::default()
+            }
+        );
+        assert_eq!(
+            b,
+            Effect {
+                ..Default::default()
+            }
+        );
 
-        let a = Effect {
+        let mut a = Effect {
             water: true,
             ..Default::default()
         };
-        assert_eq!(a.reaction(b), EffectReaction::Paralize);
+        let mut b = Effect {
+            electricity: true,
+            ..Default::default()
+        };
+        assert_eq!(a.react(&mut b), EffectReaction::Paralize);
+        assert_eq!(
+            a,
+            Effect {
+                ..Default::default()
+            }
+        );
+        assert_eq!(
+            b,
+            Effect {
+                ..Default::default()
+            }
+        );
 
-        let a = Effect {
+        let mut a = Effect {
             fire: true,
             water: true,
             ..Default::default()
         };
-        let b = Effect {
+        let mut b = Effect {
             electricity: true,
             water: true,
             ..Default::default()
         };
-        assert_eq!(a.reaction(b), EffectReaction::None);
+        assert_eq!(a.react(&mut b), EffectReaction::None);
+        assert_eq!(
+            a,
+            Effect {
+                fire: true,
+                water: true,
+                ..Default::default()
+            }
+        );
+        assert_eq!(
+            b,
+            Effect {
+                electricity: true,
+                water: true,
+                ..Default::default()
+            }
+        );
     }
 }
