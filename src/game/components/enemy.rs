@@ -1,2 +1,1 @@
-pub struct Enemy {
-}
+pub struct Enemy {}
