@@ -9,5 +9,6 @@ pub mod particle;
 pub mod particle_generator;
 pub mod player;
 pub mod projectile;
+pub mod speed;
 pub mod spell;
 pub mod sprite_data;

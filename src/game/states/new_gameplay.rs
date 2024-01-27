@@ -5,13 +5,15 @@ use super::{
 use crate::game::{
     components::{
         animation::Animation, collidable::Collidable, damage::Damage, effect::Effect, enemy::Enemy,
-        health::Health, particle_generator::ParticleGenerator, sprite_data::SpriteData,
+        health::Health, particle_generator::ParticleGenerator, speed::Speed,
+        sprite_data::SpriteData,
     },
     systems::{
         animation_controller::AnimationController, collision_detector::CollisionDetector,
         damage_dealer::DamageDealer, effects_reactions::EffectsReactions,
-        particle_manager::ParticleManager, player_controller::PlayerCastAction,
-        slime_color::SlimeColor, spell_controller::SpellController,
+        enemy_controller::EnemyController, particle_manager::ParticleManager,
+        player_controller::PlayerCastAction, slime_color::SlimeColor,
+        spell_controller::SpellController,
     },
     ui::{health_bar::health_bar, world_to_screen_content_layout},
     utils::magic::spell_tag::{
@@ -212,10 +214,11 @@ impl GameState for NewGameplay {
             },
             Health { value: 100.0 },
             Damage { value: 1.0 },
+            Speed::new(40.0..=100.0),
         ));
     }
 
-    fn exit(&mut self, mut context: GameContext) {
+    fn exit(&mut self, context: GameContext) {
         if let Some(id) = self.exit_handle {
             context.input.remove_mapping(id);
             self.exit_handle = None;
@@ -238,6 +241,7 @@ impl GameState for NewGameplay {
             delta_time,
             &self.word_to_spell_tag_database,
         );
+        EnemyController::run(&self.world, delta_time);
         AnimationController::run(&self.world, &mut context, delta_time);
         ProjectileController::run(&self.world, delta_time);
         CollisionDetector::run(&self.world);
