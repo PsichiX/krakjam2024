@@ -4,14 +4,14 @@ use super::{
 };
 use crate::game::{
     components::{
-        animation::Animation, collidable::Collidable, effect::Effect, enemy::Enemy, health::Health,
-        particle_generator::ParticleGenerator, sprite_data::SpriteData,
+        animation::Animation, collidable::Collidable, damage::Damage, effect::Effect, enemy::Enemy,
+        health::Health, particle_generator::ParticleGenerator, sprite_data::SpriteData,
     },
     systems::{
         animation_controller::AnimationController, collision_detector::CollisionDetector,
-        effects_reactions::EffectsReactions, particle_manager::ParticleManager,
-        player_controller::PlayerCastAction, slime_color::SlimeColor,
-        spell_controller::SpellController,
+        damage_dealer::DamageDealer, effects_reactions::EffectsReactions,
+        particle_manager::ParticleManager, player_controller::PlayerCastAction,
+        slime_color::SlimeColor, spell_controller::SpellController,
     },
     ui::{health_bar::health_bar, world_to_screen_content_layout},
     utils::magic::spell_tag::{
@@ -213,6 +213,7 @@ impl GameState for NewGameplay {
                 ..Default::default()
             },
             Health { value: 100.0 },
+            Damage { value: 1.0 },
         ));
     }
 
@@ -244,6 +245,7 @@ impl GameState for NewGameplay {
         CollisionDetector::run(&self.world);
         EffectsReactions::run(&self.world);
         SpellController::run(&self.world, &mut context);
+        DamageDealer::run(&self.world);
         self.particle_manager.process(&self.world, delta_time);
         SlimeColor::run(&self.world);
 
@@ -540,6 +542,7 @@ impl NewGameplay {
                     SpellTagEffect::Water => "particle/water".into(),
                 },
             },
+            Damage { value: 1.0 },
             cast.spell.clone(),
         ));
     }

@@ -1,5 +1,6 @@
 pub mod animation;
 pub mod collidable;
+pub mod damage;
 pub mod effect;
 pub mod enemy;
 pub mod health;

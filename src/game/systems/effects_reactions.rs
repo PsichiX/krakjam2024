@@ -17,11 +17,9 @@ impl EffectsReactions {
             if let Some(space_object) = collidable.space_object.as_ref() {
                 for object in space.collisions(space_object, true) {
                     if let Some(entity_b) = object.entity {
-                        if entity_b == entity_a {
-                            continue;
+                        if entity_b != entity_a {
+                            entities_to_process.push((entity_a, entity_b));
                         }
-
-                        entities_to_process.push((entity_a, entity_b));
                     }
                 }
             }

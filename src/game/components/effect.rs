@@ -1,6 +1,5 @@
-use micro_games_kit::third_party::vek::Rgba;
-
 use crate::game::utils::magic::spell_tag::SpellTagEffect;
+use micro_games_kit::third_party::vek::Rgba;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum EffectReaction {
