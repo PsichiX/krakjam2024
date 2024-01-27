@@ -118,7 +118,9 @@ impl Default for NewGameplay {
                 .with("fast", SpellTag::Speed(SpellTagSpeed::Fast))
                 .with("forth", SpellTag::Direction(SpellTagDirection::Forward))
                 .with("back", SpellTag::Direction(SpellTagDirection::Backward))
-                .with("down", SpellTag::Direction(SpellTagDirection::Down)),
+                .with("down", SpellTag::Direction(SpellTagDirection::Down))
+                .with("wall", SpellTag::Shape(SpellTagShape::Wall))
+                .with("triangle", SpellTag::Shape(SpellTagShape::Triangle)),
         }
     }
 }
@@ -424,9 +426,75 @@ impl NewGameplay {
         let mut transform = Transform::<f32, f32, f32>::default();
         transform.position = cast.position.into();
 
+        match cast.spell.shape {
+            SpellTagShape::Point => Self::cast_point_spell(world, &cast, &transform),
+            SpellTagShape::Triangle => Self::cast_triangle_spell(world, &cast, &transform),
+            SpellTagShape::Wall => Self::cast_wall_spell(world, &cast, &transform),
+        }
+    }
+
+    fn cast_wall_spell(
+        world: &mut World,
+        cast: &PlayerCastAction,
+        transform: &Transform<f32, f32, f32>,
+    ) {
+        let perpendicular_direction = Vec2::new(-cast.direction.y, cast.direction.x);
+        let count = 5;
+        let start = cast.position + perpendicular_direction * cast.spell.size.radius();
+
+        for i in 0..count {
+            let mut new_transform = transform.clone();
+            new_transform.position =
+                (start + perpendicular_direction * cast.spell.size.radius() * i as f32).into();
+            Self::cast_point_spell(world, cast, &new_transform);
+        }
+    }
+
+    fn cast_triangle_spell(
+        world: &mut World,
+        cast: &PlayerCastAction,
+        transform: &Transform<f32, f32, f32>,
+    ) {
+        let angle = cast.direction.y.atan2(cast.direction.x);
+        let left = angle - std::f32::consts::FRAC_PI_3 + std::f32::consts::FRAC_PI_2;
+        let right = angle + std::f32::consts::FRAC_PI_3 + std::f32::consts::FRAC_PI_2;
+        let end = angle - std::f32::consts::FRAC_PI_2;
+        let left_direction = Vec2::<f32>::new(left.cos(), left.sin());
+        let right_direction = Vec2::<f32>::new(right.cos(), right.sin());
+        let end_direction = Vec2::<f32>::new(end.cos(), end.sin());
+        let count = 5;
+        let start = cast.position;
+
+        for i in 0..count {
+            let mut new_transform = transform.clone();
+            new_transform.position =
+                (start + left_direction * cast.spell.size.radius() * i as f32).into();
+            Self::cast_point_spell(world, cast, &new_transform);
+
+            let mut new_transform = transform.clone();
+            new_transform.position =
+                (start - right_direction * cast.spell.size.radius() * i as f32).into();
+            Self::cast_point_spell(world, cast, &new_transform);
+        }
+
+        for i in 0..(count + 1) {
+            let mut new_transform = transform.clone();
+            new_transform.position = ((start
+                + left_direction * cast.spell.size.radius() * count as f32)
+                + end_direction * cast.spell.size.radius() * i as f32)
+                .into();
+            Self::cast_point_spell(world, cast, &new_transform);
+        }
+    }
+
+    fn cast_point_spell(
+        world: &mut World,
+        cast: &PlayerCastAction,
+        transform: &Transform<f32, f32, f32>,
+    ) {
         world.spawn((
             Animation { animation: None },
-            transform,
+            transform.clone(),
             Projectile::new(
                 match cast.spell.speed {
                     SpellTagSpeed::Fast => 1000.0,
@@ -448,7 +516,7 @@ impl NewGameplay {
                 pivot: 0.5.into(),
                 tint: Rgba::default(),
             },
-            cast.spell,
+            cast.spell.clone(),
         ));
     }
 

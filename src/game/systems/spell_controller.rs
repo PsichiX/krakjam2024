@@ -61,18 +61,10 @@ impl SpellController {
             .query::<(&mut Transform<f32, f32, f32>, &Spell, &mut Collidable)>()
             .iter()
         {
-            transform.scale = match spell.size {
-                SpellTagSize::Large => Vec2::new(4.0, 4.0).into(),
-                SpellTagSize::Medium => Vec2::new(2.0, 2.0).into(),
-                SpellTagSize::Small => Vec2::new(1.0, 1.0).into(),
-            };
+            transform.scale = spell.size.scale().into();
 
             if let Some(space_object) = collidable.space_object.as_mut() {
-                space_object.collider_radius = match spell.size {
-                    SpellTagSize::Large => 40.0,
-                    SpellTagSize::Medium => 20.0,
-                    SpellTagSize::Small => 10.0,
-                };
+                space_object.collider_radius = spell.size.radius();
             }
         }
     }

@@ -1,4 +1,7 @@
-use micro_games_kit::third_party::rand::{thread_rng, Rng};
+use micro_games_kit::third_party::{
+    rand::{thread_rng, Rng},
+    vek::Vec2,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum SpellTag {
@@ -118,6 +121,22 @@ impl SpellTagSize {
             1 => Self::Medium,
             2 => Self::Large,
             _ => unreachable!(),
+        }
+    }
+
+    pub fn scale(&self) -> Vec2<f32> {
+        match self {
+            SpellTagSize::Large => Vec2::new(4.0, 4.0).into(),
+            SpellTagSize::Medium => Vec2::new(2.0, 2.0).into(),
+            SpellTagSize::Small => Vec2::new(1.0, 1.0).into(),
+        }
+    }
+
+    pub fn radius(&self) -> f32 {
+        match self {
+            SpellTagSize::Large => 40.0,
+            SpellTagSize::Medium => 20.0,
+            SpellTagSize::Small => 10.0,
         }
     }
 }
