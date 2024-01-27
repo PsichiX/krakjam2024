@@ -45,36 +45,16 @@ impl CollisionDetector {
         let space = Space::read();
         let space = space.read().unwrap();
 
-        for (_, (_, collidable)) in world.query::<(&Enemy, &Collidable)>().iter() {
-            if let Some(space_object) = collidable.space_object.as_ref() {
-                if let SpaceObjectId::Enemy = space_object.id {
-                    for object in space.collisions(space_object, true) {
-                        match object.id {
-                            SpaceObjectId::Player => {
-                                // println!("Enemy with player collision");
-
-                                // self.player.state.write().unwrap().consume_item(item);
-                                // Events::write(Event::KillItem { id: item_id });
-                                // let _ = Audio::write().write().unwrap().play("collect");
-                            }
-                            _ => {}
-                        }
-                    }
-                }
-            }
-        }
-
         for (id, (_, collidable)) in world.query::<(&Spell, &Collidable)>().iter() {
             if let Some(space_object) = collidable.space_object.as_ref() {
-                if let SpaceObjectId::Spell = space_object.id {
-                    for object in space.collisions(space_object, true) {
-                        if let Some(entity) = object.entity {
-                            match object.id {
-                                SpaceObjectId::Enemy => {
-                                    Events::write(Event::KillEntity { entity });
-                                    Events::write(Event::KillEntity { entity: id });
-                                }
-                                _ => {}
+                for object in space.collisions(space_object, true) {
+                    if let Some(entity) = object.entity {
+                        let mut query = world.query_one::<(&Enemy,)>(entity);
+
+                        if let Ok(query) = query.as_mut() {
+                            if query.get().is_some() {
+                                Events::write(Event::KillEntity { entity });
+                                Events::write(Event::KillEntity { entity: id });
                             }
                         }
                     }
