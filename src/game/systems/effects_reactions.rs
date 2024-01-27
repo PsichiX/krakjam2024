@@ -41,15 +41,10 @@ impl EffectsReactions {
             if let Some((effect_a, mut health_a, mut immobility_a, mut transform_a)) =
                 entity_a_query
             {
-                println!("--- COLLISION");
-
                 if let Some((effect_b, mut health_b, mut immobility_b, mut transform_b)) =
                     entity_b_query
                 {
-                    println!("--- TEST");
-
                     let reaction = effect_a.react(effect_b);
-                    println!("--- REACTION: {:?}", reaction);
 
                     let damage = reaction.damage();
                     let immobile_time = reaction.immobile_time();

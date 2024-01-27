@@ -505,6 +505,10 @@ impl NewGameplay {
                 (start + left_direction * cast.spell.size.radius() * i as f32).into();
             Self::cast_point_spell(world, cast, &new_transform);
 
+            if i == 0 {
+                continue;
+            }
+
             let mut new_transform = transform.clone();
             new_transform.position =
                 (start - right_direction * cast.spell.size.radius() * i as f32).into();
