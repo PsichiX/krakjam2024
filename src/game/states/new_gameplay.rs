@@ -5,8 +5,8 @@ use super::{
 use crate::game::{
     components::{
         animation::Animation, collidable::Collidable, damage::Damage, effect::Effect, enemy::Enemy,
-        health::Health, particle_generator::ParticleGenerator, speed::Speed,
-        sprite_data::SpriteData,
+        health::Health, ignore_player::IgnorePlayer, particle_generator::ParticleGenerator,
+        speed::Speed, sprite_data::SpriteData,
     },
     systems::{
         animation_controller::AnimationController, collision_detector::CollisionDetector,
@@ -105,10 +105,13 @@ impl Default for NewGameplay {
             enemy_spawn: EnemySpawn::new(1000.0, 1.0, 50),
             particle_manager: ParticleManager {},
             word_to_spell_tag_database: WordToSpellTagDatabase::default()
+                // Fire
                 .with("fire", SpellTag::Effect(SpellTagEffect::Fire))
                 .with("burn", SpellTag::Effect(SpellTagEffect::Fire))
                 .with("heat", SpellTag::Effect(SpellTagEffect::Fire))
                 .with("hot", SpellTag::Effect(SpellTagEffect::Fire))
+                .with("meteor", SpellTag::Effect(SpellTagEffect::Fire))
+                // Water
                 .with("wet", SpellTag::Effect(SpellTagEffect::Water))
                 .with("aqua", SpellTag::Effect(SpellTagEffect::Water))
                 .with("h2o", SpellTag::Effect(SpellTagEffect::Water))
@@ -116,6 +119,8 @@ impl Default for NewGameplay {
                 .with("fluid", SpellTag::Effect(SpellTagEffect::Water))
                 .with("sprinkle", SpellTag::Effect(SpellTagEffect::Water))
                 .with("drink", SpellTag::Effect(SpellTagEffect::Water))
+                .with("cool", SpellTag::Effect(SpellTagEffect::Water))
+                // Electricity
                 .with("zap", SpellTag::Effect(SpellTagEffect::Electric))
                 .with("power", SpellTag::Effect(SpellTagEffect::Electric))
                 .with("tingly", SpellTag::Effect(SpellTagEffect::Electric))
@@ -123,25 +128,73 @@ impl Default for NewGameplay {
                 .with("electro", SpellTag::Effect(SpellTagEffect::Electric))
                 .with("electric", SpellTag::Effect(SpellTagEffect::Electric))
                 .with("thunder", SpellTag::Effect(SpellTagEffect::Electric))
+                // Large
                 .with("big", SpellTag::Size(SpellTagSize::Large))
-                .with("ball", SpellTag::Shape(SpellTagShape::Point))
-                .with("fine", SpellTag::Size(SpellTagSize::Medium))
-                .with("tiny", SpellTag::Size(SpellTagSize::Small))
-                .with("meteor", SpellTag::Effect(SpellTagEffect::Fire))
+                .with("large", SpellTag::Size(SpellTagSize::Large))
+                .with("enormous", SpellTag::Size(SpellTagSize::Large))
+                .with("chungus", SpellTag::Size(SpellTagSize::Large))
+                .with("chonker", SpellTag::Size(SpellTagSize::Large))
+                .with("chonk", SpellTag::Size(SpellTagSize::Large))
                 .with("meteor", SpellTag::Size(SpellTagSize::Large))
-                .with("meteor", SpellTag::Shape(SpellTagShape::Point))
+                // Medium
+                .with("fine", SpellTag::Size(SpellTagSize::Medium))
+                .with("basic", SpellTag::Size(SpellTagSize::Medium))
+                .with("boring", SpellTag::Size(SpellTagSize::Medium))
+                // Small
+                .with("tiny", SpellTag::Size(SpellTagSize::Small))
+                .with("cute", SpellTag::Size(SpellTagSize::Small))
+                .with("smol", SpellTag::Size(SpellTagSize::Small))
+                .with("itsy", SpellTag::Size(SpellTagSize::Small))
+                .with("little", SpellTag::Size(SpellTagSize::Small))
+                .with("small", SpellTag::Size(SpellTagSize::Small))
+                .with("small", SpellTag::Size(SpellTagSize::Small))
+                .with("joke", SpellTag::Size(SpellTagSize::Small))
+                // Sinus
                 .with("sinus", SpellTag::Trajectory(SpellTagTrajectory::Sinus))
+                .with("nice", SpellTag::Trajectory(SpellTagTrajectory::Sinus))
+                // Circle
                 .with("circle", SpellTag::Trajectory(SpellTagTrajectory::Circle))
+                .with("joke", SpellTag::Trajectory(SpellTagTrajectory::Circle))
+                // Slow
                 .with("slow", SpellTag::Speed(SpellTagSpeed::Slow))
+                .with("turtle", SpellTag::Speed(SpellTagSpeed::Slow))
+                .with("boring", SpellTag::Speed(SpellTagSpeed::Slow))
+                .with("faster", SpellTag::Speed(SpellTagSpeed::Slow))
+                // Medium
                 .with("regular", SpellTag::Speed(SpellTagSpeed::Medium))
+                // Fast
                 .with("fast", SpellTag::Speed(SpellTagSpeed::Fast))
+                .with("joke", SpellTag::Speed(SpellTagSpeed::Fast))
+                // Forward
                 .with("forth", SpellTag::Direction(SpellTagDirection::Forward))
+                // Backward
                 .with("back", SpellTag::Direction(SpellTagDirection::Backward))
+                .with("ass", SpellTag::Direction(SpellTagDirection::Backward))
+                // Down
                 .with("down", SpellTag::Direction(SpellTagDirection::Down))
+                .with("stop", SpellTag::Direction(SpellTagDirection::Down))
+                // Point
+                .with("ball", SpellTag::Shape(SpellTagShape::Point))
+                .with("basic", SpellTag::Shape(SpellTagShape::Point))
+                .with("boring", SpellTag::Shape(SpellTagShape::Point))
+                .with("meteor", SpellTag::Shape(SpellTagShape::Point))
+                .with("joke", SpellTag::Shape(SpellTagShape::Point))
+                // Wall
                 .with("wall", SpellTag::Shape(SpellTagShape::Wall))
+                .with("brick", SpellTag::Shape(SpellTagShape::Wall))
+                .with("block", SpellTag::Shape(SpellTagShape::Wall))
+                .with("rectangle", SpellTag::Shape(SpellTagShape::Wall))
+                .with("square", SpellTag::Shape(SpellTagShape::Wall))
+                .with("stuck", SpellTag::Shape(SpellTagShape::Wall))
+                // Triangle
                 .with("triangle", SpellTag::Shape(SpellTagShape::Triangle))
+                .with("triforce", SpellTag::Shape(SpellTagShape::Triangle))
+                // Quick
                 .with("quick", SpellTag::Duration(SpellTagDuration::Quick))
+                // Medium
                 .with("moment", SpellTag::Duration(SpellTagDuration::Medium))
+                .with("joke", SpellTag::Duration(SpellTagDuration::Medium))
+                // Long
                 .with("long", SpellTag::Duration(SpellTagDuration::Long)),
         }
     }
@@ -217,7 +270,7 @@ impl GameState for NewGameplay {
         AnimationController::run(&self.world, &mut context, delta_time);
         ProjectileController::run(&self.world, delta_time);
         CollisionDetector::run(&self.world);
-        EffectsReactions::run(&self.world);
+        EffectsReactions::run(&mut self.world);
         SpellController::run(&self.world, &mut context);
         DamageDealer::run(&self.world);
         self.particle_manager.process(&mut self.world, delta_time);
@@ -510,15 +563,14 @@ impl NewGameplay {
             ParticleGenerator {
                 emmission_accumulator: 0.0,
                 emmission_time: 0.1,
-                texture: match cast.spell.effect {
-                    SpellTagEffect::None => "particle/smoke".into(),
-                    SpellTagEffect::Fire => "particle/fire".into(),
-                    SpellTagEffect::Electric => "particle/electric".into(),
-                    SpellTagEffect::Water => "particle/water".into(),
-                },
+                texture: cast.spell.effect.texture().into(),
                 batch_size: 16,
             },
             Damage { value: 1.0 },
+            IgnorePlayer {
+                ignore_time: 0.5,
+                player_entity: None,
+            },
             cast.spell.clone(),
         ));
     }

@@ -1,9 +1,9 @@
 use crate::game::{
-    components::{animation::Animation, player::Player, spell::Spell},
+    components::{animation::Animation, ignore_player::IgnorePlayer, player::Player, spell::Spell},
     states::new_gameplay::NewGameplay,
     utils::magic::database::WordToSpellTagDatabase,
 };
-use hecs::World;
+use hecs::{Entity, World};
 use micro_games_kit::{
     animation::{FrameAnimation, NamedAnimation},
     context::GameContext,
@@ -93,11 +93,14 @@ impl PlayerController {
         }
 
         let mut cast_action: Option<PlayerCastAction> = None;
+        let mut player_entity: Option<Entity> = None;
 
-        for (_, (_, transform, animation)) in world
+        for (entity, (_, transform, animation)) in world
             .query::<(&Player, &mut Transform<f32, f32, f32>, &mut Animation)>()
             .iter()
         {
+            player_entity = Some(entity);
+
             if let Some(input) = self.input.as_ref() {
                 let mouse_pos = Vec2::new(input.mouse_x.get().0, input.mouse_y.get().0);
                 let diff = (mouse_pos - context.graphics.main_camera.screen_size / 2.0) / 200.0;
@@ -130,7 +133,7 @@ impl PlayerController {
 
                     cast_action = Some(PlayerCastAction {
                         position: (transform.position
-                            + movement.normalized() * basic_spell.direction.multiplier() * 60.0)
+                            + movement.normalized() * basic_spell.direction.multiplier() * 15.0)
                             .into(),
                         direction: movement.normalized(),
                         spell: basic_spell,
@@ -140,7 +143,7 @@ impl PlayerController {
                 if let Some(spell) = cast_spell.as_ref() {
                     cast_action = Some(PlayerCastAction {
                         position: (transform.position
-                            + movement.normalized() * spell.direction.multiplier() * 30.0)
+                            + movement.normalized() * spell.direction.multiplier() * 15.0)
                             .into(),
                         direction: movement.normalized(),
                         spell: spell.clone(),
@@ -153,6 +156,11 @@ impl PlayerController {
 
         if let Some(cast) = cast_action {
             NewGameplay::cast_spell(world, cast);
+        }
+
+        for (_, (ignore_player,)) in world.query::<(&mut IgnorePlayer,)>().iter() {
+            ignore_player.ignore_time = (ignore_player.ignore_time - delta_time).max(0.0);
+            ignore_player.player_entity = player_entity;
         }
     }
 }
