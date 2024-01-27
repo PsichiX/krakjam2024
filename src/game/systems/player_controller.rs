@@ -1,3 +1,8 @@
+use crate::game::{
+    components::{animation::Animation, player::Player, spell::Spell},
+    states::new_gameplay::NewGameplay,
+    utils::magic::{database::WordToSpellTagDatabase, spell_tag::SpellTag},
+};
 use hecs::World;
 use micro_games_kit::{
     animation::{FrameAnimation, NamedAnimation},
@@ -6,13 +11,6 @@ use micro_games_kit::{
         spitfire_input::{InputAxisRef, InputContext, InputMapping, VirtualAxis},
         vek::{Clamp, Transform, Vec2},
     },
-};
-use std::collections::HashSet;
-
-use crate::game::{
-    components::{animation::Animation, player::Player, spell::Spell},
-    states::new_gameplay::NewGameplay,
-    utils::magic::{database::WordToSpellTagDatabase, spell_tag::SpellTag},
 };
 
 pub struct PlayerInput {
@@ -38,16 +36,12 @@ impl Default for PlayerController {
         PlayerController {
             input: None,
             run_animation: NamedAnimation {
-                animation: FrameAnimation::new(1..25)
-                    .looping()
-                    .playing()
-                    .event(6, "footstep")
-                    .event(18, "footstep"),
-                id: "player/run".to_owned(),
+                animation: FrameAnimation::new(0..1).looping().playing(),
+                id: "player".to_owned(),
             },
             idle_animation: NamedAnimation {
-                animation: FrameAnimation::new(1..2).looping().playing(),
-                id: "player/idle".to_owned(),
+                animation: FrameAnimation::new(0..1).looping().playing(),
+                id: "player".to_owned(),
             },
             spell_text: Default::default(),
         }

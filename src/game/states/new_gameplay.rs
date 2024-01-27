@@ -127,7 +127,7 @@ impl GameState for NewGameplay {
     fn enter(&mut self, mut context: GameContext) {
         context.graphics.color = [0.0, 0.3, 0.0, 1.0];
         context.graphics.main_camera.screen_alignment = 0.5.into();
-        context.graphics.main_camera.scaling = CameraScaling::FitVertical(512.0);
+        context.graphics.main_camera.scaling = CameraScaling::FitVertical(800.0);
         context.gui.coords_map_scaling = CoordsMappingScaling::FitVertical(1024.0);
 
         self.exit_handle = Some(context.input.push_mapping(
@@ -232,7 +232,7 @@ impl GameState for NewGameplay {
         Events::maintain(delta_time);
 
         if self.exit.get().is_down() {
-            *context.state_change = GameStateChange::Swap(Box::new(MainMenu));
+            *context.state_change = GameStateChange::Swap(Box::new(NewGameplay::default()));
         }
 
         self.player_controller.run(
@@ -479,7 +479,7 @@ impl NewGameplay {
                 match event {
                     Event::KillPlayer => {
                         *context.state_change =
-                            GameStateChange::Swap(Box::new(GameEnd::new(GameEndReason::Lost)));
+                            GameStateChange::Swap(Box::new(NewGameplay::default()));
                     }
                     Event::KillEntity { entity } => {
                         // self.enemies.remove(id);
@@ -493,7 +493,7 @@ impl NewGameplay {
                     }
                     Event::WinGame => {
                         *context.state_change =
-                            GameStateChange::Swap(Box::new(GameEnd::new(GameEndReason::Won)));
+                            GameStateChange::Swap(Box::new(NewGameplay::default()));
                     }
                     _ => {}
                 }

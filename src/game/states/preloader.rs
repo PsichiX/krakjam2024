@@ -116,22 +116,17 @@ impl Preloader {
         );
 
         // player character
-        load_texture_series!(context, "player/idle", [1]);
-        load_texture_series!(
-            context,
-            "player/run",
-            [
-                1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
-                24
-            ]
+        load_texture(
+            context.draw,
+            context.graphics,
+            "player/0",
+            include_bytes!("../../../assets/images/player/character.png"),
+            1,
+            1,
         );
-        load_texture_series!(context, "player/axe", [1, 2, 3, 4, 5, 6, 7, 8]);
-        load_texture_series!(context, "player/sword", [1, 2, 3, 4, 5, 6, 7]);
 
         // enemy character
         load_texture_series!(context, "enemy/idle", [1, 2, 3, 4, 5]);
-        // load_texture_series!(context, "enemy/run", [1, 2, 3, 4, 5, 6, 7, 8]);
-        // load_texture_series!(context, "enemy/attack", [1, 2, 3, 4, 5, 6, 7, 8]);
 
         // items
         load_texture(
@@ -142,30 +137,6 @@ impl Preloader {
             1,
             1,
         );
-        // load_texture(
-        //     context.draw,
-        //     context.graphics,
-        //     "item/banana",
-        //     include_bytes!("../../../assets/images/item/banana.png"),
-        //     1,
-        //     1,
-        // );
-        // load_texture(
-        //     context.draw,
-        //     context.graphics,
-        //     "item/orange",
-        //     include_bytes!("../../../assets/images/item/orange.png"),
-        //     1,
-        //     1,
-        // );
-        // load_texture(
-        //     context.draw,
-        //     context.graphics,
-        //     "item/torch",
-        //     include_bytes!("../../../assets/images/item/torch.png"),
-        //     1,
-        //     1,
-        // );
 
         // particles
         load_texture(
@@ -173,6 +144,70 @@ impl Preloader {
             context.graphics,
             "particle/fire",
             include_bytes!("../../../assets/images/particles/fire.png"),
+            1,
+            1,
+        );
+        load_texture(
+            context.draw,
+            context.graphics,
+            "particle/smoke",
+            include_bytes!("../../../assets/images/particles/smoke.png"),
+            1,
+            1,
+        );
+        load_texture(
+            context.draw,
+            context.graphics,
+            "particle/water",
+            include_bytes!("../../../assets/images/particles/water.png"),
+            1,
+            1,
+        );
+        load_texture(
+            context.draw,
+            context.graphics,
+            "particle/drops",
+            include_bytes!("../../../assets/images/particles/drops.png"),
+            1,
+            1,
+        );
+        load_texture(
+            context.draw,
+            context.graphics,
+            "particle/electric",
+            include_bytes!("../../../assets/images/particles/electric.png"),
+            1,
+            1,
+        );
+        load_texture(
+            context.draw,
+            context.graphics,
+            "particle/sparks",
+            include_bytes!("../../../assets/images/particles/sparks.png"),
+            1,
+            1,
+        );
+        load_texture(
+            context.draw,
+            context.graphics,
+            "particle/steam",
+            include_bytes!("../../../assets/images/particles/steam.png"),
+            1,
+            1,
+        );
+        load_texture(
+            context.draw,
+            context.graphics,
+            "particle/paralized",
+            include_bytes!("../../../assets/images/particles/paralized.png"),
+            1,
+            1,
+        );
+        load_texture(
+            context.draw,
+            context.graphics,
+            "particle/explosion",
+            include_bytes!("../../../assets/images/particles/explosion.png"),
             1,
             1,
         );
