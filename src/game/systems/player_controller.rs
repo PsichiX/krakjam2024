@@ -79,7 +79,7 @@ impl PlayerController {
                 if character == '\n' || character == '\r' {
                     cast_spell = word_to_spell_tag_database.parse(&self.spell_text);
                     self.spell_text.clear();
-                } else if character == ' ' || character.is_alphabetic() {
+                } else if character == ' ' || character.is_alphanumeric() {
                     self.spell_text.push(character);
                 }
             }
@@ -100,7 +100,6 @@ impl PlayerController {
 
                 if movement.magnitude() > 0.5 {
                     transform.position += movement * delta_time * 150.0;
-                    context.graphics.main_camera.transform.position = transform.position;
 
                     if let Some(named_animation) = animation.animation.as_ref() {
                         if named_animation.id != self.run_animation.id {
@@ -121,12 +120,16 @@ impl PlayerController {
 
                 if let Some(spell) = cast_spell.as_ref() {
                     cast_action = Some(PlayerCastAction {
-                        position: transform.position.into(),
+                        position: (transform.position
+                            + movement.normalized() * spell.direction.multiplier() * 30.0)
+                            .into(),
                         direction: movement.normalized(),
                         spell: spell.clone(),
                     });
                 }
             }
+
+            context.graphics.main_camera.transform.position = transform.position;
         }
 
         if let Some(cast) = cast_action {

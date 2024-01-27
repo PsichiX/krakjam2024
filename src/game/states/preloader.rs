@@ -137,6 +137,30 @@ impl Preloader {
             1,
             1,
         );
+        load_texture(
+            context.draw,
+            context.graphics,
+            "item/banana",
+            include_bytes!("../../../assets/images/item/banana.png"),
+            1,
+            1,
+        );
+        // load_texture(
+        //     context.draw,
+        //     context.graphics,
+        //     "item/orange",
+        //     include_bytes!("../../../assets/images/item/orange.png"),
+        //     1,
+        //     1,
+        // );
+        // load_texture(
+        //     context.draw,
+        //     context.graphics,
+        //     "item/torch",
+        //     include_bytes!("../../../assets/images/item/torch.png"),
+        //     1,
+        //     1,
+        // );
 
         // particles
         load_texture(
@@ -213,22 +237,22 @@ impl Preloader {
         );
 
         // ui
-        // load_texture(
-        //     context.draw,
-        //     context.graphics,
-        //     "ui/panel",
-        //     include_bytes!("../../../assets/images/ui/panel.png"),
-        //     1,
-        //     1,
-        // );
-        // load_texture(
-        //     context.draw,
-        //     context.graphics,
-        //     "ui/bar",
-        //     include_bytes!("../../../assets/images/ui/bar.png"),
-        //     1,
-        //     1,
-        // );
+        load_texture(
+            context.draw,
+            context.graphics,
+            "ui/panel",
+            include_bytes!("../../../assets/images/ui/panel.png"),
+            1,
+            1,
+        );
+        load_texture(
+            context.draw,
+            context.graphics,
+            "ui/bar",
+            include_bytes!("../../../assets/images/ui/bar.png"),
+            1,
+            1,
+        );
         // load_texture(
         //     context.draw,
         //     context.graphics,

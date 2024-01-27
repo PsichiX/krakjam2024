@@ -1,3 +1,5 @@
+use crate::game::utils::magic::spell_tag::SpellTagEffect;
+
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum EffectReaction {
     // pair of same effects or all effects combined
@@ -47,11 +49,30 @@ pub struct Effect {
     pub electricity: bool,
 }
 
+impl From<SpellTagEffect> for Effect {
+    fn from(value: SpellTagEffect) -> Self {
+        return Effect {
+            electricity: value == SpellTagEffect::Electric,
+            fire: value == SpellTagEffect::Fire,
+            water: value == SpellTagEffect::Water,
+        };
+    }
+}
+
 impl Effect {
     pub fn react(&mut self, other: &mut Self) -> EffectReaction {
         let fire = self.fire || other.fire;
         let water = self.water || other.water;
         let electricity = self.electricity || other.electricity;
+
+        self.fire = fire;
+        self.water = water;
+        self.electricity = electricity;
+
+        other.fire = fire;
+        other.water = water;
+        other.electricity = electricity;
+
         if fire && water && electricity {
             EffectReaction::None
         } else if fire && water {

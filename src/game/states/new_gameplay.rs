@@ -4,16 +4,18 @@ use super::{
 };
 use crate::game::{
     components::{
-        animation::Animation, collidable::Collidable, enemy::Enemy, sprite_data::SpriteData,
+        animation::Animation, collidable::Collidable, effect::Effect, enemy::Enemy, health::Health,
+        sprite_data::SpriteData,
     },
     systems::{
         animation_controller::AnimationController, collision_detector::CollisionDetector,
         effects_reactions::EffectsReactions, player_controller::PlayerCastAction,
         spell_controller::SpellController,
     },
+    ui::{health_bar::health_bar, world_to_screen_content_layout},
     utils::magic::spell_tag::{
-        SpellTag, SpellTagDirection, SpellTagEffect, SpellTagShape, SpellTagSize, SpellTagSpeed,
-        SpellTagTrajectory,
+        SpellTag, SpellTagDirection, SpellTagDuration, SpellTagEffect, SpellTagShape, SpellTagSize,
+        SpellTagSpeed, SpellTagTrajectory,
     },
 };
 use crate::game::{
@@ -104,6 +106,23 @@ impl Default for NewGameplay {
             player_controller: PlayerController::default(),
             word_to_spell_tag_database: WordToSpellTagDatabase::default()
                 .with("fire", SpellTag::Effect(SpellTagEffect::Fire))
+                .with("burn", SpellTag::Effect(SpellTagEffect::Fire))
+                .with("heat", SpellTag::Effect(SpellTagEffect::Fire))
+                .with("hot", SpellTag::Effect(SpellTagEffect::Fire))
+                .with("wet", SpellTag::Effect(SpellTagEffect::Water))
+                .with("aqua", SpellTag::Effect(SpellTagEffect::Water))
+                .with("h2o", SpellTag::Effect(SpellTagEffect::Water))
+                .with("water", SpellTag::Effect(SpellTagEffect::Water))
+                .with("fluid", SpellTag::Effect(SpellTagEffect::Water))
+                .with("sprinkle", SpellTag::Effect(SpellTagEffect::Water))
+                .with("drink", SpellTag::Effect(SpellTagEffect::Water))
+                .with("zap", SpellTag::Effect(SpellTagEffect::Electric))
+                .with("power", SpellTag::Effect(SpellTagEffect::Electric))
+                .with("tingly", SpellTag::Effect(SpellTagEffect::Electric))
+                .with("charged", SpellTag::Effect(SpellTagEffect::Electric))
+                .with("electro", SpellTag::Effect(SpellTagEffect::Electric))
+                .with("electric", SpellTag::Effect(SpellTagEffect::Electric))
+                .with("thunder", SpellTag::Effect(SpellTagEffect::Electric))
                 .with("big", SpellTag::Size(SpellTagSize::Large))
                 .with("ball", SpellTag::Shape(SpellTagShape::Point))
                 .with("fine", SpellTag::Size(SpellTagSize::Medium))
@@ -118,7 +137,12 @@ impl Default for NewGameplay {
                 .with("fast", SpellTag::Speed(SpellTagSpeed::Fast))
                 .with("forth", SpellTag::Direction(SpellTagDirection::Forward))
                 .with("back", SpellTag::Direction(SpellTagDirection::Backward))
-                .with("down", SpellTag::Direction(SpellTagDirection::Down)),
+                .with("down", SpellTag::Direction(SpellTagDirection::Down))
+                .with("wall", SpellTag::Shape(SpellTagShape::Wall))
+                .with("triangle", SpellTag::Shape(SpellTagShape::Triangle))
+                .with("quick", SpellTag::Duration(SpellTagDuration::Quick))
+                .with("moment", SpellTag::Duration(SpellTagDuration::Medium))
+                .with("long", SpellTag::Duration(SpellTagDuration::Medium)),
         }
     }
 }
@@ -151,6 +175,12 @@ impl GameState for NewGameplay {
                     position: Vec2::default(),
                     collider_radius: 20.0,
                 }),
+            },
+            Health { value: 100.0 },
+            Effect {
+                electricity: false,
+                fire: false,
+                water: false,
             },
             SpriteData {
                 texture: "player/idle/1".into(),
@@ -326,23 +356,28 @@ impl GameState for NewGameplay {
     }
 
     fn draw_gui(&mut self, context: GameContext) {
-        // let health_bar_rectangle = Rect {
-        //     left: -50.0,
-        //     right: 50.0,
-        //     top: -60.0,
-        //     bottom: -40.0,
-        // };
+        let health_bar_rectangle = Rect {
+            left: -50.0,
+            right: 50.0,
+            top: -60.0,
+            bottom: -40.0,
+        };
 
-        // {
-        //     let state = self.player.state.read().unwrap();
-        //     let layout = world_to_screen_content_layout(
-        //         state.sprite.transform.position.xy(),
-        //         health_bar_rectangle,
-        //         &context,
-        //     );
+        {
+            for (_, (_, transform, health)) in self
+                .world
+                .query::<(&Player, &Transform<f32, f32, f32>, &Health)>()
+                .iter()
+            {
+                let layout = world_to_screen_content_layout(
+                    transform.position.xy(),
+                    health_bar_rectangle,
+                    &context,
+                );
 
-        //     health_bar(layout, state.health);
-        // }
+                health_bar(layout, health.value as usize);
+            }
+        }
 
         // for enemy in self.enemies.values() {
         //     let state = enemy.state.read().unwrap();
@@ -424,9 +459,76 @@ impl NewGameplay {
         let mut transform = Transform::<f32, f32, f32>::default();
         transform.position = cast.position.into();
 
+        match cast.spell.shape {
+            SpellTagShape::Point => Self::cast_point_spell(world, &cast, &transform),
+            SpellTagShape::Triangle => Self::cast_triangle_spell(world, &cast, &transform),
+            SpellTagShape::Wall => Self::cast_wall_spell(world, &cast, &transform),
+        }
+    }
+
+    fn cast_wall_spell(
+        world: &mut World,
+        cast: &PlayerCastAction,
+        transform: &Transform<f32, f32, f32>,
+    ) {
+        let perpendicular_direction = Vec2::new(-cast.direction.y, cast.direction.x);
+        let count = 5;
+        let start = cast.position + perpendicular_direction * cast.spell.size.radius();
+
+        for i in 0..count {
+            let mut new_transform = transform.clone();
+            new_transform.position =
+                (start + perpendicular_direction * cast.spell.size.radius() * i as f32).into();
+            Self::cast_point_spell(world, cast, &new_transform);
+        }
+    }
+
+    fn cast_triangle_spell(
+        world: &mut World,
+        cast: &PlayerCastAction,
+        transform: &Transform<f32, f32, f32>,
+    ) {
+        let angle = cast.direction.y.atan2(cast.direction.x);
+        let left = angle - std::f32::consts::FRAC_PI_3 + std::f32::consts::FRAC_PI_2;
+        let right = angle + std::f32::consts::FRAC_PI_3 + std::f32::consts::FRAC_PI_2;
+        let end = angle - std::f32::consts::FRAC_PI_2;
+        let left_direction = Vec2::<f32>::new(left.cos(), left.sin());
+        let right_direction = Vec2::<f32>::new(right.cos(), right.sin());
+        let end_direction = Vec2::<f32>::new(end.cos(), end.sin());
+        let count = 5;
+        let start = cast.position;
+
+        for i in 0..count {
+            let mut new_transform = transform.clone();
+            new_transform.position =
+                (start + left_direction * cast.spell.size.radius() * i as f32).into();
+            Self::cast_point_spell(world, cast, &new_transform);
+
+            let mut new_transform = transform.clone();
+            new_transform.position =
+                (start - right_direction * cast.spell.size.radius() * i as f32).into();
+            Self::cast_point_spell(world, cast, &new_transform);
+        }
+
+        for i in 0..(count + 1) {
+            let mut new_transform = transform.clone();
+            new_transform.position = ((start
+                + left_direction * cast.spell.size.radius() * count as f32)
+                + end_direction * cast.spell.size.radius() * i as f32)
+                .into();
+            Self::cast_point_spell(world, cast, &new_transform);
+        }
+    }
+
+    fn cast_point_spell(
+        world: &mut World,
+        cast: &PlayerCastAction,
+        transform: &Transform<f32, f32, f32>,
+    ) {
         world.spawn((
             Animation { animation: None },
-            transform,
+            Effect::from(cast.spell.effect),
+            transform.clone(),
             Projectile::new(
                 match cast.spell.speed {
                     SpellTagSpeed::Fast => 1000.0,
@@ -443,12 +545,16 @@ impl NewGameplay {
                 }),
             },
             SpriteData {
-                texture: "item/apple".into(),
+                texture: match cast.spell.effect {
+                    SpellTagEffect::Fire => "particle/fire".into(),
+                    SpellTagEffect::Electric => "item/banana".into(),
+                    SpellTagEffect::Water => "item/apple".into(),
+                },
                 shader: "image".into(),
                 pivot: 0.5.into(),
                 tint: Rgba::default(),
             },
-            cast.spell,
+            cast.spell.clone(),
         ));
     }
 

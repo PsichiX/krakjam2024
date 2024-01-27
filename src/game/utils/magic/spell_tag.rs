@@ -1,4 +1,7 @@
-use micro_games_kit::third_party::rand::{thread_rng, Rng};
+use micro_games_kit::third_party::{
+    rand::{thread_rng, Rng},
+    vek::Vec2,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum SpellTag {
@@ -8,6 +11,7 @@ pub enum SpellTag {
     Shape(SpellTagShape),
     Direction(SpellTagDirection),
     Trajectory(SpellTagTrajectory),
+    Duration(SpellTagDuration),
 }
 
 impl SpellTag {
@@ -19,6 +23,7 @@ impl SpellTag {
             3 => Self::Shape(SpellTagShape::random()),
             4 => Self::Direction(SpellTagDirection::random()),
             5 => Self::Trajectory(SpellTagTrajectory::random()),
+            6 => Self::Duration(SpellTagDuration::random()),
             _ => unreachable!(),
         }
     }
@@ -61,6 +66,13 @@ impl SpellTag {
     pub fn as_trajectory(&self) -> Option<SpellTagTrajectory> {
         match self {
             Self::Trajectory(result) => Some(*result),
+            _ => None,
+        }
+    }
+
+    pub fn as_duration(&self) -> Option<SpellTagDuration> {
+        match self {
+            Self::Duration(result) => Some(*result),
             _ => None,
         }
     }
@@ -120,6 +132,22 @@ impl SpellTagSize {
             _ => unreachable!(),
         }
     }
+
+    pub fn scale(&self) -> Vec2<f32> {
+        match self {
+            SpellTagSize::Large => Vec2::new(4.0, 4.0).into(),
+            SpellTagSize::Medium => Vec2::new(2.0, 2.0).into(),
+            SpellTagSize::Small => Vec2::new(1.0, 1.0).into(),
+        }
+    }
+
+    pub fn radius(&self) -> f32 {
+        match self {
+            SpellTagSize::Large => 40.0,
+            SpellTagSize::Medium => 20.0,
+            SpellTagSize::Small => 10.0,
+        }
+    }
 }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -158,6 +186,14 @@ impl SpellTagDuration {
             _ => unreachable!(),
         }
     }
+
+    pub fn time(&self) -> f32 {
+        match self {
+            SpellTagDuration::Long => 8.0,
+            SpellTagDuration::Medium => 2.0,
+            SpellTagDuration::Quick => 0.5,
+        }
+    }
 }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -194,6 +230,14 @@ impl SpellTagDirection {
             1 => Self::Backward,
             2 => Self::Down,
             _ => unreachable!(),
+        }
+    }
+
+    pub fn multiplier(&self) -> f32 {
+        match self {
+            Self::Forward => 1.0,
+            Self::Backward => -1.0,
+            Self::Down => 0.0,
         }
     }
 }

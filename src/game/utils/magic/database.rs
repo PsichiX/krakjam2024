@@ -52,6 +52,10 @@ impl WordToSpellTagDatabase {
                 .iter()
                 .find_map(|tag| tag.as_trajectory())
                 .unwrap_or_else(|| Default::default());
+            let duration = tags
+                .iter()
+                .find_map(|tag| tag.as_duration())
+                .unwrap_or_else(|| Default::default());
             Some(Spell {
                 size,
                 speed,
@@ -59,6 +63,7 @@ impl WordToSpellTagDatabase {
                 shape,
                 direction,
                 trajectory,
+                duration,
             })
         } else {
             None
@@ -94,6 +99,7 @@ mod tests {
                 shape: SpellTagShape::Point,
                 direction: Default::default(),
                 trajectory: Default::default(),
+                duration: Default::default(),
             }
         );
 
@@ -107,6 +113,7 @@ mod tests {
                 shape: SpellTagShape::Point,
                 direction: Default::default(),
                 trajectory: Default::default(),
+                duration: Default::default(),
             }
         );
 
@@ -120,6 +127,7 @@ mod tests {
                 shape: Default::default(),
                 direction: Default::default(),
                 trajectory: Default::default(),
+                duration: Default::default(),
             }
         );
     }
