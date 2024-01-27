@@ -126,7 +126,14 @@ impl Preloader {
         );
 
         // enemy character
-        // load_texture_series!(context, "enemy/idle", [1, 2, 3, 4, 5]);
+        load_texture(
+            context.draw,
+            context.graphics,
+            "enemy/0",
+            include_bytes!("../../../assets/images/enemy/slime.png"),
+            1,
+            1,
+        );
 
         // items
         load_texture(

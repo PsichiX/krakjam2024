@@ -1,3 +1,4 @@
+use crate::game::components::sprite_data::SpriteData;
 use hecs::World;
 use micro_games_kit::{
     context::GameContext,
@@ -6,12 +7,9 @@ use micro_games_kit::{
             sprite::{Sprite, SpriteTexture},
             utils::{Drawable, ShaderRef, TextureRef},
         },
-        spitfire_glow::renderer::GlowUniformValue,
         vek::Transform,
     },
 };
-
-use crate::game::components::sprite_data::SpriteData;
 
 pub struct SpriteRenderer;
 
@@ -28,11 +26,7 @@ impl SpriteRenderer {
             .transform(*transform)
             .shader(ShaderRef::name(sprite_data.shader.clone()))
             .pivot(sprite_data.pivot)
-            .uniform(
-                "u_fill_color".into(),
-                GlowUniformValue::F4([0.0, 0.0, 0.0, 0.0]),
-            );
-
+            .tint(sprite_data.tint);
             sprite.draw(context.draw, context.graphics);
         }
     }

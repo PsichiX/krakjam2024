@@ -21,7 +21,6 @@ impl EffectsReactions {
                             continue;
                         }
 
-                        println!("Entity: {:?}, Id: {:?}", entity_b, entity_a);
                         entities_to_process.push((entity_a, entity_b));
                     }
                 }
@@ -45,7 +44,9 @@ impl EffectsReactions {
                     entity_b_query
                 {
                     let reaction = effect_a.react(effect_b);
-
+                    println!("=== Entity A: {:?} | Effect A: {:?}", entity_a, effect_a);
+                    println!("=== Entity B: {:?} | Effect B: {:?}", entity_b, effect_b);
+                    println!("=== Reaction: {:?}", reaction);
                     let damage = reaction.damage();
                     let immobile_time = reaction.immobile_time();
                     let push_distance = reaction.push_distance();

@@ -1,6 +1,5 @@
-use std::borrow::Cow;
-
 use micro_games_kit::third_party::{vek::Rgba, vek::Vec2};
+use std::borrow::Cow;
 
 pub struct SpriteData {
     pub shader: Cow<'static, str>,
