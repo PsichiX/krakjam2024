@@ -3,18 +3,22 @@ use super::{
     main_menu::MainMenu,
 };
 use crate::game::{
+    components::{animation::Animation, spell::Spell, sprite_data::SpriteData},
+    systems::{animation_controller::AnimationController, player_controller::PlayerCastAction},
+    utils::magic::spell_tag::SpellTagTrajectory,
+};
+use crate::game::{
     components::{player::Player, projectile::Projectile},
     player::PlayerState,
-    systems::{player_controller::PlayerController, projectile_controller::ProjectileController, sprite_renderer::SpriteRenderer},
+    systems::{
+        player_controller::PlayerController, projectile_controller::ProjectileController,
+        sprite_renderer::SpriteRenderer,
+    },
     utils::{
         events::{Event, Events},
         magic::database::WordToSpellTagDatabase,
         space::{Space, SpaceObject, SpaceObjectId},
     },
-};
-use crate::game::{
-    components::{animation::Animation, sprite_data::SpriteData},
-    systems::animation_controller::AnimationController,
 };
 use hecs::World;
 use micro_games_kit::{
@@ -34,7 +38,7 @@ use micro_games_kit::{
         spitfire_glow::{graphics::CameraScaling, renderer::GlowTextureFiltering},
         spitfire_input::{InputActionRef, InputConsume, InputMapping, VirtualAction},
         typid::ID,
-        vek::{Rgba, Transform, Vec2},
+        vek::{Rgba, Transform},
         windowing::event::VirtualKeyCode,
     },
 };
@@ -53,7 +57,6 @@ pub struct NewGameplay {
     // music_battle: StaticSoundHandle,
     world: World,
     player_controller: PlayerController,
-    spell_text: String,
     word_to_spell_tag_database: WordToSpellTagDatabase,
 }
 
@@ -89,7 +92,6 @@ impl Default for NewGameplay {
             // music_battle,
             world: World::new(),
             player_controller: PlayerController::default(),
-            spell_text: Default::default(),
             word_to_spell_tag_database: WordToSpellTagDatabase::default(),
         }
     }
@@ -170,26 +172,18 @@ impl GameState for NewGameplay {
     }
 
     fn fixed_update(&mut self, mut context: GameContext, delta_time: f32) {
-        if let Some(mut characters) = context.input.characters().write() {
-            for character in characters.take().chars() {
-                if character == '\n' || character == '\r' {
-                    let tags = self.word_to_spell_tag_database.parse(&self.spell_text);
-                    // TODO: cast spell with tags here.
-                    self.spell_text.clear();
-                } else if character == ' ' || character.is_alphabetic() {
-                    self.spell_text.push(character);
-                }
-            }
-        }
-
         // self.maintain(delta_time);
 
         if self.exit.get().is_down() {
             *context.state_change = GameStateChange::Swap(Box::new(MainMenu));
         }
 
-        self.player_controller
-            .run(&mut self.world, &mut context, delta_time);
+        self.player_controller.run(
+            &mut self.world,
+            &mut context,
+            delta_time,
+            &self.word_to_spell_tag_database,
+        );
         AnimationController::run(&self.world, &mut context, delta_time);
         ProjectileController::run(&self.world, &mut context, delta_time);
 
@@ -341,12 +335,15 @@ impl GameState for NewGameplay {
                     top: -100.0,
                     bottom: 50.0,
                 },
-                align: micro_games_kit::third_party::raui_immediate_widgets::core::Vec2 { x: 0.5, y: 1.0 },
+                align: micro_games_kit::third_party::raui_immediate_widgets::core::Vec2 {
+                    x: 0.5,
+                    y: 1.0,
+                },
                 ..Default::default()
             },
             || {
                 text_box(TextBoxProps {
-                    text: format!("> {}", self.spell_text),
+                    text: format!("> {}", self.player_controller.spell_text),
                     horizontal_align: TextBoxHorizontalAlign::Center,
                     vertical_align: TextBoxVerticalAlign::Middle,
                     font: TextBoxFont {
@@ -362,25 +359,26 @@ impl GameState for NewGameplay {
 }
 
 impl NewGameplay {
-    pub fn cast_spell(world: &mut World, position: Vec2<f32>, direction: Vec2<f32>) {
+    pub fn cast_spell(world: &mut World, cast: PlayerCastAction) {
         let mut transform = Transform::<f32, f32, f32>::default();
-        transform.position = position.into();
+        transform.position = cast.position.into();
 
         world.spawn((
-            Animation { 
-                animation: None
-            },
-            transform, 
+            Animation { animation: None },
+            transform,
             Projectile {
                 speed: 100.0,
-                direction,
-                trajectory: crate::game::utils::magic::spell_tag::SpellTagTrajectory::Straight,
+                direction: cast.direction,
+                trajectory: SpellTagTrajectory::Straight,
             },
             SpriteData {
                 texture: "item/apple".into(),
                 shader: "image".into(),
                 pivot: 0.5.into(),
-                tint: Rgba::default()
+                tint: Rgba::default(),
+            },
+            Spell {
+                description: cast.tags,
             },
         ));
     }
