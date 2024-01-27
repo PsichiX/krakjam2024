@@ -4,12 +4,11 @@ use super::{
 };
 use crate::game::{
     components::{
-        animation::Animation, collidable::Collidable, enemy::Enemy, spell::Spell,
-        sprite_data::SpriteData,
+        animation::Animation, collidable::Collidable, enemy::Enemy, sprite_data::SpriteData,
     },
     systems::{
         animation_controller::AnimationController, collision_detector::CollisionDetector,
-        player_controller::PlayerCastAction,
+        effects_reactions::EffectsReactions, player_controller::PlayerCastAction,
     },
     utils::magic::spell_tag::{
         SpellTag, SpellTagEffect, SpellTagShape, SpellTagSize, SpellTagTrajectory,
@@ -104,10 +103,10 @@ impl Default for NewGameplay {
             word_to_spell_tag_database: WordToSpellTagDatabase::default()
                 .with("fire", SpellTag::Effect(SpellTagEffect::Fire))
                 .with("big", SpellTag::Size(SpellTagSize::Large))
-                .with("ball", SpellTag::Shape(SpellTagShape::Circle))
+                .with("ball", SpellTag::Shape(SpellTagShape::Point))
                 .with("meteor", SpellTag::Effect(SpellTagEffect::Fire))
                 .with("meteor", SpellTag::Size(SpellTagSize::Large))
-                .with("meteor", SpellTag::Shape(SpellTagShape::Circle))
+                .with("meteor", SpellTag::Shape(SpellTagShape::Point))
                 .with("sinus", SpellTag::Trajectory(SpellTagTrajectory::Sinus))
                 .with("circle", SpellTag::Trajectory(SpellTagTrajectory::Circle)),
         }
@@ -234,7 +233,8 @@ impl GameState for NewGameplay {
         );
         AnimationController::run(&self.world, &mut context, delta_time);
         ProjectileController::run(&self.world, &mut context, delta_time);
-        CollisionDetector::run(&self.world, &mut context, delta_time);
+        CollisionDetector::run(&self.world);
+        EffectsReactions::run(&self.world);
 
         // self.process_game_objects(&mut context, delta_time);
 
