@@ -232,4 +232,12 @@ impl SpellTagDirection {
             _ => unreachable!(),
         }
     }
+
+    pub fn multiplier(&self) -> f32 {
+        match self {
+            Self::Forward => 1.0,
+            Self::Backward => -1.0,
+            Self::Down => 0.0
+        }
+    }
 }
