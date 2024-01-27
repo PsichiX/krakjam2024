@@ -1,4 +1,5 @@
 use crate::game::{enemy::EnemyState, item::Item};
+use hecs::Entity;
 use micro_games_kit::third_party::{typid::ID, vek::Vec2};
 use std::cell::RefCell;
 
@@ -16,7 +17,10 @@ pub enum Instigator {
 
 pub enum Event {
     KillPlayer,
-    KillEnemy {
+    KillEntity {
+        entity: Entity,
+    },
+    KillEnemyOld {
         id: ID<EnemyState>,
     },
     KillItem {

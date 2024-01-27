@@ -300,16 +300,19 @@ impl Gameplay {
                 .iter()
                 .map(|(id, enemy)| SpaceObject {
                     id: SpaceObjectId::EnemyOld(*id),
+                    entity: None,
                     position: enemy.state.read().unwrap().sprite.transform.position.xy(),
                     collider_radius: 20.0,
                 })
                 .chain(self.items.iter().map(|(id, item)| SpaceObject {
                     id: SpaceObjectId::Item(*id),
+                    entity: None,
                     position: item.sprite.transform.position.xy(),
                     collider_radius: 10.0,
                 }))
                 .chain(std::iter::once(SpaceObject {
                     id: SpaceObjectId::Player,
+                    entity: None,
                     position: self
                         .player
                         .state
@@ -354,7 +357,7 @@ impl Gameplay {
                         *context.state_change =
                             GameStateChange::Swap(Box::new(GameEnd::new(GameEndReason::Lost)));
                     }
-                    Event::KillEnemy { id } => {
+                    Event::KillEnemyOld { id } => {
                         self.enemies.remove(id);
                         if self.enemies.is_empty() {
                             Events::write_delayed(2.0, Event::WinGame);

@@ -1,4 +1,5 @@
 use crate::game::{enemy::EnemyState, item::Item};
+use hecs::Entity;
 use micro_games_kit::third_party::{
     raui_core::{Managed, ManagedRef, ManagedRefMut},
     rstar::{Envelope, Point, PointDistance, RTree, RTreeObject, AABB},
@@ -16,6 +17,7 @@ pub enum SpaceObjectId {
     None,
     Player,
     Enemy,
+    Spell,
     EnemyOld(ID<EnemyState>),
     Item(ID<Item>),
 }
@@ -23,6 +25,7 @@ pub enum SpaceObjectId {
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct SpaceObject {
     pub id: SpaceObjectId,
+    pub entity: Option<Entity>,
     pub position: Vec2<f32>,
     pub collider_radius: f32,
 }

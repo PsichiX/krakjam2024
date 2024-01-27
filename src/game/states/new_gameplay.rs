@@ -123,6 +123,7 @@ impl GameState for NewGameplay {
             Collidable {
                 space_object: Some(SpaceObject {
                     id: SpaceObjectId::Player,
+                    entity: None,
                     position: Vec2::default(),
                     collider_radius: 20.0,
                 })
@@ -147,6 +148,7 @@ impl GameState for NewGameplay {
             Collidable {
                 space_object: Some(SpaceObject {
                     id: SpaceObjectId::Enemy,
+                    entity: None,
                     position: Vec2::default(),
                     collider_radius: 10.0,
                 })
@@ -204,7 +206,7 @@ impl GameState for NewGameplay {
     }
 
     fn fixed_update(&mut self, mut context: GameContext, delta_time: f32) {
-        // self.maintain(delta_time);
+        Events::maintain(delta_time);
 
         if self.exit.get().is_down() {
             *context.state_change = GameStateChange::Swap(Box::new(MainMenu));
@@ -218,13 +220,13 @@ impl GameState for NewGameplay {
         );
         AnimationController::run(&self.world, &mut context, delta_time);
         ProjectileController::run(&self.world, &mut context, delta_time);
-        CollisionDetector::run(&self.world, &mut context, delta_time)
+        CollisionDetector::run(&self.world, &mut context, delta_time);
 
         // self.process_game_objects(&mut context, delta_time);
 
         // self.resolve_collisions();
 
-        // self.execute_events(&mut context);
+        self.execute_events(&mut context);
 
         // self.update_ambient_music();
     }
@@ -404,6 +406,14 @@ impl NewGameplay {
                 direction: cast.direction,
                 trajectory: SpellTagTrajectory::Straight,
             },
+            Collidable {
+                space_object: Some(SpaceObject {
+                    id: SpaceObjectId::Spell,
+                    entity: None,
+                    position: Vec2::default(),
+                    collider_radius: 10.0,
+                })
+            },
             SpriteData {
                 texture: "item/apple".into(),
                 shader: "image".into(),
@@ -416,57 +426,10 @@ impl NewGameplay {
         ));
     }
 
-    fn maintain(&self, delta_time: f32) {
-        Events::maintain(delta_time);
-
-        Space::write().write().unwrap().maintain(
-            // self.enemies
-            //     .iter()
-            //     .map(|(id, enemy)| SpaceObject {
-            //         id: SpaceObjectId::Enemy(*id),
-            //         position: enemy.state.read().unwrap().sprite.transform.position.xy(),
-            //         collider_radius: 20.0,
-            //     })
-            //     .chain(self.items.iter().map(|(id, item)| SpaceObject {
-            //         id: SpaceObjectId::Item(*id),
-            //         position: item.sprite.transform.position.xy(),
-            //         collider_radius: 10.0,
-            //     }))
-            //     .chain(std::iter::once(SpaceObject {
-            //         id: SpaceObjectId::Player,
-            //         position: self
-            //             .player
-            //             .state
-            //             .read()
-            //             .unwrap()
-            //             .sprite
-            //             .transform
-            //             .position
-            //             .xy(),
-            //         collider_radius: 20.0,
-            //     }))
-            //     .collect(),
-            std::iter::once(SpaceObject {
-                id: SpaceObjectId::Player,
-                position: self
-                    .player
-                    .state
-                    .read()
-                    .unwrap()
-                    .sprite
-                    .transform
-                    .position
-                    .xy(),
-                collider_radius: 20.0,
-            })
-            .collect(),
-        );
-    }
-
     fn process_game_objects(&mut self, context: &mut GameContext, delta_time: f32) {
         // self.torch.process(context, delta_time);
 
-        self.player.process(context, delta_time);
+        // self.player.process(context, delta_time);
 
         // for enemy in self.enemies.values_mut() {
         //     enemy.process(context, delta_time);
@@ -492,11 +455,12 @@ impl NewGameplay {
                         *context.state_change =
                             GameStateChange::Swap(Box::new(GameEnd::new(GameEndReason::Lost)));
                     }
-                    Event::KillEnemy { id } => {
+                    Event::KillEntity { entity } => {
                         // self.enemies.remove(id);
                         // if self.enemies.is_empty() {
                         //     Events::write_delayed(2.0, Event::WinGame);
                         // }
+                        let _ = self.world.despawn(*entity);
                     }
                     Event::KillItem { id } => {
                         // self.items.remove(id);

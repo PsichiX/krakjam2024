@@ -171,7 +171,7 @@ impl EnemyState {
                         self.blink_seconds = 0.15;
                         self.health = self.health.saturating_sub(*value);
                         if self.health == 0 {
-                            Events::write(Event::KillEnemy { id });
+                            Events::write(Event::KillEnemyOld { id });
                         }
                     }
                 }
