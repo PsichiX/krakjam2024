@@ -1,15 +1,16 @@
-use std::default;
-
 use super::{
     game_end::{GameEnd, GameEndReason},
     main_menu::MainMenu,
 };
 use crate::game::components::sprite_data::SpriteData;
 use crate::game::{
-    components::player::Player, player::PlayerState, systems::{player_controller::PlayerController, sprite_renderer::SpriteRenderer}, utils::{
+    components::player::Player,
+    player::PlayerState,
+    systems::{player_controller::PlayerController, sprite_renderer::SpriteRenderer},
+    utils::{
         events::{Event, Events},
         space::{Space, SpaceObject, SpaceObjectId},
-    }
+    },
 };
 use hecs::World;
 use micro_games_kit::{
@@ -18,6 +19,10 @@ use micro_games_kit::{
     game::{GameObject, GameState, GameStateChange},
     third_party::{
         raui_core::layout::CoordsMappingScaling,
+        raui_immediate_widgets::core::{
+            containers::nav_content_box, text_box, ContentBoxItemLayout, Rect, TextBoxFont,
+            TextBoxHorizontalAlign, TextBoxProps, TextBoxVerticalAlign, Vec2,
+        },
         spitfire_draw::{
             sprite::{Sprite, SpriteTexture},
             utils::{Drawable, TextureRef},
@@ -44,6 +49,7 @@ pub struct NewGameplay {
     // music_battle: StaticSoundHandle,
     world: World,
     player_controller: PlayerController,
+    spell_text: String,
 }
 
 impl Default for NewGameplay {
@@ -77,7 +83,8 @@ impl Default for NewGameplay {
             // music_forest,
             // music_battle,
             world: World::new(),
-            player_controller: PlayerController::default()
+            player_controller: PlayerController::default(),
+            spell_text: Default::default(),
         }
     }
 }
@@ -102,12 +109,12 @@ impl GameState for NewGameplay {
 
         self.world.spawn((
             Player {},
-            Transform::<f32, f32, f32>::default(), 
+            Transform::<f32, f32, f32>::default(),
             SpriteData {
                 texture: "player/idle/1".into(),
                 shader: "character".into(),
                 pivot: 0.5.into(),
-                tint: Rgba::default()
+                tint: Rgba::default(),
             },
         ));
 
@@ -156,13 +163,18 @@ impl GameState for NewGameplay {
     }
 
     fn fixed_update(&mut self, mut context: GameContext, delta_time: f32) {
+        if let Some(mut characters) = context.input.characters().write() {
+            self.spell_text.push_str(characters.take().as_str());
+        }
+
         self.maintain(delta_time);
 
         if self.exit.get().is_down() {
             *context.state_change = GameStateChange::Swap(Box::new(MainMenu));
         }
 
-        self.player_controller.run(&self.world, &mut context, delta_time);
+        self.player_controller
+            .run(&self.world, &mut context, delta_time);
 
         self.process_game_objects(&mut context, delta_time);
 
@@ -243,60 +255,92 @@ impl GameState for NewGameplay {
     }
 
     fn draw_gui(&mut self, context: GameContext) {
-        //     let health_bar_rectangle = Rect {
-        //         left: -50.0,
-        //         right: 50.0,
-        //         top: -60.0,
-        //         bottom: -40.0,
-        //     };
+        // let health_bar_rectangle = Rect {
+        //     left: -50.0,
+        //     right: 50.0,
+        //     top: -60.0,
+        //     bottom: -40.0,
+        // };
 
-        //     {
-        //         let state = self.player.state.read().unwrap();
-        //         let layout = world_to_screen_content_layout(
-        //             state.sprite.transform.position.xy(),
-        //             health_bar_rectangle,
-        //             &context,
-        //         );
+        // {
+        //     let state = self.player.state.read().unwrap();
+        //     let layout = world_to_screen_content_layout(
+        //         state.sprite.transform.position.xy(),
+        //         health_bar_rectangle,
+        //         &context,
+        //     );
 
-        //         health_bar(layout, state.health);
-        //     }
+        //     health_bar(layout, state.health);
+        // }
 
-        //     for enemy in self.enemies.values() {
-        //         let state = enemy.state.read().unwrap();
-        //         let layout = world_to_screen_content_layout(
-        //             state.sprite.transform.position.xy(),
-        //             health_bar_rectangle,
-        //             &context,
-        //         );
+        // for enemy in self.enemies.values() {
+        //     let state = enemy.state.read().unwrap();
+        //     let layout = world_to_screen_content_layout(
+        //         state.sprite.transform.position.xy(),
+        //         health_bar_rectangle,
+        //         &context,
+        //     );
 
-        //         health_bar(layout, state.health);
-        //     }
+        //     health_bar(layout, state.health);
+        // }
 
-        //     text_box((
-        //         ContentBoxItemLayout {
-        //             margin: 40.0.into(),
-        //             ..Default::default()
+        // text_box((
+        //     ContentBoxItemLayout {
+        //         margin: 40.0.into(),
+        //         ..Default::default()
+        //     },
+        //     TextBoxProps {
+        //         text: format!(
+        //             "Weapon: {:?}\nEnemies: {}\nItems: {}",
+        //             self.player.state.read().unwrap().weapon,
+        //             self.enemies.len(),
+        //             self.items.len(),
+        //         ),
+        //         font: TextBoxFont {
+        //             name: "roboto".to_owned(),
+        //             size: 28.0,
         //         },
-        //         TextBoxProps {
-        //             text: format!(
-        //                 "Weapon: {:?}\nEnemies: {}\nItems: {}",
-        //                 self.player.state.read().unwrap().weapon,
-        //                 self.enemies.len(),
-        //                 self.items.len(),
-        //             ),
-        //             font: TextBoxFont {
-        //                 name: "roboto".to_owned(),
-        //                 size: 28.0,
-        //             },
-        //             color: Color {
-        //                 r: 1.0,
-        //                 g: 1.0,
-        //                 b: 1.0,
-        //                 a: 1.0,
-        //             },
-        //             ..Default::default()
+        //         color: Color {
+        //             r: 1.0,
+        //             g: 1.0,
+        //             b: 1.0,
+        //             a: 1.0,
         //         },
-        //     ));
+        //         ..Default::default()
+        //     },
+        // ));
+
+        nav_content_box(
+            ContentBoxItemLayout {
+                anchors: Rect {
+                    left: 0.0,
+                    right: 1.0,
+                    top: 1.0,
+                    bottom: 1.0,
+                },
+                margin: Rect {
+                    left: 50.0,
+                    right: 50.0,
+                    top: -100.0,
+                    bottom: 50.0,
+                },
+                align: Vec2 { x: 0.5, y: 1.0 },
+                ..Default::default()
+            },
+            || {
+                text_box(TextBoxProps {
+                    text: format!("> {}", self.spell_text),
+                    horizontal_align: TextBoxHorizontalAlign::Center,
+                    vertical_align: TextBoxVerticalAlign::Middle,
+                    font: TextBoxFont {
+                        name: "roboto".to_owned(),
+                        size: 48.0,
+                    },
+                    color: Default::default(),
+                    ..Default::default()
+                });
+            },
+        );
     }
 }
 
