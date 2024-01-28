@@ -20,9 +20,12 @@ use crate::game::{
         slime_color::SlimeColor, spell_controller::SpellController,
     },
     ui::{health_bar::health_bar, world_to_screen_content_layout},
-    utils::magic::spell_tag::{
-        SpellTag, SpellTagDamage, SpellTagDirection, SpellTagDuration, SpellTagEffect,
-        SpellTagShape, SpellTagSize, SpellTagSpeed, SpellTagTrajectory,
+    utils::{
+        audio::Audio,
+        magic::spell_tag::{
+            SpellTag, SpellTagDamage, SpellTagDirection, SpellTagDuration, SpellTagEffect,
+            SpellTagShape, SpellTagSize, SpellTagSpeed, SpellTagTrajectory,
+        },
     },
 };
 use crate::game::{
@@ -38,6 +41,7 @@ use micro_games_kit::{
     context::GameContext,
     game::{GameState, GameStateChange},
     third_party::{
+        kira::sound::static_sound::StaticSoundHandle,
         raui_core::layout::CoordsMappingScaling,
         raui_immediate_widgets::core::{
             containers::content_box, image_box, text_box, Color, ContentBoxItemLayout,
@@ -58,8 +62,7 @@ use micro_games_kit::{
 pub struct NewGameplay {
     map: [Sprite; 4],
     exit: InputActionRef,
-    // music_forest: StaticSoundHandle,
-    // music_battle: StaticSoundHandle,
+    music: StaticSoundHandle,
     world: World,
     player_controller: PlayerController,
     enemy_spawn: EnemySpawn,
@@ -72,17 +75,6 @@ pub struct NewGameplay {
 
 impl Default for NewGameplay {
     fn default() -> Self {
-        // let mut audio = Audio::write();
-        // let mut audio = audio.write().unwrap();
-
-        // let mut music_forest = audio.play("forest").unwrap();
-        // let _ = music_forest.set_volume(0.0, Default::default());
-        // let _ = music_forest.set_loop_region(..);
-
-        // let mut music_battle = audio.play("battle").unwrap();
-        // let _ = music_battle.set_volume(0.0, Default::default());
-        // let _ = music_battle.set_loop_region(..);
-
         Self {
             map: [
                 Sprite::single(SpriteTexture {
@@ -111,6 +103,11 @@ impl Default for NewGameplay {
                 .pivot((0.0, 0.0).into()),
             ],
             exit: Default::default(),
+            music: Audio::write()
+                .write()
+                .unwrap()
+                .play("music/ambient")
+                .unwrap(),
             world: World::new(),
             player_controller: PlayerController::default(),
             enemy_spawn: EnemySpawn::new(1000.0, 3.0, 30),
@@ -405,8 +402,7 @@ impl GameState for NewGameplay {
     fn exit(&mut self, context: GameContext) {
         context.input.pop_mapping();
 
-        // let _ = self.music_forest.stop(Default::default());
-        // let _ = self.music_battle.stop(Default::default());
+        let _ = self.music.stop(Default::default());
     }
 
     fn fixed_update(&mut self, mut context: GameContext, delta_time: f32) {
@@ -447,8 +443,6 @@ impl GameState for NewGameplay {
             *context.state_change =
                 GameStateChange::Swap(Box::new(GameEnd::new(self.alive_time_seconds)));
         }
-
-        // self.update_ambient_music();
     }
 
     fn draw(&mut self, mut context: GameContext) {
@@ -718,6 +712,9 @@ impl NewGameplay {
         transform: &Transform<f32, f32, f32>,
         caster: Entity,
     ) {
+        let mut sound = Audio::write().write().unwrap().play("sound/spell").unwrap();
+        let _ = sound.set_volume(0.5, Default::default());
+
         world.spawn((
             Animation { animation: None },
             Effect::from(cast.spell.effect),
@@ -766,40 +763,4 @@ impl NewGameplay {
             cast.spell.clone(),
         ));
     }
-
-    // fn update_ambient_music(&mut self) {
-    //     // let player_position = self
-    //     //     .player
-    //     //     .state
-    //     //     .read()
-    //     //     .unwrap()
-    //     //     .sprite
-    //     //     .transform
-    //     //     .position
-    //     //     .xy();
-    //     // let factor = self
-    //     //     .enemies
-    //     //     .values()
-    //     //     .map(|enemy| {
-    //     //         enemy
-    //     //             .state
-    //     //             .read()
-    //     //             .unwrap()
-    //     //             .sprite
-    //     //             .transform
-    //     //             .position
-    //     //             .xy()
-    //     //             .distance(player_position)
-    //     //     })
-    //     //     .min_by(|a, b| a.partial_cmp(b).unwrap())
-    //     //     .unwrap_or(INFINITY)
-    //     //     .min(300.0) as f64
-    //     //     / 300.0;
-    //     // let _ = self
-    //     //     .music_forest
-    //     //     .set_volume(factor * 2.0, Default::default());
-    //     // let _ = self
-    //     //     .music_battle
-    //     //     .set_volume((1.0 - factor) * 2.0, Default::default());
-    // }
 }

@@ -1,3 +1,5 @@
+use crate::game::utils::audio::Audio;
+
 use super::new_gameplay::NewGameplay;
 use micro_games_kit::{
     context::GameContext,
@@ -354,38 +356,17 @@ impl Preloader {
     }
 
     fn load_sounds_and_music() {
-        // let mut audio = Audio::write();
-        // let mut audio = audio.write().unwrap();
+        let mut audio = Audio::write();
+        let mut audio = audio.write().unwrap();
 
-        // audio.register(
-        //     "footstep/grass/1",
-        //     include_bytes!("../../../assets/sounds/footstep-grass-1.ogg"),
-        // );
-        // audio.register(
-        //     "footstep/grass/2",
-        //     include_bytes!("../../../assets/sounds/footstep-grass-2.ogg"),
-        // );
-        // audio.register(
-        //     "footstep/grass/3",
-        //     include_bytes!("../../../assets/sounds/footstep-grass-3.ogg"),
-        // );
-        // audio.register("sword", include_bytes!("../../../assets/sounds/sword.ogg"));
-        // audio.register("axe", include_bytes!("../../../assets/sounds/axe.ogg"));
-        // audio.register(
-        //     "collect",
-        //     include_bytes!("../../../assets/sounds/collect.ogg"),
-        // );
-        // audio.register(
-        //     "button/select",
-        //     include_bytes!("../../../assets/sounds/button-select.ogg"),
-        // );
-        // audio.register(
-        //     "button/click",
-        //     include_bytes!("../../../assets/sounds/button-click.ogg"),
-        // );
-
-        // audio.register("forest", include_bytes!("../../../assets/music/forest.ogg"));
-        // audio.register("battle", include_bytes!("../../../assets/music/battle.ogg"));
+        audio.register(
+            "sound/spell",
+            include_bytes!("../../../assets/sounds/spell.ogg"),
+        );
+        audio.register(
+            "music/ambient",
+            include_bytes!("../../../assets/music/ambient.ogg"),
+        );
     }
 
     fn setup_gui_inputs(context: &mut GameContext) {
