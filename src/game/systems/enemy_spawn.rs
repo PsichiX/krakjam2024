@@ -11,7 +11,7 @@ use micro_games_kit::{
     animation::{FrameAnimation, NamedAnimation},
     third_party::{
         rand::{thread_rng, Rng},
-        vek::{Rgba, Transform, Vec2},
+        vek::{Transform, Vec2},
     },
 };
 
@@ -75,6 +75,7 @@ impl EnemySpawn {
                 Enemy {
                     acceleration: 50.0,
                     speed_limit: 200.0,
+                    jump_phase: thread_rng().gen_range(0.0..1.0),
                 },
                 Animation {
                     animation: Some(NamedAnimation {
@@ -95,9 +96,8 @@ impl EnemySpawn {
                 },
                 SpriteData {
                     texture: "enemy/0".into(),
-                    shader: "image".into(),
                     pivot: [0.25, 0.5].into(),
-                    tint: Rgba::white(),
+                    ..Default::default()
                 },
                 effect,
                 Health { value: 100.0 },
