@@ -3,16 +3,15 @@ use micro_games_kit::third_party::vek::{Transform, Vec2};
 
 use crate::game::{
     components::{collidable::Collidable, projectile::Projectile, spell::Spell},
-    utils::{
-        events::{Event, Events},
-        magic::spell_tag::{SpellTagDirection, SpellTagSpeed, SpellTagTrajectory},
-    },
+    utils::magic::spell_tag::{SpellTagDirection, SpellTagSpeed, SpellTagTrajectory},
 };
 
 pub struct SpellController;
 
 impl SpellController {
-    pub fn run(world: &World) {
+    pub fn run(world: &mut World) {
+        let mut to_despawn = Vec::new();
+
         // Velocity calculation
         for (entity, (projectile, spell)) in world.query::<(&mut Projectile, &Spell)>().iter() {
             let time_divider = match spell.speed {
@@ -56,7 +55,7 @@ impl SpellController {
             }
 
             if projectile.alive_time > spell.duration.time() {
-                Events::write(Event::KillEntity { entity });
+                to_despawn.push(entity);
             }
         }
 
@@ -70,6 +69,10 @@ impl SpellController {
             if let Some(space_object) = collidable.space_object.as_mut() {
                 space_object.collider_radius = spell.size.radius();
             }
+        }
+
+        for entity in to_despawn {
+            let _ = world.despawn(entity);
         }
     }
 }

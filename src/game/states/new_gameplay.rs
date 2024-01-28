@@ -24,7 +24,7 @@ use crate::game::{
         player_controller::PlayerController, projectile_controller::ProjectileController,
         sprite_renderer::SpriteRenderer,
     },
-    utils::{events::Events, magic::database::WordToSpellTagDatabase, space::SpaceObject},
+    utils::{magic::database::WordToSpellTagDatabase, space::SpaceObject},
 };
 use hecs::World;
 use micro_games_kit::{
@@ -246,8 +246,6 @@ impl GameState for NewGameplay {
     }
 
     fn fixed_update(&mut self, mut context: GameContext, delta_time: f32) {
-        Events::maintain(delta_time);
-
         if self.exit.get().is_down() {
             *context.state_change = GameStateChange::Pop;
         }
@@ -264,7 +262,7 @@ impl GameState for NewGameplay {
         ProjectileController::run(&self.world, delta_time);
         CollisionDetector::run(&self.world);
         EffectsReactions::run(&mut self.world);
-        SpellController::run(&self.world);
+        SpellController::run(&mut self.world);
         DamageDealer::run(&self.world);
         self.particle_manager.process(&mut self.world, delta_time);
         SlimeColor::run(&self.world);
