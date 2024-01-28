@@ -1,3 +1,5 @@
+use std::ops::DerefMut;
+
 use crate::game::{
     components::{
         effect::Effect, enemy::Enemy, immobility::Immobility, player::Player, speed::Speed,
@@ -41,11 +43,14 @@ impl EnemyController {
                 )>()
                 .iter()
             {
-                let direction = (player_position - transform.position.xy())
+                let to_player_direction = (player_position - transform.position.xy())
                     .try_normalized()
                     .unwrap_or_default();
 
-                let mut velocity = direction * speed.value * delta_time;
+                enemy.direction += to_player_direction.rotated_z(enemy.direction_rotation);
+                enemy.direction.normalize();
+
+                let mut velocity = enemy.direction * speed.value * delta_time;
 
                 if let Some(immobility) = immobility {
                     if immobility.time_left > 0.0 {
@@ -65,12 +70,17 @@ impl EnemyController {
                 enemy.shoot_cooldown -= delta_time;
 
                 if enemy.shoot_cooldown <= 0.0 {
+                    enemy.direction_rotation =
+                        rng.gen_range(-std::f32::consts::FRAC_PI_2..=std::f32::consts::FRAC_PI_2);
+
+                    speed.value = 0.0;
+
                     enemy.shoot_cooldown = rng.gen_range(5.0..=15.0);
 
                     cast_spells.push((
                         entity,
                         PlayerCastAction {
-                            direction,
+                            direction: to_player_direction,
                             position: transform.position.into(),
                             spell: Spell {
                                 direction: SpellTagDirection::Forward,
