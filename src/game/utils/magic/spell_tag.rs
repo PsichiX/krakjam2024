@@ -12,11 +12,12 @@ pub enum SpellTag {
     Direction(SpellTagDirection),
     Trajectory(SpellTagTrajectory),
     Duration(SpellTagDuration),
+    Damage(SpellTagDamage),
 }
 
 impl SpellTag {
     pub fn random() -> Self {
-        match thread_rng().gen_range(0..6) {
+        match thread_rng().gen_range(0..7) {
             0 => Self::Size(SpellTagSize::random()),
             1 => Self::Speed(SpellTagSpeed::random()),
             2 => Self::Effect(SpellTagEffect::random()),
@@ -24,6 +25,7 @@ impl SpellTag {
             4 => Self::Direction(SpellTagDirection::random()),
             5 => Self::Trajectory(SpellTagTrajectory::random()),
             6 => Self::Duration(SpellTagDuration::random()),
+            7 => Self::Damage(SpellTagDamage::random()),
             _ => unreachable!(),
         }
     }
@@ -73,6 +75,13 @@ impl SpellTag {
     pub fn as_duration(&self) -> Option<SpellTagDuration> {
         match self {
             Self::Duration(result) => Some(*result),
+            _ => None,
+        }
+    }
+
+    pub fn as_damage(&self) -> Option<SpellTagDamage> {
+        match self {
+            Self::Damage(result) => Some(*result),
             _ => None,
         }
     }
@@ -258,6 +267,33 @@ impl SpellTagDirection {
             Self::Forward => 1.0,
             Self::Backward => -1.0,
             Self::Down => 0.0,
+        }
+    }
+}
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum SpellTagDamage {
+    #[default]
+    Low,
+    Medium,
+    High,
+}
+
+impl SpellTagDamage {
+    pub fn random() -> Self {
+        match thread_rng().gen_range(0..3) {
+            0 => Self::Low,
+            1 => Self::Medium,
+            2 => Self::High,
+            _ => unreachable!(),
+        }
+    }
+
+    pub fn damage(&self) -> f32 {
+        match self {
+            Self::Low => 1.0,
+            Self::Medium => 5.0,
+            Self::High => 20.0,
         }
     }
 }
