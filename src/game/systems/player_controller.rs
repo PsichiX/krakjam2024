@@ -1,13 +1,13 @@
 use crate::game::{
     components::{
         animation::Animation, effect::Effect, follow_player::FollowPlayer,
-        ignore_player::IgnorePlayer, immobility::Immobility, particle::Particle, player::Player,
+        ignore_entity::IgnoreEntity, immobility::Immobility, particle::Particle, player::Player,
         spell::Spell,
     },
     states::new_gameplay::NewGameplay,
     utils::magic::{database::WordToSpellTagDatabase, spell_tag::SpellTagEffect},
 };
-use hecs::World;
+use hecs::{Entity, World};
 use micro_games_kit::{
     animation::{FrameAnimation, NamedAnimation},
     context::GameContext,
@@ -96,11 +96,11 @@ impl PlayerController {
             }
         }
 
-        let mut cast_action: Option<PlayerCastAction> = None;
+        let mut cast_action: Option<(Entity, PlayerCastAction)> = None;
         let mut particles = Vec::<Particle>::new();
         let mut player_moved_vector: Option<Vec2<f32>> = None;
 
-        for (_, (player, transform, animation, immobility, effect)) in world
+        for (entity, (player, transform, animation, immobility, effect)) in world
             .query::<(
                 &mut Player,
                 &mut Transform<f32, f32, f32>,
@@ -146,23 +146,31 @@ impl PlayerController {
                 if input.attack_action.get().is_pressed() {
                     let basic_spell = Spell::basic();
 
-                    cast_action = Some(PlayerCastAction {
-                        position: (transform.position
-                            + movement.normalized() * basic_spell.direction.multiplier() * 15.0)
-                            .into(),
-                        direction: movement.normalized(),
-                        spell: basic_spell,
-                    });
+                    cast_action = Some((
+                        entity,
+                        PlayerCastAction {
+                            position: (transform.position
+                                + movement.normalized()
+                                    * basic_spell.direction.multiplier()
+                                    * 15.0)
+                                .into(),
+                            direction: movement.normalized(),
+                            spell: basic_spell,
+                        },
+                    ));
                 }
 
                 if let Some(spell) = cast_spell.as_ref() {
-                    cast_action = Some(PlayerCastAction {
-                        position: (transform.position
-                            + movement.normalized() * spell.direction.multiplier() * 15.0)
-                            .into(),
-                        direction: movement.normalized(),
-                        spell: spell.clone(),
-                    });
+                    cast_action = Some((
+                        entity,
+                        PlayerCastAction {
+                            position: (transform.position
+                                + movement.normalized() * spell.direction.multiplier() * 15.0)
+                                .into(),
+                            direction: movement.normalized(),
+                            spell: spell.clone(),
+                        },
+                    ));
                 }
             }
 
@@ -198,10 +206,10 @@ impl PlayerController {
         }
 
         if let Some(cast) = cast_action {
-            NewGameplay::cast_spell(world, cast);
+            NewGameplay::cast_spell(world, cast.1, cast.0);
         }
 
-        for (_, (ignore_player,)) in world.query::<(&mut IgnorePlayer,)>().iter() {
+        for (_, (ignore_player,)) in world.query::<(&mut IgnoreEntity,)>().iter() {
             ignore_player.ignore_time = (ignore_player.ignore_time - delta_time).max(0.0);
         }
     }

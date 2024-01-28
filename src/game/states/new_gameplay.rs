@@ -1,7 +1,7 @@
 use crate::game::{
     components::{
         animation::Animation, collidable::Collidable, damage::Damage, effect::Effect,
-        health::Health, ignore_player::IgnorePlayer, immobility::Immobility,
+        health::Health, ignore_entity::IgnoreEntity, immobility::Immobility,
         particle_generator::ParticleGenerator, sprite_data::SpriteData,
     },
     systems::{
@@ -26,7 +26,7 @@ use crate::game::{
     },
     utils::{magic::database::WordToSpellTagDatabase, space::SpaceObject},
 };
-use hecs::World;
+use hecs::{Entity, World};
 use micro_games_kit::{
     context::GameContext,
     game::{GameState, GameStateChange},
@@ -275,9 +275,9 @@ impl GameState for NewGameplay {
             delta_time,
             &self.word_to_spell_tag_database,
         );
-        EnemyController::run(&self.world, delta_time);
+        EnemyController::run(&mut self.world, delta_time);
         AnimationController::run(&self.world, delta_time);
-        ProjectileController::run(&self.world, delta_time);
+        ProjectileController::run(&mut self.world, delta_time);
         CollisionDetector::run(&self.world);
         EffectsReactions::run(&mut self.world);
         SpellController::run(&mut self.world);
@@ -368,15 +368,15 @@ impl GameState for NewGameplay {
 }
 
 impl NewGameplay {
-    pub fn cast_spell(world: &mut World, cast: PlayerCastAction) {
+    pub fn cast_spell(world: &mut World, cast: PlayerCastAction, caster: Entity) {
         println!("=== CAST SPELL: {:#?}", cast.spell);
         let mut transform = Transform::<f32, f32, f32>::default();
         transform.position = cast.position.into();
 
         match cast.spell.shape {
-            SpellTagShape::Point => Self::cast_point_spell(world, &cast, &transform),
-            SpellTagShape::Triangle => Self::cast_triangle_spell(world, &cast, &transform),
-            SpellTagShape::Wall => Self::cast_wall_spell(world, &cast, &transform),
+            SpellTagShape::Point => Self::cast_point_spell(world, &cast, &transform, caster),
+            SpellTagShape::Triangle => Self::cast_triangle_spell(world, &cast, &transform, caster),
+            SpellTagShape::Wall => Self::cast_wall_spell(world, &cast, &transform, caster),
         }
     }
 
@@ -384,6 +384,7 @@ impl NewGameplay {
         world: &mut World,
         cast: &PlayerCastAction,
         transform: &Transform<f32, f32, f32>,
+        caster: Entity,
     ) {
         let perpendicular_direction = Vec2::new(-cast.direction.y, cast.direction.x);
         let count = 5;
@@ -394,7 +395,7 @@ impl NewGameplay {
             let mut new_transform = transform.clone();
             new_transform.position =
                 (start + perpendicular_direction * cast.spell.size.radius() * i as f32).into();
-            Self::cast_point_spell(world, cast, &new_transform);
+            Self::cast_point_spell(world, cast, &new_transform, caster);
         }
     }
 
@@ -402,6 +403,7 @@ impl NewGameplay {
         world: &mut World,
         cast: &PlayerCastAction,
         transform: &Transform<f32, f32, f32>,
+        caster: Entity,
     ) {
         let angle = cast.direction.y.atan2(cast.direction.x);
         let left = angle - std::f32::consts::FRAC_PI_3 + std::f32::consts::FRAC_PI_2;
@@ -417,7 +419,7 @@ impl NewGameplay {
             let mut new_transform = transform.clone();
             new_transform.position =
                 (start + left_direction * cast.spell.size.radius() * i as f32).into();
-            Self::cast_point_spell(world, cast, &new_transform);
+            Self::cast_point_spell(world, cast, &new_transform, caster);
 
             if i == 0 {
                 continue;
@@ -426,7 +428,7 @@ impl NewGameplay {
             let mut new_transform = transform.clone();
             new_transform.position =
                 (start - right_direction * cast.spell.size.radius() * i as f32).into();
-            Self::cast_point_spell(world, cast, &new_transform);
+            Self::cast_point_spell(world, cast, &new_transform, caster);
         }
 
         for i in 0..(count + 1) {
@@ -435,7 +437,7 @@ impl NewGameplay {
                 + left_direction * cast.spell.size.radius() * count as f32)
                 + end_direction * cast.spell.size.radius() * i as f32)
                 .into();
-            Self::cast_point_spell(world, cast, &new_transform);
+            Self::cast_point_spell(world, cast, &new_transform, caster);
         }
     }
 
@@ -443,6 +445,7 @@ impl NewGameplay {
         world: &mut World,
         cast: &PlayerCastAction,
         transform: &Transform<f32, f32, f32>,
+        caster: Entity,
     ) {
         world.spawn((
             Animation { animation: None },
@@ -455,6 +458,7 @@ impl NewGameplay {
                     SpellTagSpeed::Slow => 100.0,
                 },
                 cast.direction,
+                cast.spell.duration.time(),
             ),
             Collidable {
                 space_object: Some(SpaceObject {
@@ -481,7 +485,10 @@ impl NewGameplay {
                 batch_size: 16,
             },
             Damage { value: 1.0 },
-            IgnorePlayer { ignore_time: 0.5 },
+            IgnoreEntity {
+                ignore_time: 0.5,
+                ignored_entity: caster,
+            },
             cast.spell.clone(),
         ));
     }
