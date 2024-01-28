@@ -15,7 +15,7 @@ use micro_games_kit::{
         spitfire_input::{
             InputActionRef, InputAxisRef, InputContext, InputMapping, VirtualAction, VirtualAxis,
         },
-        vek::{Clamp, Transform, Vec2},
+        vek::{Transform, Vec2},
         windowing::event::MouseButton,
     },
 };
@@ -121,7 +121,7 @@ impl PlayerController {
                 transform.scale.x = if movement.x > 0.0 { -1.0 } else { 1.0 };
 
                 if movement.magnitude() > 0.5 {
-                    player_moved_vector = Some(movement * delta_time * 150.0);
+                    player_moved_vector = Some(movement * delta_time * 200.0);
 
                     if immobility.time_left > 0.0 {
                         player_moved_vector = Some(player_moved_vector.unwrap() * 0.5);

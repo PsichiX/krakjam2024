@@ -1,17 +1,13 @@
-use crate::game::ui::{make_theme, text_button::text_button};
+use crate::game::ui::make_theme;
 use micro_games_kit::{
     context::GameContext,
     game::{GameState, GameStateChange},
     third_party::{
         raui_immediate::apply_shared_props,
-        raui_immediate_widgets::{
-            core::{
-                containers::{horizontal_box, nav_vertical_box},
-                image_box, text_box, Color, FlexBoxItemLayout, ImageBoxAspectRatio, ImageBoxImage,
-                ImageBoxMaterial, ImageBoxProps, TextBoxFont, TextBoxHorizontalAlign, TextBoxProps,
-                TextBoxVerticalAlign, Transform, Vec2,
-            },
-            material::{text_paper, TextPaperProps},
+        raui_immediate_widgets::core::{
+            containers::nav_vertical_box, image_box, text_box, Color, ImageBoxAspectRatio,
+            ImageBoxImage, ImageBoxMaterial, ImageBoxProps, TextBoxFont, TextBoxHorizontalAlign,
+            TextBoxProps, TextBoxVerticalAlign, Transform, Vec2,
         },
         spitfire_input::{InputActionRef, InputMapping, VirtualAction},
         windowing::event::MouseButton,
@@ -63,7 +59,7 @@ impl GameState for GameEnd {
         context.input.push_mapping(mapping);
     }
 
-    fn fixed_update(&mut self, context: GameContext, delta_time: f32) {
+    fn fixed_update(&mut self, context: GameContext, _delta_time: f32) {
         if let Some(action) = self.restart.as_ref() {
             if action.get().is_pressed() {
                 *context.state_change = GameStateChange::Swap(Box::<NewGameplay>::default());
