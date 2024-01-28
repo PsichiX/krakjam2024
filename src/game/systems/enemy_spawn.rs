@@ -18,7 +18,7 @@ use micro_games_kit::{
     animation::{FrameAnimation, NamedAnimation},
     third_party::{
         rand::{thread_rng, Rng},
-        vek::{Rgba, Transform, Vec2},
+        vek::{Transform, Vec2},
     },
 };
 
@@ -78,12 +78,17 @@ impl EnemySpawn {
                 _ => unreachable!(),
             };
 
+            let kind = if thread_rng().gen_ratio(1, 3) {
+                "truck"
+            } else {
+                "slime"
+            };
             let _ = world.spawn((
                 Enemy::default(),
                 Animation {
                     animation: Some(NamedAnimation {
                         animation: FrameAnimation::new(0..1).fps(10.0).looping().playing(),
-                        id: "enemy".to_owned(),
+                        id: kind.to_owned(),
                     }),
                 },
                 Transform::<f32, f32, f32> {
@@ -98,10 +103,8 @@ impl EnemySpawn {
                     }),
                 },
                 SpriteData {
-                    texture: "enemy/0".into(),
-                    shader: "image".into(),
-                    pivot: [0.25, 0.5].into(),
-                    tint: Rgba::white(),
+                    texture: format!("{}/0", kind).into(),
+                    ..Default::default()
                 },
                 effect,
                 Health {

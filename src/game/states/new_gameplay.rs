@@ -13,10 +13,10 @@ use crate::game::{
     systems::{
         animation_controller::AnimationController, collision_detector::CollisionDetector,
         damage_dealer::DamageDealer, death::Death, effects_reactions::EffectsReactions,
-        enemy_controller::EnemyController, enemy_spawn::EnemySpawn,
-        immobility_controller::ImmobilityController, particle_manager::ParticleManager,
-        player_controller::PlayerCastAction, slime_color::SlimeColor,
-        spell_controller::SpellController,
+        enemy_controller::EnemyController, enemy_jump_animation::EnemyJumpAnimation,
+        enemy_spawn::EnemySpawn, immobility_controller::ImmobilityController,
+        particle_manager::ParticleManager, player_controller::PlayerCastAction,
+        slime_color::SlimeColor, spell_controller::SpellController,
     },
     ui::{health_bar::health_bar, world_to_screen_content_layout},
     utils::magic::spell_tag::{
@@ -49,7 +49,7 @@ use micro_games_kit::{
         spitfire_glow::{graphics::CameraScaling, renderer::GlowTextureFiltering},
         spitfire_input::{InputActionRef, InputConsume, InputMapping, VirtualAction},
         typid::ID,
-        vek::{Rgba, Transform, Vec2},
+        vek::{Transform, Vec2},
         windowing::event::VirtualKeyCode,
     },
 };
@@ -256,9 +256,7 @@ impl GameState for NewGameplay {
             },
             SpriteData {
                 texture: "player/idle/0".into(),
-                shader: "image".into(),
-                pivot: 0.5.into(),
-                tint: Rgba::white(),
+                ..Default::default()
             },
             Immobility { time_left: 0.0 },
         ));
@@ -295,6 +293,7 @@ impl GameState for NewGameplay {
         DamageDealer::run(&self.world);
         self.particle_manager.process(&mut self.world, delta_time);
         SlimeColor::run(&self.world);
+        EnemyJumpAnimation::run(&self.world, delta_time);
         ImmobilityController::run(&self.world, delta_time);
 
         // always keep death last in the frame to run!

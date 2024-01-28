@@ -19,11 +19,14 @@ impl SpriteRenderer {
             .query::<(&Transform<f32, f32, f32>, &SpriteData)>()
             .iter()
         {
+            let mut transform = *transform;
+            transform.position += sprite_data.offset;
+            transform.scale *= sprite_data.scale;
             let sprite = Sprite::single(SpriteTexture::new(
                 "u_image".into(),
                 TextureRef::name(sprite_data.texture.clone()),
             ))
-            .transform(*transform)
+            .transform(transform)
             .shader(ShaderRef::name(sprite_data.shader.clone()))
             .pivot(sprite_data.pivot)
             .tint(sprite_data.tint);

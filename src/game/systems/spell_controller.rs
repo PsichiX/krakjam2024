@@ -1,11 +1,8 @@
 use hecs::World;
-use micro_games_kit::third_party::{
-    kira::track::effect,
-    vek::{Transform, Vec2},
-};
+use micro_games_kit::third_party::vek::{Transform, Vec2};
 
 use crate::game::{
-    components::{collidable::Collidable, effect::Effect, projectile::Projectile, spell::Spell},
+    components::{collidable::Collidable, projectile::Projectile, spell::Spell},
     utils::magic::spell_tag::{SpellTagDirection, SpellTagSpeed, SpellTagTrajectory},
 };
 
@@ -14,7 +11,7 @@ pub struct SpellController;
 impl SpellController {
     pub fn run(world: &mut World) {
         // Velocity calculation
-        for (entity, (projectile, spell)) in world.query::<(&mut Projectile, &Spell)>().iter() {
+        for (_, (projectile, spell)) in world.query::<(&mut Projectile, &Spell)>().iter() {
             let time_divider = match spell.speed {
                 SpellTagSpeed::Fast => 0.5,
                 SpellTagSpeed::Medium => 1.0,

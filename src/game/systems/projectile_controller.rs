@@ -1,9 +1,5 @@
 use crate::game::{
-    components::{
-        collidable::Collidable,
-        ignore_entity::IgnoreEntity,
-        projectile::{self, Projectile},
-    },
+    components::{collidable::Collidable, ignore_entity::IgnoreEntity, projectile::Projectile},
     utils::space::Space,
 };
 use hecs::{Entity, World};

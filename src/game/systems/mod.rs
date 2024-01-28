@@ -4,6 +4,7 @@ pub mod damage_dealer;
 pub mod death;
 pub mod effects_reactions;
 pub mod enemy_controller;
+pub mod enemy_jump_animation;
 pub mod enemy_spawn;
 pub mod immobility_controller;
 pub mod particle_manager;
