@@ -33,8 +33,9 @@ use micro_games_kit::{
     third_party::{
         raui_core::layout::CoordsMappingScaling,
         raui_immediate_widgets::core::{
-            containers::content_box, text_box, ContentBoxItemLayout, Rect, TextBoxFont,
-            TextBoxHorizontalAlign, TextBoxProps, TextBoxVerticalAlign,
+            containers::content_box, image_box, text_box, Color, ContentBoxItemLayout,
+            ImageBoxFrame, ImageBoxImage, ImageBoxImageScaling, ImageBoxMaterial, ImageBoxProps,
+            TextBoxFont, TextBoxHorizontalAlign, TextBoxProps, TextBoxVerticalAlign,
         },
         spitfire_draw::{
             sprite::{Sprite, SpriteTexture},
@@ -157,6 +158,8 @@ impl Default for NewGameplay {
                 // Sinus
                 .with("sinus", SpellTag::Trajectory(SpellTagTrajectory::Sinus))
                 .with("nice", SpellTag::Trajectory(SpellTagTrajectory::Sinus))
+                .with("shit", SpellTag::Trajectory(SpellTagTrajectory::Sinus))
+                .with("snake", SpellTag::Trajectory(SpellTagTrajectory::Sinus))
                 // Circle
                 .with("circle", SpellTag::Trajectory(SpellTagTrajectory::Circle))
                 .with("joke", SpellTag::Trajectory(SpellTagTrajectory::Circle))
@@ -307,11 +310,13 @@ impl GameState for NewGameplay {
     }
 
     fn draw_gui(&mut self, context: GameContext) {
+        use micro_games_kit::third_party::raui_immediate_widgets::core::{Rect, Vec2};
+
         let health_bar_rectangle = Rect {
             left: -50.0,
             right: 50.0,
-            top: -60.0,
-            bottom: -40.0,
+            top: -70.0,
+            bottom: -50.0,
         };
 
         {
@@ -339,27 +344,48 @@ impl GameState for NewGameplay {
                     bottom: 1.0,
                 },
                 margin: Rect {
-                    left: 50.0,
-                    right: 50.0,
-                    top: -100.0,
-                    bottom: 50.0,
+                    left: 100.0,
+                    right: 100.0,
+                    top: -150.0,
+                    bottom: 10.0,
                 },
-                align: micro_games_kit::third_party::raui_immediate_widgets::core::Vec2 {
-                    x: 0.5,
-                    y: 1.0,
-                },
+                align: Vec2 { x: 0.5, y: 1.0 },
                 ..Default::default()
             },
             || {
+                // image_box(ImageBoxProps::image("ui/panel"));
+                image_box(ImageBoxProps {
+                    material: ImageBoxMaterial::Image(ImageBoxImage {
+                        id: "ui/panel".to_owned(),
+                        scaling: ImageBoxImageScaling::Frame(ImageBoxFrame {
+                            source: 0.5.into(),
+                            destination: 70.0.into(),
+                            frame_only: false,
+                            frame_keep_aspect_ratio: false,
+                        }),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                });
+
                 text_box(TextBoxProps {
-                    text: format!("> {}", self.player_controller.spell_text),
+                    text: if self.player_controller.spell_text.is_empty() {
+                        "Type your spell...".to_owned()
+                    } else {
+                        self.player_controller.spell_text.to_uppercase()
+                    },
                     horizontal_align: TextBoxHorizontalAlign::Center,
                     vertical_align: TextBoxVerticalAlign::Middle,
                     font: TextBoxFont {
                         name: "roboto".to_owned(),
                         size: 48.0,
                     },
-                    color: Default::default(),
+                    color: Color {
+                        r: 0.9,
+                        g: 0.1,
+                        b: 0.1,
+                        a: 1.0,
+                    },
                     ..Default::default()
                 });
             },
