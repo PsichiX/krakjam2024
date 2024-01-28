@@ -28,7 +28,7 @@ impl EffectReaction {
         match self {
             Self::None => 0.0,
             Self::Steam => 0.0,
-            Self::Paralize => 5.0,
+            Self::Paralize => 3.0,
             Self::Explode => 0.0,
         }
     }
@@ -109,6 +109,18 @@ impl Effect {
         } else {
             Rgba::new(1.0, 1.0, 1.0, 1.0)
         }
+    }
+
+    pub fn to_effect_tag(&self) -> SpellTagEffect {
+        if self.electricity {
+            return SpellTagEffect::Electric;
+        } else if self.fire {
+            return SpellTagEffect::Fire;
+        } else if self.water {
+            return SpellTagEffect::Water;
+        }
+
+        return SpellTagEffect::None;
     }
 }
 

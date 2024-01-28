@@ -1,7 +1,8 @@
 use crate::game::{
     components::{
         animation::Animation, collidable::Collidable, damage::Damage, effect::Effect, enemy::Enemy,
-        health::Health, player::Player, speed::Speed, sprite_data::SpriteData,
+        health::Health, immobility::Immobility, player::Player, speed::Speed,
+        sprite_data::SpriteData,
     },
     utils::space::SpaceObject,
 };
@@ -102,6 +103,7 @@ impl EnemySpawn {
                 Health { value: 100.0 },
                 Damage { value: 1.0 },
                 Speed::new(40.0..=100.0),
+                Immobility { time_left: 0.0 },
             ));
         }
     }

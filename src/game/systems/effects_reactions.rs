@@ -6,6 +6,7 @@ use crate::game::{
         ignore_player::IgnorePlayer,
         immobility::Immobility,
         particle::Particle,
+        player::Player,
         speed::Speed,
     },
     utils::space::Space,
@@ -20,21 +21,18 @@ impl EffectsReactions {
         let space = Space::read();
         let space = space.read().unwrap();
         let mut entities_to_process = Vec::<(Entity, Entity)>::new();
+        let (player_entity, _) = world.query::<()>().with::<&Player>().iter().next().unwrap();
 
-        for (entity_a, (collidable, _, ignore_player)) in world
-            .query::<(&Collidable, &Effect, Option<&IgnorePlayer>)>()
-            .iter()
-        {
+        for (entity_a, (collidable, _)) in world.query::<(&Collidable, &Effect)>().iter() {
             if let Some(space_object) = collidable.space_object.as_ref() {
                 for object in space.collisions(space_object, true) {
                     if let Some(entity_b) = object.entity {
                         if entity_b != entity_a {
-                            if let Some(ignore_player) = ignore_player {
-                                if ignore_player.should_be_ignored(entity_a)
-                                    && ignore_player.should_be_ignored(entity_b)
-                                {
-                                    continue;
-                                }
+                            if (entity_a == player_entity || entity_b == player_entity)
+                                && (IgnorePlayer::should_be_ignored(&world, entity_a)
+                                    || IgnorePlayer::should_be_ignored(&world, entity_b))
+                            {
+                                continue;
                             }
 
                             entities_to_process.push((entity_a, entity_b));
@@ -59,18 +57,13 @@ impl EffectsReactions {
                 let mut view = query.view();
                 let [entity_a_query, entity_b_query] = view.get_mut_n([entity_a, entity_b]);
 
-                if let Some((
-                    effect_a,
-                    mut health_a,
-                    mut immobility_a,
-                    mut transform_a,
-                    mut speed_a,
-                )) = entity_a_query
+                if let Some((effect_a, mut health_a, immobility_a, mut transform_a, mut speed_a)) =
+                    entity_a_query
                 {
                     if let Some((
                         effect_b,
                         mut health_b,
-                        mut immobility_b,
+                        immobility_b,
                         mut transform_b,
                         mut speed_b,
                     )) = entity_b_query
@@ -85,11 +78,15 @@ impl EffectsReactions {
                         if let Some(health) = health_b.as_mut() {
                             health.value = (health.value - damage).max(0.0);
                         }
-                        if let Some(immobility) = immobility_a.as_mut() {
-                            immobility.time_left = immobile_time;
+                        if let Some(immobility) = immobility_a {
+                            if immobility.time_left <= 0.0 {
+                                immobility.time_left = immobile_time;
+                            }
                         }
-                        if let Some(immobility) = immobility_b.as_mut() {
-                            immobility.time_left = immobile_time;
+                        if let Some(immobility) = immobility_b {
+                            if immobility.time_left <= 0.0 {
+                                immobility.time_left = immobile_time;
+                            }
                         }
                         if let (Some(transform_a), Some(transform_b)) =
                             (transform_a.as_mut(), transform_b.as_mut())
@@ -119,12 +116,7 @@ impl EffectsReactions {
                         EffectReaction::None => {}
                         EffectReaction::Explode => {
                             world.spawn((Particle::new(
-                                match reaction {
-                                    EffectReaction::None => "particle/smoke".into(),
-                                    EffectReaction::Explode => "particle/explosion".into(),
-                                    EffectReaction::Steam => "particle/steam".into(),
-                                    EffectReaction::Paralize => "particle/paralized".into(),
-                                },
+                                "particle/explosion".into(),
                                 reaction_transform.position.into(),
                                 Vec2::<f32>::zero(),
                                 180.0f32.to_radians(),
@@ -135,12 +127,7 @@ impl EffectsReactions {
                         }
                         EffectReaction::Paralize => {
                             world.spawn((Particle::new(
-                                match reaction {
-                                    EffectReaction::None => "particle/smoke".into(),
-                                    EffectReaction::Explode => "particle/explosion".into(),
-                                    EffectReaction::Steam => "particle/steam".into(),
-                                    EffectReaction::Paralize => "particle/paralized".into(),
-                                },
+                                "particle/paralized".into(),
                                 reaction_transform.position.into(),
                                 Vec2::<f32>::zero(),
                                 180.0f32.to_radians(),
@@ -151,12 +138,7 @@ impl EffectsReactions {
                         }
                         EffectReaction::Steam => {
                             world.spawn((Particle::new(
-                                match reaction {
-                                    EffectReaction::None => "particle/smoke".into(),
-                                    EffectReaction::Explode => "particle/explosion".into(),
-                                    EffectReaction::Steam => "particle/steam".into(),
-                                    EffectReaction::Paralize => "particle/paralized".into(),
-                                },
+                                "particle/steam".into(),
                                 reaction_transform.position.into(),
                                 Vec2::<f32>::zero(),
                                 180.0f32.to_radians(),

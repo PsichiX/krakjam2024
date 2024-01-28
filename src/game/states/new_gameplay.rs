@@ -1,15 +1,16 @@
 use crate::game::{
     components::{
         animation::Animation, collidable::Collidable, damage::Damage, effect::Effect,
-        health::Health, ignore_player::IgnorePlayer, particle_generator::ParticleGenerator,
-        sprite_data::SpriteData,
+        health::Health, ignore_player::IgnorePlayer, immobility::Immobility,
+        particle_generator::ParticleGenerator, sprite_data::SpriteData,
     },
     systems::{
         animation_controller::AnimationController, collision_detector::CollisionDetector,
         damage_dealer::DamageDealer, death::Death, effects_reactions::EffectsReactions,
         enemy_controller::EnemyController, enemy_spawn::EnemySpawn,
-        particle_manager::ParticleManager, player_controller::PlayerCastAction,
-        slime_color::SlimeColor, spell_controller::SpellController,
+        immobility_controller::ImmobilityController, particle_manager::ParticleManager,
+        player_controller::PlayerCastAction, slime_color::SlimeColor,
+        spell_controller::SpellController,
     },
     ui::{health_bar::health_bar, world_to_screen_content_layout},
     utils::magic::spell_tag::{
@@ -205,7 +206,10 @@ impl GameState for NewGameplay {
         self.player_controller.init(context.input);
 
         self.world.spawn((
-            Player {},
+            Player {
+                current_effect_particle_accumulator: 0.0,
+                current_effect_particle_time: 1.0,
+            },
             Animation { animation: None },
             Transform::<f32, f32, f32>::default(),
             Collidable {
@@ -227,6 +231,7 @@ impl GameState for NewGameplay {
                 pivot: 0.5.into(),
                 tint: Rgba::white(),
             },
+            Immobility { time_left: 0.0 },
         ));
     }
 
@@ -263,6 +268,7 @@ impl GameState for NewGameplay {
         DamageDealer::run(&self.world);
         self.particle_manager.process(&mut self.world, delta_time);
         SlimeColor::run(&self.world);
+        ImmobilityController::run(&self.world, delta_time);
 
         // always keep death last in the frame to run!
         Death::run(&mut self.world);
@@ -456,10 +462,7 @@ impl NewGameplay {
                 batch_size: 16,
             },
             Damage { value: 1.0 },
-            IgnorePlayer {
-                ignore_time: 0.5,
-                player_entity: None,
-            },
+            IgnorePlayer { ignore_time: 0.5 },
             cast.spell.clone(),
         ));
     }

@@ -1,7 +1,11 @@
 use crate::game::{
-    components::{animation::Animation, ignore_player::IgnorePlayer, player::Player, spell::Spell},
+    components::{
+        animation::Animation, effect::Effect, follow_player::FollowPlayer,
+        ignore_player::IgnorePlayer, immobility::Immobility, particle::Particle, player::Player,
+        spell::Spell,
+    },
     states::new_gameplay::NewGameplay,
-    utils::magic::database::WordToSpellTagDatabase,
+    utils::magic::{database::WordToSpellTagDatabase, spell_tag::SpellTagEffect},
 };
 use hecs::{Entity, World};
 use micro_games_kit::{
@@ -94,9 +98,17 @@ impl PlayerController {
 
         let mut cast_action: Option<PlayerCastAction> = None;
         let mut player_entity: Option<Entity> = None;
+        let mut particles = Vec::<Particle>::new();
+        let mut player_moved_vector: Option<Vec2<f32>> = None;
 
-        for (entity, (_, transform, animation)) in world
-            .query::<(&Player, &mut Transform<f32, f32, f32>, &mut Animation)>()
+        for (entity, (player, transform, animation, immobility, effect)) in world
+            .query::<(
+                &mut Player,
+                &mut Transform<f32, f32, f32>,
+                &mut Animation,
+                &Immobility,
+                &Effect,
+            )>()
             .iter()
         {
             player_entity = Some(entity);
@@ -109,7 +121,13 @@ impl PlayerController {
                 transform.scale.x = if movement.x > 0.0 { -1.0 } else { 1.0 };
 
                 if movement.magnitude() > 0.5 {
-                    transform.position += movement * delta_time * 150.0;
+                    player_moved_vector = Some(movement * delta_time * 150.0);
+
+                    if immobility.time_left > 0.0 {
+                        player_moved_vector = Some(player_moved_vector.unwrap() * 0.5);
+                    }
+
+                    transform.position += player_moved_vector.unwrap();
 
                     if let Some(named_animation) = animation.animation.as_ref() {
                         if named_animation.id != self.run_animation.id {
@@ -151,7 +169,35 @@ impl PlayerController {
                 }
             }
 
+            player.current_effect_particle_accumulator += delta_time;
+
+            while player.current_effect_particle_accumulator > player.current_effect_particle_time
+                && effect.to_effect_tag() != SpellTagEffect::None
+            {
+                player.current_effect_particle_accumulator = 0.0;
+
+                particles.push(Particle::new(
+                    effect.to_effect_tag().texture().into(),
+                    transform.position.xy() + Vec2::<f32>::new(0.0, -50.0),
+                    Vec2::<f32>::zero(),
+                    20.0f32.to_radians(),
+                    10.0..=20.0,
+                    1.0..=2.0,
+                    0.4..=1.0,
+                ));
+            }
+
             context.graphics.main_camera.transform.position = transform.position;
+        }
+
+        for (_, (particle, _)) in world.query::<(&mut Particle, &FollowPlayer)>().iter() {
+            if let Some(v) = player_moved_vector {
+                particle.position += v;
+            }
+        }
+
+        for particle in particles {
+            world.spawn((particle, FollowPlayer));
         }
 
         if let Some(cast) = cast_action {
@@ -160,7 +206,6 @@ impl PlayerController {
 
         for (_, (ignore_player,)) in world.query::<(&mut IgnorePlayer,)>().iter() {
             ignore_player.ignore_time = (ignore_player.ignore_time - delta_time).max(0.0);
-            ignore_player.player_entity = player_entity;
         }
     }
 }
