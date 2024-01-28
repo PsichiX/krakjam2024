@@ -7,7 +7,7 @@ use crate::game::{
     states::new_gameplay::NewGameplay,
     utils::magic::{database::WordToSpellTagDatabase, spell_tag::SpellTagEffect},
 };
-use hecs::{Entity, World};
+use hecs::World;
 use micro_games_kit::{
     animation::{FrameAnimation, NamedAnimation},
     context::GameContext,
@@ -97,11 +97,10 @@ impl PlayerController {
         }
 
         let mut cast_action: Option<PlayerCastAction> = None;
-        let mut player_entity: Option<Entity> = None;
         let mut particles = Vec::<Particle>::new();
         let mut player_moved_vector: Option<Vec2<f32>> = None;
 
-        for (entity, (player, transform, animation, immobility, effect)) in world
+        for (_, (player, transform, animation, immobility, effect)) in world
             .query::<(
                 &mut Player,
                 &mut Transform<f32, f32, f32>,
@@ -111,8 +110,6 @@ impl PlayerController {
             )>()
             .iter()
         {
-            player_entity = Some(entity);
-
             if let Some(input) = self.input.as_ref() {
                 let mouse_pos = Vec2::new(input.mouse_x.get().0, input.mouse_y.get().0);
                 let diff = (mouse_pos - context.graphics.main_camera.screen_size / 2.0) / 200.0;
