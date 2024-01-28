@@ -328,6 +328,7 @@ impl Default for NewGameplay {
                 .with("ocean", SpellTag::Damage(SpellTagDamage::Medium))
                 .with("splash", SpellTag::Damage(SpellTagDamage::Medium))
                 .with("potion", SpellTag::Damage(SpellTagDamage::Medium))
+                .with("vodka", SpellTag::Damage(SpellTagDamage::Medium))
                 // Damage - High
                 .with("triforce", SpellTag::Damage(SpellTagDamage::High))
                 .with("inferno", SpellTag::Damage(SpellTagDamage::High))
