@@ -279,7 +279,7 @@ impl GameState for NewGameplay {
         );
         EnemyController::run(&mut self.world, delta_time);
         AnimationController::run(&self.world, delta_time);
-        ProjectileController::run(&self.world, delta_time);
+        ProjectileController::run(&mut self.world, delta_time);
         CollisionDetector::run(&self.world);
         EffectsReactions::run(&mut self.world);
         SpellController::run(&mut self.world);
@@ -459,6 +459,7 @@ impl NewGameplay {
                     SpellTagSpeed::Slow => 100.0,
                 },
                 cast.direction,
+                cast.spell.duration.time(),
             ),
             Collidable {
                 space_object: Some(SpaceObject {

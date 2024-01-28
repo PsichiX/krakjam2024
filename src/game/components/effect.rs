@@ -122,6 +122,10 @@ impl Effect {
 
         return SpellTagEffect::None;
     }
+
+    pub fn empty(&self) -> bool {
+        !self.electricity && !self.fire && !self.water
+    }
 }
 
 #[cfg(test)]
