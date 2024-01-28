@@ -2,6 +2,7 @@ use crate::game::{
     components::{
         collidable::Collidable,
         effect::{Effect, EffectReaction},
+        enemy::Enemy,
         health::Health,
         ignore_entity::IgnoreEntity,
         immobility::Immobility,
@@ -48,12 +49,19 @@ impl EffectsReactions {
                     Option<&mut Immobility>,
                     Option<&mut Transform<f32, f32, f32>>,
                     Option<&mut Speed>,
+                    Option<&mut Enemy>,
                 )>();
                 let mut view = query.view();
                 let [entity_a_query, entity_b_query] = view.get_mut_n([entity_a, entity_b]);
 
-                if let Some((effect_a, mut health_a, immobility_a, mut transform_a, mut speed_a)) =
-                    entity_a_query
+                if let Some((
+                    effect_a,
+                    mut health_a,
+                    immobility_a,
+                    mut transform_a,
+                    mut speed_a,
+                    mut enemy_a,
+                )) = entity_a_query
                 {
                     if let Some((
                         effect_b,
@@ -61,6 +69,7 @@ impl EffectsReactions {
                         immobility_b,
                         mut transform_b,
                         mut speed_b,
+                        mut enemy_b,
                     )) = entity_b_query
                     {
                         reaction = effect_a.react(effect_b);
@@ -95,12 +104,24 @@ impl EffectsReactions {
 
                             reaction_transform = transform_a.clone();
                         }
-                        if let Some(speed) = speed_a.as_mut() {
-                            speed.value = 0.0;
-                        }
-                        if let Some(speed) = speed_b.as_mut() {
-                            speed.value = 0.0;
-                        }
+                        // if let Some(speed) = speed_a.as_mut() {
+                        //     if let Some(enemy) = enemy_a.as_mut() {
+                        //         speed.value = 30.0;
+                        //         enemy.direction += enemy.direction;
+                        //     }
+                        //     else {
+                        //         speed.value = 0.0;
+                        //     }
+                        // }
+                        // if let Some(speed) = speed_b.as_mut() {
+                        //     if let Some(enemy) = enemy_b.as_mut() {
+                        //         speed.value = 30.0;
+                        //         enemy.direction += enemy.direction;
+                        //     }
+                        //     else {
+                        //         speed.value = 0.0;
+                        //     }
+                        // }
                     }
                 }
             }

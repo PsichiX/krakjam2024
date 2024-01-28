@@ -11,7 +11,6 @@ use crate::game::{
 };
 use hecs::{Entity, World};
 use micro_games_kit::third_party::{
-    kira::track::effect,
     rand::{thread_rng, Rng},
     vek::{Transform, Vec2},
 };
@@ -42,11 +41,14 @@ impl EnemyController {
                 )>()
                 .iter()
             {
-                let direction = (player_position - transform.position.xy())
+                let to_player_direction = (player_position - transform.position.xy())
                     .try_normalized()
                     .unwrap_or_default();
 
-                let mut velocity = direction * speed.value * delta_time;
+                enemy.direction += to_player_direction;
+                enemy.direction.normalize();
+
+                let mut velocity = enemy.direction * speed.value * delta_time;
 
                 if let Some(immobility) = immobility {
                     if immobility.time_left > 0.0 {
@@ -66,7 +68,7 @@ impl EnemyController {
                     cast_spells.push((
                         entity,
                         PlayerCastAction {
-                            direction,
+                            direction: to_player_direction,
                             position: transform.position.into(),
                             spell: Spell {
                                 direction: SpellTagDirection::Forward,

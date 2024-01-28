@@ -1,8 +1,14 @@
 use crate::game::{
     components::{
-        animation::Animation, collidable::Collidable, damage::Damage, effect::Effect,
-        health::Health, ignore_entity::IgnoreEntity, immobility::Immobility,
-        particle_generator::ParticleGenerator, sprite_data::SpriteData,
+        animation::Animation,
+        collidable::Collidable,
+        damage::{Damage, DamageLayer},
+        effect::Effect,
+        health::Health,
+        ignore_entity::IgnoreEntity,
+        immobility::Immobility,
+        particle_generator::ParticleGenerator,
+        sprite_data::SpriteData,
     },
     systems::{
         animation_controller::AnimationController, collision_detector::CollisionDetector,
@@ -239,7 +245,10 @@ impl GameState for NewGameplay {
                     collider_radius: 40.0,
                 }),
             },
-            Health { value: 100.0 },
+            Health {
+                value: 100.0,
+                layer: DamageLayer::None,
+            },
             Effect {
                 electricity: false,
                 fire: false,
@@ -485,7 +494,10 @@ impl NewGameplay {
                 texture: cast.spell.effect.texture().into(),
                 batch_size: 16,
             },
-            Damage { value: 1.0 },
+            Damage {
+                value: 1.0,
+                layer: DamageLayer::None,
+            },
             IgnoreEntity {
                 ignore_time: 0.5,
                 ignored_entity: caster,

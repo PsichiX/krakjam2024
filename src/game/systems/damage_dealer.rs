@@ -1,7 +1,6 @@
 use crate::game::{
     components::{
         collidable::Collidable, damage::Damage, health::Health, ignore_entity::IgnoreEntity,
-        player::Player,
     },
     utils::space::Space,
 };
@@ -13,7 +12,7 @@ impl DamageDealer {
     pub fn run(world: &World) {
         let space = Space::read();
         let space = space.read().unwrap();
-        let mut entities_to_damage = Vec::<(f32, Entity)>::new();
+        let mut entities_to_damage = Vec::<(Damage, Entity)>::new();
 
         for (entity_a, (collidable, damage)) in world.query::<(&Collidable, &Damage)>().iter() {
             if let Some(space_object) = collidable.space_object.as_ref() {
@@ -24,7 +23,7 @@ impl DamageDealer {
                                 continue;
                             }
 
-                            entities_to_damage.push((damage.value, entity_b));
+                            entities_to_damage.push((damage.clone(), entity_b));
                         }
                     }
                 }
@@ -37,7 +36,11 @@ impl DamageDealer {
             let [entity_query] = view.get_mut_n([entity]);
 
             if let Some(health) = entity_query {
-                health.value -= damage;
+                if !damage.layer.allow_damage(health.layer) {
+                    continue;
+                }
+
+                health.value -= damage.value;
             }
         }
     }
