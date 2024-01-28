@@ -67,6 +67,8 @@ pub struct NewGameplay {
     particle_manager: ParticleManager,
     word_to_spell_tag_database: WordToSpellTagDatabase,
     alive_time_seconds: f32,
+    tip_time_seconds: f32,
+    tip_content: String,
 }
 
 impl Default for NewGameplay {
@@ -340,6 +342,8 @@ impl Default for NewGameplay {
                 .with("moisture", SpellTag::Damage(SpellTagDamage::High))
                 .with("liquor", SpellTag::Damage(SpellTagDamage::High)),
             alive_time_seconds: 0.0,
+            tip_time_seconds: 0.0,
+            tip_content: Default::default(),
         }
     }
 }
@@ -407,6 +411,11 @@ impl GameState for NewGameplay {
         }
 
         self.alive_time_seconds += delta_time;
+        self.tip_time_seconds -= delta_time;
+        if self.tip_time_seconds <= 0.0 {
+            self.tip_time_seconds = 2.0;
+            self.tip_content = self.word_to_spell_tag_database.random_word().to_uppercase();
+        }
 
         self.enemy_spawn.run(&mut self.world, delta_time);
         self.player_controller.run(
@@ -510,6 +519,57 @@ impl GameState for NewGameplay {
                     } else {
                         self.player_controller.spell_text.to_uppercase()
                     },
+                    horizontal_align: TextBoxHorizontalAlign::Center,
+                    vertical_align: TextBoxVerticalAlign::Middle,
+                    font: TextBoxFont {
+                        name: "roboto".to_owned(),
+                        size: 48.0,
+                    },
+                    color: Color {
+                        r: 0.9,
+                        g: 0.1,
+                        b: 0.1,
+                        a: 1.0,
+                    },
+                    ..Default::default()
+                });
+            },
+        );
+
+        content_box(
+            ContentBoxItemLayout {
+                anchors: Rect {
+                    left: 0.0,
+                    right: 1.0,
+                    top: 1.0,
+                    bottom: 1.0,
+                },
+                margin: Rect {
+                    left: 200.0,
+                    right: 200.0,
+                    top: 160.0,
+                    bottom: -220.0,
+                },
+                align: Vec2 { x: 0.5, y: 1.0 },
+                ..Default::default()
+            },
+            || {
+                image_box(ImageBoxProps {
+                    material: ImageBoxMaterial::Image(ImageBoxImage {
+                        id: "ui/panel".to_owned(),
+                        scaling: ImageBoxImageScaling::Frame(ImageBoxFrame {
+                            source: 0.5.into(),
+                            destination: 70.0.into(),
+                            frame_only: false,
+                            frame_keep_aspect_ratio: false,
+                        }),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                });
+
+                text_box(TextBoxProps {
+                    text: format!("Tip of this moment: {}", self.tip_content),
                     horizontal_align: TextBoxHorizontalAlign::Center,
                     vertical_align: TextBoxVerticalAlign::Middle,
                     font: TextBoxFont {

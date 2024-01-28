@@ -1,3 +1,5 @@
+use micro_games_kit::third_party::rand::{thread_rng, Rng};
+
 use super::spell_tag::SpellTag;
 use crate::{game::components::spell::Spell, hash_set};
 use std::collections::{HashMap, HashSet};
@@ -71,6 +73,12 @@ impl WordToSpellTagDatabase {
         } else {
             Some(Spell::basic())
         }
+    }
+
+    pub fn random_word(&self) -> String {
+        let count = self.records.len();
+        let index = thread_rng().gen_range(0..count);
+        self.records.keys().nth(index).cloned().unwrap_or_default()
     }
 }
 
