@@ -69,6 +69,8 @@ pub struct NewGameplay {
     particle_manager: ParticleManager,
     word_to_spell_tag_database: WordToSpellTagDatabase,
     alive_time_seconds: f32,
+    tip_time_seconds: f32,
+    tip_content: String,
 }
 
 impl Default for NewGameplay {
@@ -342,6 +344,8 @@ impl Default for NewGameplay {
                 .with("moisture", SpellTag::Damage(SpellTagDamage::High))
                 .with("liquor", SpellTag::Damage(SpellTagDamage::High)),
             alive_time_seconds: 0.0,
+            tip_time_seconds: 0.0,
+            tip_content: Default::default(),
         }
     }
 }
@@ -409,6 +413,11 @@ impl GameState for NewGameplay {
         }
 
         self.alive_time_seconds += delta_time;
+        self.tip_time_seconds -= delta_time;
+        if self.tip_time_seconds <= 0.0 {
+            self.tip_time_seconds = 2.0;
+            self.tip_content = self.word_to_spell_tag_database.random_word().to_uppercase();
+        }
 
         self.enemy_spawn.run(&mut self.world, delta_time);
         self.player_controller.run(
@@ -533,6 +542,64 @@ impl GameState for NewGameplay {
         content_box(
             ContentBoxItemLayout {
                 anchors: Rect {
+                    left: 0.0,
+                    right: 1.0,
+                    top: 1.0,
+                    bottom: 1.0,
+                },
+                margin: Rect {
+                    left: 300.0,
+                    right: 300.0,
+                    top: -200.0,
+                    bottom: 160.0,
+                },
+                align: Vec2 { x: 0.5, y: 1.0 },
+                ..Default::default()
+            },
+            || {
+                // image_box(ImageBoxProps {
+                //     material: ImageBoxMaterial::Image(ImageBoxImage {
+                //         id: "ui/panel".to_owned(),
+                //         scaling: ImageBoxImageScaling::Frame(ImageBoxFrame {
+                //             source: 0.5.into(),
+                //             destination: 30.0.into(),
+                //             frame_only: false,
+                //             frame_keep_aspect_ratio: false,
+                //         }),
+                //         ..Default::default()
+                //     }),
+                //     ..Default::default()
+                // });
+
+                image_box(ImageBoxProps::colored(Color {
+                    r: 0.0,
+                    g: 0.0,
+                    b: 0.0,
+                    a: 0.5,
+                }));
+
+                text_box(TextBoxProps {
+                    text: format!("Tip word: {}", self.tip_content),
+                    horizontal_align: TextBoxHorizontalAlign::Center,
+                    vertical_align: TextBoxVerticalAlign::Middle,
+                    font: TextBoxFont {
+                        name: "roboto".to_owned(),
+                        size: 32.0,
+                    },
+                    color: Color {
+                        r: 0.9,
+                        g: 0.9,
+                        b: 0.9,
+                        a: 1.0,
+                    },
+                    ..Default::default()
+                });
+            },
+        );
+
+        content_box(
+            ContentBoxItemLayout {
+                anchors: Rect {
                     left: 0.5,
                     right: 0.5,
                     top: 0.0,
@@ -553,7 +620,7 @@ impl GameState for NewGameplay {
                         id: "ui/panel".to_owned(),
                         scaling: ImageBoxImageScaling::Frame(ImageBoxFrame {
                             source: 0.5.into(),
-                            destination: 70.0.into(),
+                            destination: 50.0.into(),
                             frame_only: false,
                             frame_keep_aspect_ratio: false,
                         }),
