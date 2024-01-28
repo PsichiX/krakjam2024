@@ -5,7 +5,7 @@ pub mod effect;
 pub mod enemy;
 pub mod follow_player;
 pub mod health;
-pub mod ignore_player;
+pub mod ignore_entity;
 pub mod immobility;
 pub mod particle;
 pub mod particle_generator;

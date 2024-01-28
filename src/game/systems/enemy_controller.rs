@@ -1,11 +1,30 @@
-use crate::game::components::{enemy::Enemy, immobility::Immobility, player::Player, speed::Speed};
-use hecs::World;
-use micro_games_kit::third_party::vek::{Transform, Vec2};
+use crate::game::{
+    components::{
+        effect::Effect, enemy::Enemy, immobility::Immobility, player::Player, speed::Speed,
+        spell::Spell,
+    },
+    states::new_gameplay::NewGameplay,
+    utils::magic::spell_tag::{
+        SpellTagDirection, SpellTagDuration, SpellTagEffect, SpellTagShape, SpellTagSize,
+        SpellTagSpeed, SpellTagTrajectory,
+    },
+};
+use hecs::{Entity, World};
+use micro_games_kit::third_party::{
+    kira::track::effect,
+    rand::{thread_rng, Rng},
+    vek::{Transform, Vec2},
+};
+
+use super::player_controller::PlayerCastAction;
 
 pub struct EnemyController;
 
 impl EnemyController {
-    pub fn run(world: &World, delta_time: f32) {
+    pub fn run(world: &mut World, delta_time: f32) {
+        let mut rng = thread_rng();
+        let mut cast_spells = Vec::<(Entity, PlayerCastAction)>::new();
+
         if let Some(player_position) = world
             .query::<&Transform<f32, f32, f32>>()
             .with::<&Player>()
@@ -13,12 +32,13 @@ impl EnemyController {
             .next()
             .map(|(_, transform)| transform.position.xy())
         {
-            for (_, (enemy, speed, transform, immobility)) in world
+            for (entity, (enemy, speed, transform, immobility, effect)) in world
                 .query::<(
-                    &Enemy,
+                    &mut Enemy,
                     &mut Speed,
                     &mut Transform<f32, f32, f32>,
                     Option<&Immobility>,
+                    Option<&Effect>,
                 )>()
                 .iter()
             {
@@ -30,7 +50,6 @@ impl EnemyController {
 
                 if let Some(immobility) = immobility {
                     if immobility.time_left > 0.0 {
-                        println!("Enemy immobility: {}", immobility.time_left);
                         velocity = Vec2::<f32>::zero();
                     }
                 }
@@ -38,7 +57,46 @@ impl EnemyController {
                 transform.position += velocity;
                 speed.value =
                     (speed.value + enemy.acceleration * delta_time).min(enemy.speed_limit);
+
+                enemy.shoot_cooldown -= delta_time;
+
+                if enemy.shoot_cooldown <= 0.0 {
+                    enemy.shoot_cooldown = rng.gen_range(5.0..=15.0);
+
+                    cast_spells.push((
+                        entity,
+                        PlayerCastAction {
+                            direction,
+                            position: transform.position.into(),
+                            spell: Spell {
+                                direction: SpellTagDirection::Forward,
+                                duration: match effect {
+                                    None => SpellTagDuration::Instant,
+                                    Some(v) => {
+                                        if v.to_effect_tag() == SpellTagEffect::None {
+                                            SpellTagDuration::Instant
+                                        } else {
+                                            SpellTagDuration::Medium
+                                        }
+                                    }
+                                },
+                                effect: match effect {
+                                    None => SpellTagEffect::None,
+                                    Some(v) => v.to_effect_tag(),
+                                },
+                                shape: SpellTagShape::Point,
+                                size: SpellTagSize::Small,
+                                speed: SpellTagSpeed::Medium,
+                                trajectory: SpellTagTrajectory::Straight,
+                            },
+                        },
+                    ));
+                }
             }
+        }
+
+        for spell in cast_spells {
+            NewGameplay::cast_spell(world, spell.1, spell.0);
         }
     }
 }

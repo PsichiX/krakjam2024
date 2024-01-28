@@ -1,6 +1,6 @@
 use crate::game::{
     components::{
-        collidable::Collidable, damage::Damage, health::Health, ignore_player::IgnorePlayer,
+        collidable::Collidable, damage::Damage, health::Health, ignore_entity::IgnoreEntity,
         player::Player,
     },
     utils::space::Space,
@@ -14,17 +14,13 @@ impl DamageDealer {
         let space = Space::read();
         let space = space.read().unwrap();
         let mut entities_to_damage = Vec::<(f32, Entity)>::new();
-        let (player_entity, _) = world.query::<()>().with::<&Player>().iter().next().unwrap();
 
         for (entity_a, (collidable, damage)) in world.query::<(&Collidable, &Damage)>().iter() {
             if let Some(space_object) = collidable.space_object.as_ref() {
                 for object in space.collisions(space_object, true) {
                     if let Some(entity_b) = object.entity {
                         if entity_b != entity_a {
-                            if (entity_a == player_entity || entity_b == player_entity)
-                                && (IgnorePlayer::should_be_ignored(world, entity_a)
-                                    || IgnorePlayer::should_be_ignored(world, entity_b))
-                            {
+                            if IgnoreEntity::should_be_ignored(world, entity_a, entity_b) {
                                 continue;
                             }
 
