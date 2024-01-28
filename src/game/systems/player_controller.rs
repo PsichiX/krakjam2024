@@ -115,7 +115,8 @@ impl PlayerController {
             if let Some(input) = self.input.as_ref() {
                 let mouse_pos = Vec2::new(input.mouse_x.get().0, input.mouse_y.get().0);
                 let diff = (mouse_pos - context.graphics.main_camera.screen_size / 2.0) / 200.0;
-                let movement = diff.clamped(Vec2::new(-1.0, -1.0), Vec2::new(1.0, 1.0));
+                let length = diff.magnitude().min(1.0);
+                let movement = diff.try_normalized().unwrap_or_default() * length;
 
                 transform.scale.x = if movement.x > 0.0 { -1.0 } else { 1.0 };
 
