@@ -445,8 +445,8 @@ impl GameState for NewGameplay {
                 }),
             },
             Health {
-                value: 100.0,
-                limit: 100.0,
+                value: 150.0,
+                limit: 150.0,
                 layer: DamageLayer::None,
             },
             Effect {
