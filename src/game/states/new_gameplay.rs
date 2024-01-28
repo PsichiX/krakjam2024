@@ -545,41 +545,48 @@ impl GameState for NewGameplay {
                     bottom: 1.0,
                 },
                 margin: Rect {
-                    left: 200.0,
-                    right: 200.0,
-                    top: 160.0,
-                    bottom: -220.0,
+                    left: 300.0,
+                    right: 300.0,
+                    top: -200.0,
+                    bottom: 160.0,
                 },
                 align: Vec2 { x: 0.5, y: 1.0 },
                 ..Default::default()
             },
             || {
-                image_box(ImageBoxProps {
-                    material: ImageBoxMaterial::Image(ImageBoxImage {
-                        id: "ui/panel".to_owned(),
-                        scaling: ImageBoxImageScaling::Frame(ImageBoxFrame {
-                            source: 0.5.into(),
-                            destination: 70.0.into(),
-                            frame_only: false,
-                            frame_keep_aspect_ratio: false,
-                        }),
-                        ..Default::default()
-                    }),
-                    ..Default::default()
-                });
+                // image_box(ImageBoxProps {
+                //     material: ImageBoxMaterial::Image(ImageBoxImage {
+                //         id: "ui/panel".to_owned(),
+                //         scaling: ImageBoxImageScaling::Frame(ImageBoxFrame {
+                //             source: 0.5.into(),
+                //             destination: 30.0.into(),
+                //             frame_only: false,
+                //             frame_keep_aspect_ratio: false,
+                //         }),
+                //         ..Default::default()
+                //     }),
+                //     ..Default::default()
+                // });
+
+                image_box(ImageBoxProps::colored(Color {
+                    r: 0.0,
+                    g: 0.0,
+                    b: 0.0,
+                    a: 0.5,
+                }));
 
                 text_box(TextBoxProps {
-                    text: format!("Tip of this moment: {}", self.tip_content),
+                    text: format!("Tip word: {}", self.tip_content),
                     horizontal_align: TextBoxHorizontalAlign::Center,
                     vertical_align: TextBoxVerticalAlign::Middle,
                     font: TextBoxFont {
                         name: "roboto".to_owned(),
-                        size: 48.0,
+                        size: 32.0,
                     },
                     color: Color {
                         r: 0.9,
-                        g: 0.1,
-                        b: 0.1,
+                        g: 0.9,
+                        b: 0.9,
                         a: 1.0,
                     },
                     ..Default::default()
@@ -610,7 +617,7 @@ impl GameState for NewGameplay {
                         id: "ui/panel".to_owned(),
                         scaling: ImageBoxImageScaling::Frame(ImageBoxFrame {
                             source: 0.5.into(),
-                            destination: 70.0.into(),
+                            destination: 50.0.into(),
                             frame_only: false,
                             frame_keep_aspect_ratio: false,
                         }),
