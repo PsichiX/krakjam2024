@@ -53,6 +53,11 @@ impl EnemyController {
                     }
                 }
 
+                if velocity.x >= 0.0 {
+                    transform.scale.x = transform.scale.x.abs();
+                } else {
+                    transform.scale.x = -transform.scale.x.abs();
+                }
                 transform.position += velocity;
                 speed.value =
                     (speed.value + enemy.acceleration * delta_time).min(enemy.speed_limit);

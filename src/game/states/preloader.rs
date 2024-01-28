@@ -110,8 +110,16 @@ impl Preloader {
         load_texture(
             context.draw,
             context.graphics,
-            "enemy/0",
+            "slime/0",
             include_bytes!("../../../assets/images/enemy/slime.png"),
+            1,
+            1,
+        );
+        load_texture(
+            context.draw,
+            context.graphics,
+            "truck/0",
+            include_bytes!("../../../assets/images/enemy/truck.png"),
             1,
             1,
         );
@@ -204,30 +212,6 @@ impl Preloader {
             context.graphics,
             "ui/bar",
             include_bytes!("../../../assets/images/ui/bar.png"),
-            1,
-            1,
-        );
-        load_texture(
-            context.draw,
-            context.graphics,
-            "ui/button/idle",
-            include_bytes!("../../../assets/images/ui/button-idle.png"),
-            1,
-            1,
-        );
-        load_texture(
-            context.draw,
-            context.graphics,
-            "ui/button/select",
-            include_bytes!("../../../assets/images/ui/button-select.png"),
-            1,
-            1,
-        );
-        load_texture(
-            context.draw,
-            context.graphics,
-            "ui/button/trigger",
-            include_bytes!("../../../assets/images/ui/button-trigger.png"),
             1,
             1,
         );
