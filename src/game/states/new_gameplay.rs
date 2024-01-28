@@ -50,7 +50,6 @@ use micro_games_kit::{
         },
         spitfire_glow::{graphics::CameraScaling, renderer::GlowTextureFiltering},
         spitfire_input::{InputActionRef, InputConsume, InputMapping, VirtualAction},
-        typid::ID,
         vek::{Transform, Vec2},
         windowing::event::VirtualKeyCode,
     },
@@ -59,7 +58,6 @@ use micro_games_kit::{
 pub struct NewGameplay {
     map: [Sprite; 4],
     exit: InputActionRef,
-    exit_handle: Option<ID<InputMapping>>,
     // music_forest: StaticSoundHandle,
     // music_battle: StaticSoundHandle,
     world: World,
@@ -113,7 +111,6 @@ impl Default for NewGameplay {
                 .pivot((0.0, 0.0).into()),
             ],
             exit: Default::default(),
-            exit_handle: None,
             world: World::new(),
             player_controller: PlayerController::default(),
             enemy_spawn: EnemySpawn::new(1000.0, 3.0, 30),
@@ -357,12 +354,12 @@ impl GameState for NewGameplay {
         context.graphics.main_camera.scaling = CameraScaling::FitVertical(800.0);
         context.gui.coords_map_scaling = CoordsMappingScaling::FitVertical(1024.0);
 
-        self.exit_handle = Some(context.input.push_mapping(
-            InputMapping::default().consume(InputConsume::Hit).action(
+        context
+            .input
+            .push_mapping(InputMapping::default().consume(InputConsume::Hit).action(
                 VirtualAction::KeyButton(VirtualKeyCode::Escape),
                 self.exit.clone(),
-            ),
-        ));
+            ));
 
         self.player_controller.init(context.input);
 
@@ -399,10 +396,7 @@ impl GameState for NewGameplay {
     }
 
     fn exit(&mut self, context: GameContext) {
-        if let Some(id) = self.exit_handle {
-            context.input.remove_mapping(id);
-            self.exit_handle = None;
-        }
+        context.input.pop_mapping();
 
         // let _ = self.music_forest.stop(Default::default());
         // let _ = self.music_battle.stop(Default::default());

@@ -10,7 +10,7 @@ use micro_games_kit::{
             TextBoxProps, TextBoxVerticalAlign, Transform, Vec2,
         },
         spitfire_input::{InputActionRef, InputMapping, VirtualAction},
-        windowing::event::MouseButton,
+        windowing::event::{MouseButton, VirtualKeyCode},
     },
 };
 
@@ -33,14 +33,16 @@ impl ToString for GameEndReason {
 
 pub struct GameEnd {
     time: f32,
-    restart: Option<InputActionRef>,
+    restart: InputActionRef,
+    exit: InputActionRef,
 }
 
 impl GameEnd {
     pub fn new(time: f32) -> Self {
         Self {
             time,
-            restart: None,
+            restart: Default::default(),
+            exit: Default::default(),
         }
     }
 }
@@ -50,20 +52,29 @@ impl GameState for GameEnd {
         context.graphics.color = [0.2, 0.2, 0.2, 1.0];
         context.gui.coords_map_scaling = Default::default();
 
-        let action = InputActionRef::default();
-        self.restart = Some(action.clone());
-
-        let mapping =
-            InputMapping::default().action(VirtualAction::MouseButton(MouseButton::Left), action);
+        let mapping = InputMapping::default()
+            .action(
+                VirtualAction::MouseButton(MouseButton::Left),
+                self.restart.clone(),
+            )
+            .action(
+                VirtualAction::KeyButton(VirtualKeyCode::Escape),
+                self.exit.clone(),
+            );
 
         context.input.push_mapping(mapping);
     }
 
+    fn exit(&mut self, context: GameContext) {
+        context.input.pop_mapping();
+    }
+
     fn fixed_update(&mut self, context: GameContext, _delta_time: f32) {
-        if let Some(action) = self.restart.as_ref() {
-            if action.get().is_pressed() {
-                *context.state_change = GameStateChange::Swap(Box::<NewGameplay>::default());
-            }
+        if self.restart.get().is_pressed() {
+            *context.state_change = GameStateChange::Swap(Box::<NewGameplay>::default());
+        }
+        if self.exit.get().is_pressed() {
+            *context.state_change = GameStateChange::Pop;
         }
     }
 
