@@ -43,11 +43,37 @@ impl EffectReaction {
     }
 }
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Effect {
     pub fire: bool,
     pub water: bool,
     pub electricity: bool,
+    pub only_source: bool,
+    pub cooldown: f32,
+}
+
+impl Default for Effect {
+    fn default() -> Self {
+        Self {
+            fire: false,
+            water: false,
+            electricity: false,
+            only_source: false,
+            cooldown: 0.0,
+        }
+    }
+}
+
+impl Effect {
+    pub fn clear(&mut self) {
+        if self.only_source {
+            return;
+        }
+
+        self.fire = false;
+        self.electricity = false;
+        self.water = false;
+    }
 }
 
 impl From<SpellTagEffect> for Effect {
@@ -56,43 +82,49 @@ impl From<SpellTagEffect> for Effect {
             electricity: value == SpellTagEffect::Electric,
             fire: value == SpellTagEffect::Fire,
             water: value == SpellTagEffect::Water,
+            only_source: false,
+            cooldown: 0.0,
         };
     }
 }
 
 impl Effect {
-    pub fn react(&mut self, other: &mut Self) -> EffectReaction {
+    pub fn react(&mut self, other: &Self) -> EffectReaction {
+        if self.cooldown > 0.0 {
+            return EffectReaction::None;
+        }
+
+        self.cooldown = 1.0;
+
         let fire = self.fire || other.fire;
         let water = self.water || other.water;
         let electricity = self.electricity || other.electricity;
 
-        self.fire = fire;
-        self.water = water;
-        self.electricity = electricity;
+        if !self.only_source {
+            self.fire = fire;
+            self.water = water;
+            self.electricity = electricity;
+        }
 
-        other.fire = fire;
-        other.water = water;
-        other.electricity = electricity;
+        // if !other.only_source {
+        //     other.fire = fire;
+        //     other.water = water;
+        //     other.electricity = electricity;
+        // };
 
         if fire && water && electricity {
             EffectReaction::None
         } else if fire && water {
-            self.fire = false;
-            other.fire = false;
-            self.water = false;
-            other.water = false;
+            self.clear();
+            // other.clear();
             EffectReaction::Steam
         } else if water && electricity {
-            self.water = false;
-            other.water = false;
-            self.electricity = false;
-            other.electricity = false;
+            self.clear();
+            // other.clear();
             EffectReaction::Paralize
         } else if electricity && fire {
-            self.electricity = false;
-            other.electricity = false;
-            self.fire = false;
-            other.fire = false;
+            self.clear();
+            // other.clear();
             EffectReaction::Explode
         } else {
             EffectReaction::None

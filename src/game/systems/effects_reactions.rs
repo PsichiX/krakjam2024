@@ -17,7 +17,7 @@ use micro_games_kit::third_party::vek::{Transform, Vec2};
 pub struct EffectsReactions;
 
 impl EffectsReactions {
-    pub fn run(world: &mut World) {
+    pub fn run(world: &mut World, delta_time: f32) {
         let space = Space::read();
         let space = space.read().unwrap();
         let mut entities_to_process = Vec::<(Entity, Entity)>::new();
@@ -44,7 +44,9 @@ impl EffectsReactions {
 
         for (entity_a, entity_b) in entities_to_process {
             let mut reaction = EffectReaction::None;
+            let mut reaction_b = EffectReaction::None;
             let mut reaction_transform = Transform::default();
+            let mut reaction_transform_b = Transform::default();
 
             {
                 let mut query = world.query::<(
@@ -68,14 +70,14 @@ impl EffectsReactions {
                         mut speed_b,
                     )) = entity_b_query
                     {
+                        let original_effect_a = effect_a.clone();
+
                         reaction = effect_a.react(effect_b);
                         let damage = reaction.damage();
                         let immobile_time = reaction.immobile_time();
                         let push_distance = reaction.push_distance();
+
                         if let Some(health) = health_a.as_mut() {
-                            health.value = (health.value - damage).max(0.0);
-                        }
-                        if let Some(health) = health_b.as_mut() {
                             health.value = (health.value - damage).max(0.0);
                         }
                         if let Some(immobility) = immobility_a {
@@ -83,11 +85,27 @@ impl EffectsReactions {
                                 immobility.time_left = immobile_time;
                             }
                         }
+                        if let Some(speed) = speed_a.as_mut() {
+                            speed.value = 0.0;
+                        }
+
+                        reaction_b = effect_b.react(&original_effect_a);
+                        let damage = reaction.damage();
+                        let immobile_time = reaction.immobile_time();
+                        let push_distance = reaction.push_distance();
+
+                        if let Some(health) = health_b.as_mut() {
+                            health.value = (health.value - damage).max(0.0);
+                        }
                         if let Some(immobility) = immobility_b {
                             if immobility.time_left <= 0.0 {
                                 immobility.time_left = immobile_time;
                             }
                         }
+                        if let Some(speed) = speed_b.as_mut() {
+                            speed.value = 0.0;
+                        }
+
                         if let (Some(transform_a), Some(transform_b)) =
                             (transform_a.as_mut(), transform_b.as_mut())
                         {
@@ -99,12 +117,7 @@ impl EffectsReactions {
                             transform_b.position += direction_ab * push_distance;
 
                             reaction_transform = transform_a.clone();
-                        }
-                        if let Some(speed) = speed_a.as_mut() {
-                            speed.value = 0.0;
-                        }
-                        if let Some(speed) = speed_b.as_mut() {
-                            speed.value = 0.0;
+                            reaction_transform_b = transform_b.clone();
                         }
                     }
                 }
@@ -150,6 +163,51 @@ impl EffectsReactions {
                     };
                 }
             }
+
+            if reaction_b != EffectReaction::None {
+                for _ in 0..50 {
+                    match reaction {
+                        EffectReaction::None => {}
+                        EffectReaction::Explode => {
+                            world.spawn((Particle::new(
+                                "particle/explosion".into(),
+                                reaction_transform_b.position.into(),
+                                Vec2::<f32>::zero(),
+                                180.0f32.to_radians(),
+                                100.0..=200.0,
+                                0.5..=2.0,
+                                2.0..=4.0,
+                            ),));
+                        }
+                        EffectReaction::Paralize => {
+                            world.spawn((Particle::new(
+                                "particle/paralized".into(),
+                                reaction_transform_b.position.into(),
+                                Vec2::<f32>::zero(),
+                                180.0f32.to_radians(),
+                                40.0..=80.0,
+                                0.5..=1.5,
+                                0.4..=1.2,
+                            ),));
+                        }
+                        EffectReaction::Steam => {
+                            world.spawn((Particle::new(
+                                "particle/steam".into(),
+                                reaction_transform_b.position.into(),
+                                Vec2::<f32>::zero(),
+                                180.0f32.to_radians(),
+                                60.0..=100.0,
+                                0.5..=1.0,
+                                1.0..=2.0,
+                            ),));
+                        }
+                    };
+                }
+            }
+        }
+
+        for (_, (effect,)) in world.query::<(&mut Effect,)>().iter() {
+            effect.cooldown = (effect.cooldown - delta_time).max(0.0);
         }
     }
 }

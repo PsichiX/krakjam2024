@@ -224,6 +224,8 @@ impl GameState for NewGameplay {
                 electricity: false,
                 fire: false,
                 water: false,
+                only_source: false,
+                cooldown: 0.0,
             },
             SpriteData {
                 texture: "player/idle/0".into(),
@@ -263,7 +265,7 @@ impl GameState for NewGameplay {
         AnimationController::run(&self.world, delta_time);
         ProjectileController::run(&self.world, delta_time);
         CollisionDetector::run(&self.world);
-        EffectsReactions::run(&mut self.world);
+        EffectsReactions::run(&mut self.world, delta_time);
         SpellController::run(&self.world);
         DamageDealer::run(&self.world);
         self.particle_manager.process(&mut self.world, delta_time);
@@ -427,7 +429,10 @@ impl NewGameplay {
     ) {
         world.spawn((
             Animation { animation: None },
-            Effect::from(cast.spell.effect),
+            Effect {
+                only_source: true,
+                ..Effect::from(cast.spell.effect)
+            },
             transform.clone(),
             Projectile::new(
                 match cast.spell.speed {
