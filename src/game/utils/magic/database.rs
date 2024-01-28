@@ -54,6 +54,10 @@ impl WordToSpellTagDatabase {
                 .iter()
                 .find_map(|tag| tag.as_duration())
                 .unwrap_or_else(|| Default::default());
+            let damage = tags
+                .iter()
+                .find_map(|tag| tag.as_damage())
+                .unwrap_or_else(|| Default::default());
             Some(Spell {
                 size,
                 speed,
@@ -62,6 +66,7 @@ impl WordToSpellTagDatabase {
                 direction,
                 trajectory,
                 duration,
+                damage,
             })
         } else {
             Some(Spell::basic())
@@ -98,6 +103,7 @@ mod tests {
                 direction: Default::default(),
                 trajectory: Default::default(),
                 duration: Default::default(),
+                damage: Default::default(),
             }
         );
 
@@ -112,6 +118,7 @@ mod tests {
                 direction: Default::default(),
                 trajectory: Default::default(),
                 duration: Default::default(),
+                damage: Default::default(),
             }
         );
 
@@ -126,6 +133,7 @@ mod tests {
                 direction: Default::default(),
                 trajectory: Default::default(),
                 duration: Default::default(),
+                damage: Default::default(),
             }
         );
     }

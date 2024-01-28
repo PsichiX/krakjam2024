@@ -6,8 +6,8 @@ use crate::game::{
     },
     states::new_gameplay::NewGameplay,
     utils::magic::spell_tag::{
-        SpellTagDirection, SpellTagDuration, SpellTagEffect, SpellTagShape, SpellTagSize,
-        SpellTagSpeed, SpellTagTrajectory,
+        SpellTagDamage, SpellTagDirection, SpellTagDuration, SpellTagEffect, SpellTagShape,
+        SpellTagSize, SpellTagSpeed, SpellTagTrajectory,
     },
 };
 use hecs::{Entity, World};
@@ -99,6 +99,7 @@ impl EnemyController {
                                 size: SpellTagSize::Small,
                                 speed: SpellTagSpeed::Medium,
                                 trajectory: SpellTagTrajectory::Straight,
+                                damage: SpellTagDamage::Low,
                             },
                         },
                     ));

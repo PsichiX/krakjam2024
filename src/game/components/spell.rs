@@ -1,6 +1,6 @@
 use crate::game::utils::magic::spell_tag::{
-    SpellTagDirection, SpellTagDuration, SpellTagEffect, SpellTagShape, SpellTagSize,
-    SpellTagSpeed, SpellTagTrajectory,
+    SpellTagDamage, SpellTagDirection, SpellTagDuration, SpellTagEffect, SpellTagShape,
+    SpellTagSize, SpellTagSpeed, SpellTagTrajectory,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -12,6 +12,7 @@ pub struct Spell {
     pub direction: SpellTagDirection,
     pub trajectory: SpellTagTrajectory,
     pub duration: SpellTagDuration,
+    pub damage: SpellTagDamage,
 }
 
 impl Spell {
@@ -24,6 +25,7 @@ impl Spell {
             size: SpellTagSize::Medium,
             speed: SpellTagSpeed::Medium,
             trajectory: SpellTagTrajectory::Straight,
+            damage: SpellTagDamage::Low,
         }
     }
 }
