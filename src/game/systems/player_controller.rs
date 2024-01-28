@@ -31,6 +31,7 @@ pub struct PlayerController {
     pub run_animation: NamedAnimation,
     pub idle_animation: NamedAnimation,
     pub spell_text: String,
+    pub walk_area: f32,
 }
 
 pub struct PlayerCastAction {
@@ -52,6 +53,7 @@ impl Default for PlayerController {
                 id: "player".to_owned(),
             },
             spell_text: Default::default(),
+            walk_area: 3500.0,
         }
     }
 }
@@ -172,6 +174,17 @@ impl PlayerController {
                         },
                     ));
                 }
+
+                transform.position.x = transform
+                    .position
+                    .x
+                    .min(self.walk_area)
+                    .max(-self.walk_area);
+                transform.position.y = transform
+                    .position
+                    .y
+                    .min(self.walk_area)
+                    .max(-self.walk_area);
             }
 
             player.current_effect_particle_accumulator += delta_time;

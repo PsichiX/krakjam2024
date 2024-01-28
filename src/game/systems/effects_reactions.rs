@@ -54,23 +54,11 @@ impl EffectsReactions {
                 let mut view = query.view();
                 let [entity_a_query, entity_b_query] = view.get_mut_n([entity_a, entity_b]);
 
-                if let Some((
-                    effect_a,
-                    mut health_a,
-                    immobility_a,
-                    mut transform_a,
-                    mut speed_a,
-                    mut enemy_a,
-                )) = entity_a_query
+                if let Some((effect_a, mut health_a, immobility_a, mut transform_a, ..)) =
+                    entity_a_query
                 {
-                    if let Some((
-                        effect_b,
-                        mut health_b,
-                        immobility_b,
-                        mut transform_b,
-                        mut speed_b,
-                        mut enemy_b,
-                    )) = entity_b_query
+                    if let Some((effect_b, mut health_b, immobility_b, mut transform_b, ..)) =
+                        entity_b_query
                     {
                         reaction = effect_a.react(effect_b);
                         let damage = reaction.damage();
