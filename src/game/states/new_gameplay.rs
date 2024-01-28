@@ -49,7 +49,7 @@ use micro_games_kit::{
 };
 
 pub struct NewGameplay {
-    map: Sprite,
+    map: [Sprite; 4],
     exit: InputActionRef,
     exit_handle: Option<ID<InputMapping>>,
     // music_forest: StaticSoundHandle,
@@ -75,12 +75,32 @@ impl Default for NewGameplay {
         // let _ = music_battle.set_loop_region(..);
 
         Self {
-            map: Sprite::single(SpriteTexture {
-                sampler: "u_image".into(),
-                texture: TextureRef::name("map/pyramid"),
-                filtering: GlowTextureFiltering::Linear,
-            })
-            .pivot(0.5.into()),
+            map: [
+                Sprite::single(SpriteTexture {
+                    sampler: "u_image".into(),
+                    texture: TextureRef::name("map/tl"),
+                    filtering: GlowTextureFiltering::Linear,
+                })
+                .pivot((1.0, 1.0).into()),
+                Sprite::single(SpriteTexture {
+                    sampler: "u_image".into(),
+                    texture: TextureRef::name("map/tr"),
+                    filtering: GlowTextureFiltering::Linear,
+                })
+                .pivot((0.0, 1.0).into()),
+                Sprite::single(SpriteTexture {
+                    sampler: "u_image".into(),
+                    texture: TextureRef::name("map/bl"),
+                    filtering: GlowTextureFiltering::Linear,
+                })
+                .pivot((1.0, 0.0).into()),
+                Sprite::single(SpriteTexture {
+                    sampler: "u_image".into(),
+                    texture: TextureRef::name("map/br"),
+                    filtering: GlowTextureFiltering::Linear,
+                })
+                .pivot((0.0, 0.0).into()),
+            ],
             exit: Default::default(),
             exit_handle: None,
             world: World::new(),
@@ -279,7 +299,9 @@ impl GameState for NewGameplay {
     }
 
     fn draw(&mut self, mut context: GameContext) {
-        self.map.draw(context.draw, context.graphics);
+        for sprite in &self.map {
+            sprite.draw(context.draw, context.graphics);
+        }
 
         SpriteRenderer::run(&self.world, &mut context);
         self.particle_manager.draw(&self.world, &mut context);

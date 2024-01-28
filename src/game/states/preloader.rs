@@ -66,8 +66,32 @@ impl Preloader {
         load_texture(
             context.draw,
             context.graphics,
-            "map/pyramid",
-            include_bytes!("../../../assets/maps/pyramid.png"),
+            "map/tl",
+            include_bytes!("../../../assets/maps/map-tl.png"),
+            1,
+            1,
+        );
+        load_texture(
+            context.draw,
+            context.graphics,
+            "map/tr",
+            include_bytes!("../../../assets/maps/map-tr.png"),
+            1,
+            1,
+        );
+        load_texture(
+            context.draw,
+            context.graphics,
+            "map/bl",
+            include_bytes!("../../../assets/maps/map-bl.png"),
+            1,
+            1,
+        );
+        load_texture(
+            context.draw,
+            context.graphics,
+            "map/br",
+            include_bytes!("../../../assets/maps/map-br.png"),
             1,
             1,
         );
