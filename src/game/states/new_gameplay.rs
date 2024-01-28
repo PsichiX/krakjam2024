@@ -339,6 +339,7 @@ impl Default for NewGameplay {
                 .with("emulsion", SpellTag::Damage(SpellTagDamage::High))
                 .with("moisture", SpellTag::Damage(SpellTagDamage::High))
                 .with("liquor", SpellTag::Damage(SpellTagDamage::High)),
+            alive_time_seconds: 0.0,
         }
     }
 }
