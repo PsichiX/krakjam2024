@@ -28,7 +28,7 @@ impl EffectReaction {
         match self {
             Self::None => 0.0,
             Self::Steam => 0.0,
-            Self::Paralize => 5.0,
+            Self::Paralize => 3.0,
             Self::Explode => 0.0,
         }
     }

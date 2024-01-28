@@ -121,10 +121,13 @@ impl PlayerController {
                 transform.scale.x = if movement.x > 0.0 { -1.0 } else { 1.0 };
 
                 if movement.magnitude() > 0.5 {
-                    if immobility.time_left <= 0.0 {
-                        player_moved_vector = Some(movement * delta_time * 150.0);
-                        transform.position += player_moved_vector.unwrap();
+                    player_moved_vector = Some(movement * delta_time * 150.0);
+
+                    if immobility.time_left > 0.0 {
+                        player_moved_vector = Some(player_moved_vector.unwrap() * 0.5);
                     }
+
+                    transform.position += player_moved_vector.unwrap();
 
                     if let Some(named_animation) = animation.animation.as_ref() {
                         if named_animation.id != self.run_animation.id {
