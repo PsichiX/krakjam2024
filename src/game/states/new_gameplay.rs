@@ -55,6 +55,8 @@ use micro_games_kit::{
     },
 };
 
+use super::game_end::{GameEnd, GameEndReason};
+
 pub struct NewGameplay {
     map: [Sprite; 4],
     exit: InputActionRef,
@@ -440,7 +442,8 @@ impl GameState for NewGameplay {
         Death::run(&mut self.world);
 
         if self.world.query::<&Player>().iter().next().is_none() {
-            *context.state_change = GameStateChange::Swap(Box::new(NewGameplay::default()));
+            *context.state_change =
+                GameStateChange::Swap(Box::new(GameEnd::new(GameEndReason::Lost)));
         }
 
         // self.update_ambient_music();

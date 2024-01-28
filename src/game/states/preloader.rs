@@ -343,6 +343,14 @@ impl Preloader {
             1,
             1,
         );
+        load_texture(
+            context.draw,
+            context.graphics,
+            "ui/lost",
+            include_bytes!("../../../assets/images/ui/lost.png"),
+            1,
+            1,
+        );
     }
 
     fn load_sounds_and_music() {
