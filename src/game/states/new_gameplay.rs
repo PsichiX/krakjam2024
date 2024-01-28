@@ -77,7 +77,7 @@ impl Default for NewGameplay {
         Self {
             map: Sprite::single(SpriteTexture {
                 sampler: "u_image".into(),
-                texture: TextureRef::name("map/level-0"),
+                texture: TextureRef::name("map/pyramid"),
                 filtering: GlowTextureFiltering::Linear,
             })
             .pivot(0.5.into()),

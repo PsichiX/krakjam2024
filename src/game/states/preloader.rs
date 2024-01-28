@@ -66,8 +66,8 @@ impl Preloader {
         load_texture(
             context.draw,
             context.graphics,
-            "map/level-0",
-            include_bytes!("../../../assets/maps/world/simplified/Level_0/_composite.png"),
+            "map/pyramid",
+            include_bytes!("../../../assets/maps/pyramid.png"),
             1,
             1,
         );
