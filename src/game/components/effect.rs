@@ -36,7 +36,7 @@ impl EffectReaction {
     pub fn push_distance(&self) -> f32 {
         match self {
             Self::None => 0.0,
-            Self::Steam => 50.0,
+            Self::Steam => 150.0,
             Self::Paralize => 0.0,
             Self::Explode => 10.0,
         }
