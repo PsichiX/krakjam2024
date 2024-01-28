@@ -150,6 +150,7 @@ impl Default for NewGameplay {
                 .with("explosion", SpellTag::Effect(SpellTagEffect::Fire))
                 .with("whisky", SpellTag::Effect(SpellTagEffect::Fire))
                 .with("flammenwerfer", SpellTag::Effect(SpellTagEffect::Fire))
+                .with("flamethrower", SpellTag::Effect(SpellTagEffect::Fire))
                 // Water
                 .with("wet", SpellTag::Effect(SpellTagEffect::Water))
                 .with("aqua", SpellTag::Effect(SpellTagEffect::Water))
@@ -203,6 +204,9 @@ impl Default for NewGameplay {
                 .with("thunder", SpellTag::Effect(SpellTagEffect::Electric))
                 .with("overcharged", SpellTag::Effect(SpellTagEffect::Electric))
                 .with("overcharge", SpellTag::Effect(SpellTagEffect::Electric))
+                .with("battery", SpellTag::Effect(SpellTagEffect::Electric))
+                .with("light", SpellTag::Effect(SpellTagEffect::Electric))
+                .with("lightning", SpellTag::Effect(SpellTagEffect::Electric))
                 // Large
                 .with("big", SpellTag::Size(SpellTagSize::Large))
                 .with("large", SpellTag::Size(SpellTagSize::Large))
@@ -218,11 +222,17 @@ impl Default for NewGameplay {
                 .with("inferno", SpellTag::Size(SpellTagSize::Large))
                 .with("hell", SpellTag::Size(SpellTagSize::Large))
                 .with("rain", SpellTag::Size(SpellTagSize::Large))
+                .with("mega", SpellTag::Size(SpellTagSize::Large))
+                .with("giga", SpellTag::Size(SpellTagSize::Large))
+                .with("tera", SpellTag::Size(SpellTagSize::Large))
+                .with("gigachad", SpellTag::Size(SpellTagSize::Large))
                 // Medium
                 .with("fine", SpellTag::Size(SpellTagSize::Medium))
                 .with("basic", SpellTag::Size(SpellTagSize::Medium))
                 .with("boring", SpellTag::Size(SpellTagSize::Medium))
                 .with("blaze", SpellTag::Size(SpellTagSize::Medium))
+                .with("compact", SpellTag::Size(SpellTagSize::Medium))
+                .with("kilo", SpellTag::Size(SpellTagSize::Medium))
                 // Small
                 .with("tiny", SpellTag::Size(SpellTagSize::Small))
                 .with("cute", SpellTag::Size(SpellTagSize::Small))
@@ -232,6 +242,17 @@ impl Default for NewGameplay {
                 .with("small", SpellTag::Size(SpellTagSize::Small))
                 .with("joke", SpellTag::Size(SpellTagSize::Small))
                 .with("spark", SpellTag::Size(SpellTagSize::Small))
+                .with("mini", SpellTag::Size(SpellTagSize::Small))
+                .with("miniature", SpellTag::Size(SpellTagSize::Small))
+                .with("mili", SpellTag::Size(SpellTagSize::Small))
+                .with("micro", SpellTag::Size(SpellTagSize::Small))
+                .with("nano", SpellTag::Size(SpellTagSize::Small))
+                .with("pico", SpellTag::Size(SpellTagSize::Small))
+                .with("baby", SpellTag::Size(SpellTagSize::Small))
+                .with("toy", SpellTag::Size(SpellTagSize::Small))
+                .with("teeny", SpellTag::Size(SpellTagSize::Small))
+                .with("weeny", SpellTag::Size(SpellTagSize::Small))
+                .with("dwarf", SpellTag::Size(SpellTagSize::Small))
                 // Sinus
                 .with("sinus", SpellTag::Trajectory(SpellTagTrajectory::Sinus))
                 .with("nice", SpellTag::Trajectory(SpellTagTrajectory::Sinus))
@@ -239,6 +260,14 @@ impl Default for NewGameplay {
                 .with("spark", SpellTag::Trajectory(SpellTagTrajectory::Sinus))
                 .with("snake", SpellTag::Trajectory(SpellTagTrajectory::Sinus))
                 .with("rain", SpellTag::Trajectory(SpellTagTrajectory::Sinus))
+                .with("drunk", SpellTag::Trajectory(SpellTagTrajectory::Sinus))
+                .with("alcohol", SpellTag::Trajectory(SpellTagTrajectory::Sinus))
+                .with("alco", SpellTag::Trajectory(SpellTagTrajectory::Sinus))
+                .with("turbulent", SpellTag::Trajectory(SpellTagTrajectory::Sinus))
+                .with(
+                    "flamethrower",
+                    SpellTag::Trajectory(SpellTagTrajectory::Sinus),
+                )
                 .with(
                     "flammenwerfer",
                     SpellTag::Trajectory(SpellTagTrajectory::Sinus),
@@ -250,6 +279,7 @@ impl Default for NewGameplay {
                 .with("blaze", SpellTag::Trajectory(SpellTagTrajectory::Circle))
                 .with("bonfire", SpellTag::Trajectory(SpellTagTrajectory::Circle))
                 .with("hell", SpellTag::Trajectory(SpellTagTrajectory::Circle))
+                .with("tornado", SpellTag::Trajectory(SpellTagTrajectory::Circle))
                 // Slow
                 .with("slow", SpellTag::Speed(SpellTagSpeed::Slow))
                 .with("turtle", SpellTag::Speed(SpellTagSpeed::Slow))
@@ -262,6 +292,13 @@ impl Default for NewGameplay {
                 // Medium
                 .with("regular", SpellTag::Speed(SpellTagSpeed::Medium))
                 // Fast
+                .with("speedy", SpellTag::Speed(SpellTagSpeed::Fast))
+                .with("swift", SpellTag::Speed(SpellTagSpeed::Fast))
+                .with("rapid", SpellTag::Speed(SpellTagSpeed::Fast))
+                .with("nimble", SpellTag::Speed(SpellTagSpeed::Fast))
+                .with("brisk", SpellTag::Speed(SpellTagSpeed::Fast))
+                .with("turbo", SpellTag::Speed(SpellTagSpeed::Fast))
+                .with("express", SpellTag::Speed(SpellTagSpeed::Fast))
                 .with("fast", SpellTag::Speed(SpellTagSpeed::Fast))
                 .with("joke", SpellTag::Speed(SpellTagSpeed::Fast))
                 // Forward
@@ -275,8 +312,11 @@ impl Default for NewGameplay {
                 .with("me", SpellTag::Direction(SpellTagDirection::Down))
                 .with("self", SpellTag::Direction(SpellTagDirection::Down))
                 .with("bomb", SpellTag::Direction(SpellTagDirection::Down))
+                .with("under", SpellTag::Direction(SpellTagDirection::Down))
+                .with("freeze", SpellTag::Direction(SpellTagDirection::Down))
                 // Shape - Point
                 .with("ball", SpellTag::Shape(SpellTagShape::Point))
+                .with("sphere", SpellTag::Shape(SpellTagShape::Point))
                 .with("basic", SpellTag::Shape(SpellTagShape::Point))
                 .with("boring", SpellTag::Shape(SpellTagShape::Point))
                 .with("meteor", SpellTag::Shape(SpellTagShape::Point))
@@ -291,9 +331,21 @@ impl Default for NewGameplay {
                 // Shape - Triangle
                 .with("triangle", SpellTag::Shape(SpellTagShape::Triangle))
                 .with("triforce", SpellTag::Shape(SpellTagShape::Triangle))
+                .with("illuminati", SpellTag::Shape(SpellTagShape::Triangle))
                 .with("flammenwerfer", SpellTag::Shape(SpellTagShape::Triangle))
+                // Duration - Instant
+                .with("instant", SpellTag::Duration(SpellTagDuration::Instant))
+                .with("dead", SpellTag::Duration(SpellTagDuration::Instant))
+                .with("bluff", SpellTag::Duration(SpellTagDuration::Instant))
+                .with("mistake", SpellTag::Duration(SpellTagDuration::Instant))
+                .with("error", SpellTag::Duration(SpellTagDuration::Instant))
                 // Duration - Quick
                 .with("quick", SpellTag::Duration(SpellTagDuration::Quick))
+                .with("brief", SpellTag::Duration(SpellTagDuration::Quick))
+                .with("moment", SpellTag::Duration(SpellTagDuration::Quick))
+                .with("momentary", SpellTag::Duration(SpellTagDuration::Quick))
+                .with("short", SpellTag::Duration(SpellTagDuration::Quick))
+                .with("express", SpellTag::Duration(SpellTagDuration::Quick))
                 .with("spark", SpellTag::Duration(SpellTagDuration::Quick))
                 // Duration - Medium
                 .with("moment", SpellTag::Duration(SpellTagDuration::Medium))
@@ -302,9 +354,13 @@ impl Default for NewGameplay {
                 // Duration - Long
                 .with("fuck", SpellTag::Duration(SpellTagDuration::Long))
                 .with("long", SpellTag::Duration(SpellTagDuration::Long))
+                .with("length", SpellTag::Duration(SpellTagDuration::Long))
+                .with("lengthy", SpellTag::Duration(SpellTagDuration::Long))
+                .with("extended", SpellTag::Duration(SpellTagDuration::Long))
                 .with("explosion", SpellTag::Duration(SpellTagDuration::Long))
                 .with("hell", SpellTag::Duration(SpellTagDuration::Long))
                 .with("flammenwerfer", SpellTag::Duration(SpellTagDuration::Long))
+                .with("tornado", SpellTag::Duration(SpellTagDuration::Long))
                 // Damage - Low
                 .with("spark", SpellTag::Damage(SpellTagDamage::Low))
                 .with("drop", SpellTag::Damage(SpellTagDamage::Low))
@@ -312,6 +368,7 @@ impl Default for NewGameplay {
                 .with("smol", SpellTag::Damage(SpellTagDamage::Low))
                 .with("sprinkle", SpellTag::Damage(SpellTagDamage::Low))
                 .with("zap", SpellTag::Damage(SpellTagDamage::Low))
+                .with("ping", SpellTag::Damage(SpellTagDamage::Low))
                 // Damage - Medium
                 .with("meteor", SpellTag::Damage(SpellTagDamage::Medium))
                 .with("wall", SpellTag::Damage(SpellTagDamage::Medium))
@@ -333,14 +390,19 @@ impl Default for NewGameplay {
                 .with("hyper", SpellTag::Damage(SpellTagDamage::Medium))
                 .with("bonk", SpellTag::Damage(SpellTagDamage::Medium))
                 .with("golden", SpellTag::Damage(SpellTagDamage::Medium))
+                .with("dwarf", SpellTag::Damage(SpellTagDamage::Medium))
+                .with("fucking", SpellTag::Damage(SpellTagDamage::Medium))
                 // Damage - High
-                .with("exquisite", SpellTag::Damage(SpellTagDamage::Medium))
+                .with("gigachad", SpellTag::Damage(SpellTagDamage::High))
+                .with("exquisite", SpellTag::Damage(SpellTagDamage::High))
+                .with("turbulent", SpellTag::Damage(SpellTagDamage::High))
                 .with("triforce", SpellTag::Damage(SpellTagDamage::High))
                 .with("inferno", SpellTag::Damage(SpellTagDamage::High))
                 .with("pyromania", SpellTag::Damage(SpellTagDamage::High))
                 .with("incandescence", SpellTag::Damage(SpellTagDamage::High))
                 .with("inflamari", SpellTag::Damage(SpellTagDamage::High))
                 .with("explosion", SpellTag::Damage(SpellTagDamage::High))
+                .with("illuminati", SpellTag::Damage(SpellTagDamage::High))
                 .with("flammenwerfer", SpellTag::Damage(SpellTagDamage::High))
                 .with("thunder", SpellTag::Damage(SpellTagDamage::High))
                 .with("overcharged", SpellTag::Damage(SpellTagDamage::High))
