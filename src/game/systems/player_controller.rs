@@ -45,8 +45,8 @@ impl Default for PlayerController {
         PlayerController {
             input: None,
             run_animation: NamedAnimation {
-                animation: FrameAnimation::new(0..1).looping().playing(),
-                id: "player".to_owned(),
+                animation: FrameAnimation::new(1..17).looping().playing(),
+                id: "player/walk".to_owned(),
             },
             idle_animation: NamedAnimation {
                 animation: FrameAnimation::new(0..1).looping().playing(),

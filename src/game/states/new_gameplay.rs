@@ -66,6 +66,7 @@ pub struct NewGameplay {
     enemy_spawn: EnemySpawn,
     particle_manager: ParticleManager,
     word_to_spell_tag_database: WordToSpellTagDatabase,
+    alive_time_seconds: f32,
 }
 
 impl Default for NewGameplay {
@@ -214,6 +215,7 @@ impl Default for NewGameplay {
                 // Long
                 .with("fuck", SpellTag::Duration(SpellTagDuration::Long))
                 .with("long", SpellTag::Duration(SpellTagDuration::Long)),
+            alive_time_seconds: 0.0,
         }
     }
 }
@@ -279,6 +281,8 @@ impl GameState for NewGameplay {
         if self.exit.get().is_down() {
             *context.state_change = GameStateChange::Pop;
         }
+
+        self.alive_time_seconds += delta_time;
 
         self.enemy_spawn.run(&mut self.world, delta_time);
         self.player_controller.run(
@@ -362,7 +366,6 @@ impl GameState for NewGameplay {
                 ..Default::default()
             },
             || {
-                // image_box(ImageBoxProps::image("ui/panel"));
                 image_box(ImageBoxProps {
                     material: ImageBoxMaterial::Image(ImageBoxImage {
                         id: "ui/panel".to_owned(),
@@ -393,6 +396,57 @@ impl GameState for NewGameplay {
                         r: 0.9,
                         g: 0.1,
                         b: 0.1,
+                        a: 1.0,
+                    },
+                    ..Default::default()
+                });
+            },
+        );
+
+        content_box(
+            ContentBoxItemLayout {
+                anchors: Rect {
+                    left: 0.5,
+                    right: 0.5,
+                    top: 0.0,
+                    bottom: 0.0,
+                },
+                margin: Rect {
+                    left: -300.0,
+                    right: -300.0,
+                    top: 10.0,
+                    bottom: -150.0,
+                },
+                align: Vec2 { x: 0.5, y: 0.0 },
+                ..Default::default()
+            },
+            || {
+                image_box(ImageBoxProps {
+                    material: ImageBoxMaterial::Image(ImageBoxImage {
+                        id: "ui/panel".to_owned(),
+                        scaling: ImageBoxImageScaling::Frame(ImageBoxFrame {
+                            source: 0.5.into(),
+                            destination: 70.0.into(),
+                            frame_only: false,
+                            frame_keep_aspect_ratio: false,
+                        }),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                });
+
+                text_box(TextBoxProps {
+                    text: format!("Alive for {:.2} seconds", self.alive_time_seconds),
+                    horizontal_align: TextBoxHorizontalAlign::Center,
+                    vertical_align: TextBoxVerticalAlign::Middle,
+                    font: TextBoxFont {
+                        name: "roboto".to_owned(),
+                        size: 30.0,
+                    },
+                    color: Color {
+                        r: 0.1,
+                        g: 0.1,
+                        b: 0.9,
                         a: 1.0,
                     },
                     ..Default::default()
