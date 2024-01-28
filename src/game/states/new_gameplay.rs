@@ -332,6 +332,7 @@ impl Default for NewGameplay {
                 .with("hiper", SpellTag::Damage(SpellTagDamage::Medium))
                 .with("hyper", SpellTag::Damage(SpellTagDamage::Medium))
                 .with("bonk", SpellTag::Damage(SpellTagDamage::Medium))
+                .with("golden", SpellTag::Damage(SpellTagDamage::Medium))
                 // Damage - High
                 .with("exquisite", SpellTag::Damage(SpellTagDamage::Medium))
                 .with("triforce", SpellTag::Damage(SpellTagDamage::High))
