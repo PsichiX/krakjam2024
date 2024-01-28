@@ -11,7 +11,6 @@ use crate::game::{
 };
 use hecs::{Entity, World};
 use micro_games_kit::third_party::{
-    kira::track::effect,
     rand::{thread_rng, Rng},
     vek::{Transform, Vec2},
 };

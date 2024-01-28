@@ -1,7 +1,6 @@
 use crate::game::{
     components::{
         collidable::Collidable, damage::Damage, health::Health, ignore_entity::IgnoreEntity,
-        player::Player,
     },
     utils::space::Space,
 };
