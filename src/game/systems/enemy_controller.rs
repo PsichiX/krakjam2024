@@ -1,5 +1,4 @@
-use std::ops::DerefMut;
-
+use super::player_controller::PlayerCastAction;
 use crate::game::{
     components::{
         effect::Effect, enemy::Enemy, immobility::Immobility, player::Player, speed::Speed,
@@ -16,8 +15,6 @@ use micro_games_kit::third_party::{
     rand::{thread_rng, Rng},
     vek::{Transform, Vec2},
 };
-
-use super::player_controller::PlayerCastAction;
 
 pub struct EnemyController;
 
