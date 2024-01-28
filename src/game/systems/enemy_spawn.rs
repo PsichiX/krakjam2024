@@ -108,7 +108,8 @@ impl EnemySpawn {
                 },
                 effect,
                 Health {
-                    value: 100.0,
+                    value: 50.0,
+                    limit: 50.0,
                     layer: DamageLayer::Enemy,
                 },
                 Damage {

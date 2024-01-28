@@ -15,7 +15,7 @@ use micro_games_kit::{
         spitfire_input::{
             InputActionRef, InputAxisRef, InputContext, InputMapping, VirtualAction, VirtualAxis,
         },
-        vek::{Clamp, Transform, Vec2},
+        vek::{Transform, Vec2},
         windowing::event::MouseButton,
     },
 };

@@ -6,8 +6,8 @@ use micro_games_kit::third_party::{
     },
 };
 
-pub fn health_bar(props: impl Into<Props>, value: usize) {
-    let percentage = (value as f32 / 100.0).clamp(0.0, 1.0);
+pub fn health_bar(props: impl Into<Props>, value: f32, limit: f32) {
+    let percentage = (value / limit).clamp(0.0, 1.0);
 
     content_box(props, || {
         image_box(ImageBoxProps {

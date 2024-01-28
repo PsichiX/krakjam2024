@@ -1,3 +1,4 @@
+use super::game_end::GameEnd;
 use crate::game::{
     components::{
         animation::Animation,
@@ -54,8 +55,6 @@ use micro_games_kit::{
         windowing::event::VirtualKeyCode,
     },
 };
-
-use super::game_end::{GameEnd, GameEndReason};
 
 pub struct NewGameplay {
     map: [Sprite; 4],
@@ -390,6 +389,7 @@ impl GameState for NewGameplay {
             },
             Health {
                 value: 100.0,
+                limit: 100.0,
                 layer: DamageLayer::None,
             },
             Effect {
@@ -488,7 +488,7 @@ impl GameState for NewGameplay {
                     &context,
                 );
 
-                health_bar(layout, health.value as usize);
+                health_bar(layout, health.value, health.limit);
             }
         }
 
@@ -565,20 +565,6 @@ impl GameState for NewGameplay {
                 ..Default::default()
             },
             || {
-                // image_box(ImageBoxProps {
-                //     material: ImageBoxMaterial::Image(ImageBoxImage {
-                //         id: "ui/panel".to_owned(),
-                //         scaling: ImageBoxImageScaling::Frame(ImageBoxFrame {
-                //             source: 0.5.into(),
-                //             destination: 30.0.into(),
-                //             frame_only: false,
-                //             frame_keep_aspect_ratio: false,
-                //         }),
-                //         ..Default::default()
-                //     }),
-                //     ..Default::default()
-                // });
-
                 image_box(ImageBoxProps::colored(Color {
                     r: 0.0,
                     g: 0.0,
