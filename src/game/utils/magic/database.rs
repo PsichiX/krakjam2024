@@ -1,6 +1,4 @@
-use micro_games_kit::third_party::kira::track::effect;
-
-use super::spell_tag::{SpellTag, SpellTagSize};
+use super::spell_tag::SpellTag;
 use crate::{game::components::spell::Spell, hash_set};
 use std::collections::{HashMap, HashSet};
 
@@ -75,7 +73,7 @@ impl WordToSpellTagDatabase {
 mod tests {
     use super::WordToSpellTagDatabase;
     use crate::game::{
-        components::spell::{self, Spell},
+        components::spell::Spell,
         utils::magic::spell_tag::{SpellTag, SpellTagEffect, SpellTagShape, SpellTagSize},
     };
 

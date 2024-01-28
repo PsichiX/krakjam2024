@@ -10,7 +10,7 @@ use micro_games_kit::{
     animation::{FrameAnimation, NamedAnimation},
     third_party::{
         rand::{thread_rng, Rng},
-        vek::{Rgba, Transform, Vec2, Vec3},
+        vek::{Rgba, Transform, Vec2},
     },
 };
 

@@ -1,12 +1,8 @@
-use super::{
-    game_end::{GameEnd, GameEndReason},
-    main_menu::MainMenu,
-};
 use crate::game::{
     components::{
-        animation::Animation, collidable::Collidable, damage::Damage, effect::Effect, enemy::Enemy,
+        animation::Animation, collidable::Collidable, damage::Damage, effect::Effect,
         health::Health, ignore_player::IgnorePlayer, particle_generator::ParticleGenerator,
-        speed::Speed, sprite_data::SpriteData,
+        sprite_data::SpriteData,
     },
     systems::{
         animation_controller::AnimationController, collision_detector::CollisionDetector,
@@ -27,25 +23,19 @@ use crate::game::{
         player_controller::PlayerController, projectile_controller::ProjectileController,
         sprite_renderer::SpriteRenderer,
     },
-    utils::{
-        events::{Event, Events},
-        magic::database::WordToSpellTagDatabase,
-        space::SpaceObject,
-    },
+    utils::{events::Events, magic::database::WordToSpellTagDatabase, space::SpaceObject},
 };
 use hecs::World;
 use micro_games_kit::{
-    animation::{FrameAnimation, NamedAnimation},
     context::GameContext,
     game::{GameState, GameStateChange},
     third_party::{
         raui_core::layout::CoordsMappingScaling,
         raui_immediate_widgets::core::{
-            containers::nav_content_box, text_box, ContentBoxItemLayout, Rect, TextBoxFont,
+            containers::content_box, text_box, ContentBoxItemLayout, Rect, TextBoxFont,
             TextBoxHorizontalAlign, TextBoxProps, TextBoxVerticalAlign,
         },
         spitfire_draw::{
-            particles::ParticleSystem,
             sprite::{Sprite, SpriteTexture},
             utils::{Drawable, TextureRef},
         },
@@ -90,16 +80,8 @@ impl Default for NewGameplay {
                 filtering: GlowTextureFiltering::Linear,
             })
             .pivot(0.5.into()),
-            // player: PlayerState::new_character([0.0, 0.0, 0.0]),
-            // enemies: Default::default(),
-            // items: Default::default(),
-            // torch: Torch::new([0.0, 0.0]),
-            // darkness: None,
             exit: Default::default(),
             exit_handle: None,
-            // map_radius: 800.0,
-            // music_forest,
-            // music_battle,
             world: World::new(),
             player_controller: PlayerController::default(),
             enemy_spawn: EnemySpawn::new(1000.0, 3.0, 30),
@@ -111,6 +93,7 @@ impl Default for NewGameplay {
                 .with("heat", SpellTag::Effect(SpellTagEffect::Fire))
                 .with("hot", SpellTag::Effect(SpellTagEffect::Fire))
                 .with("meteor", SpellTag::Effect(SpellTagEffect::Fire))
+                .with("fuck", SpellTag::Effect(SpellTagEffect::Fire))
                 // Water
                 .with("wet", SpellTag::Effect(SpellTagEffect::Water))
                 .with("aqua", SpellTag::Effect(SpellTagEffect::Water))
@@ -136,6 +119,7 @@ impl Default for NewGameplay {
                 .with("chonker", SpellTag::Size(SpellTagSize::Large))
                 .with("chonk", SpellTag::Size(SpellTagSize::Large))
                 .with("meteor", SpellTag::Size(SpellTagSize::Large))
+                .with("up", SpellTag::Size(SpellTagSize::Large))
                 // Medium
                 .with("fine", SpellTag::Size(SpellTagSize::Medium))
                 .with("basic", SpellTag::Size(SpellTagSize::Medium))
@@ -155,6 +139,7 @@ impl Default for NewGameplay {
                 // Circle
                 .with("circle", SpellTag::Trajectory(SpellTagTrajectory::Circle))
                 .with("joke", SpellTag::Trajectory(SpellTagTrajectory::Circle))
+                .with("fuck", SpellTag::Trajectory(SpellTagTrajectory::Circle))
                 // Slow
                 .with("slow", SpellTag::Speed(SpellTagSpeed::Slow))
                 .with("turtle", SpellTag::Speed(SpellTagSpeed::Slow))
@@ -173,6 +158,8 @@ impl Default for NewGameplay {
                 // Down
                 .with("down", SpellTag::Direction(SpellTagDirection::Down))
                 .with("stop", SpellTag::Direction(SpellTagDirection::Down))
+                .with("me", SpellTag::Direction(SpellTagDirection::Down))
+                .with("self", SpellTag::Direction(SpellTagDirection::Down))
                 // Point
                 .with("ball", SpellTag::Shape(SpellTagShape::Point))
                 .with("basic", SpellTag::Shape(SpellTagShape::Point))
@@ -195,13 +182,14 @@ impl Default for NewGameplay {
                 .with("moment", SpellTag::Duration(SpellTagDuration::Medium))
                 .with("joke", SpellTag::Duration(SpellTagDuration::Medium))
                 // Long
+                .with("fuck", SpellTag::Duration(SpellTagDuration::Long))
                 .with("long", SpellTag::Duration(SpellTagDuration::Long)),
         }
     }
 }
 
 impl GameState for NewGameplay {
-    fn enter(&mut self, mut context: GameContext) {
+    fn enter(&mut self, context: GameContext) {
         context.graphics.color = [0.0, 0.3, 0.0, 1.0];
         context.graphics.main_camera.screen_alignment = 0.5.into();
         context.graphics.main_camera.scaling = CameraScaling::FitVertical(800.0);
@@ -267,11 +255,11 @@ impl GameState for NewGameplay {
             &self.word_to_spell_tag_database,
         );
         EnemyController::run(&self.world, delta_time);
-        AnimationController::run(&self.world, &mut context, delta_time);
+        AnimationController::run(&self.world, delta_time);
         ProjectileController::run(&self.world, delta_time);
         CollisionDetector::run(&self.world);
         EffectsReactions::run(&mut self.world);
-        SpellController::run(&self.world, &mut context);
+        SpellController::run(&self.world);
         DamageDealer::run(&self.world);
         self.particle_manager.process(&mut self.world, delta_time);
         SlimeColor::run(&self.world);
@@ -283,12 +271,6 @@ impl GameState for NewGameplay {
             *context.state_change = GameStateChange::Swap(Box::new(NewGameplay::default()));
         }
 
-        // self.process_game_objects(&mut context, delta_time);
-
-        // self.resolve_collisions();
-
-        self.execute_events(&mut context);
-
         // self.update_ambient_music();
     }
 
@@ -297,69 +279,6 @@ impl GameState for NewGameplay {
 
         SpriteRenderer::run(&self.world, &mut context);
         self.particle_manager.draw(&self.world, &mut context);
-
-        // self.torch.draw(&mut context);
-
-        // for item in self.items.values_mut() {
-        //     item.draw(&mut context);
-        // }
-
-        // for enemy in self.enemies.values_mut() {
-        //     enemy.draw(&mut context);
-        // }
-
-        // self.player.draw(&mut context);
-
-        // if let Some(canvas) = &mut self.darkness {
-        //     let _ = canvas.match_to_screen(context.graphics);
-
-        //     canvas.with(context.draw, context.graphics, true, |draw, graphics| {
-        //         draw_sphere_light(
-        //             self.player
-        //                 .state
-        //                 .read()
-        //                 .unwrap()
-        //                 .sprite
-        //                 .transform
-        //                 .position
-        //                 .xy(),
-        //             200.0,
-        //             0.0..=1.0,
-        //             1.0,
-        //             draw,
-        //             graphics,
-        //         );
-
-        //         draw_sphere_light(
-        //             self.torch.sprite.transform.position.xy(),
-        //             350.0,
-        //             0.0..=1.0,
-        //             1.0,
-        //             draw,
-        //             graphics,
-        //         );
-        //     });
-
-        //     Sprite::single(
-        //         canvas
-        //             .sprite_texture(0, "u_image".into(), GlowTextureFiltering::Linear)
-        //             .unwrap(),
-        //     )
-        //     .pivot([0.0, 1.0].into())
-        //     .scale([1.0, -1.0].into())
-        //     .shader(ShaderRef::name("lighting"))
-        //     .blending(GlowBlending::Alpha)
-        //     .screen_space(true)
-        //     .uniform(
-        //         "u_dark_color".into(),
-        //         GlowUniformValue::F4([0.0, 0.0, 0.0, 1.0]),
-        //     )
-        //     .uniform(
-        //         "u_light_color".into(),
-        //         GlowUniformValue::F4([0.0, 0.0, 0.0, 0.0]),
-        //     )
-        //     .draw(context.draw, context.graphics);
-        // }
     }
 
     fn draw_gui(&mut self, context: GameContext) {
@@ -386,44 +305,7 @@ impl GameState for NewGameplay {
             }
         }
 
-        // for enemy in self.enemies.values() {
-        //     let state = enemy.state.read().unwrap();
-        //     let layout = world_to_screen_content_layout(
-        //         state.sprite.transform.position.xy(),
-        //         health_bar_rectangle,
-        //         &context,
-        //     );
-
-        //     health_bar(layout, state.health);
-        // }
-
-        // text_box((
-        //     ContentBoxItemLayout {
-        //         margin: 40.0.into(),
-        //         ..Default::default()
-        //     },
-        //     TextBoxProps {
-        //         text: format!(
-        //             "Weapon: {:?}\nEnemies: {}\nItems: {}",
-        //             self.player.state.read().unwrap().weapon,
-        //             self.enemies.len(),
-        //             self.items.len(),
-        //         ),
-        //         font: TextBoxFont {
-        //             name: "roboto".to_owned(),
-        //             size: 28.0,
-        //         },
-        //         color: Color {
-        //             r: 1.0,
-        //             g: 1.0,
-        //             b: 1.0,
-        //             a: 1.0,
-        //         },
-        //         ..Default::default()
-        //     },
-        // ));
-
-        nav_content_box(
+        content_box(
             ContentBoxItemLayout {
                 anchors: Rect {
                     left: 0.0,
@@ -582,116 +464,39 @@ impl NewGameplay {
         ));
     }
 
-    fn process_game_objects(&mut self, context: &mut GameContext, delta_time: f32) {
-        // self.torch.process(context, delta_time);
-
-        // self.player.process(context, delta_time);
-
-        // for enemy in self.enemies.values_mut() {
-        //     enemy.process(context, delta_time);
-        //     enemy
-        //         .state
-        //         .write()
-        //         .unwrap()
-        //         .sense_player(&self.player.state.read().unwrap());
-        // }
-    }
-
-    fn execute_events(&mut self, context: &mut GameContext) {
-        Events::read(|events| {
-            // self.player.state.write().unwrap().execute_events(events);
-
-            // for (id, enemy) in &mut self.enemies {
-            //     enemy.state.write().unwrap().execute_events(*id, events);
-            // }
-
-            for event in events {
-                match event {
-                    Event::KillPlayer => {
-                        *context.state_change =
-                            GameStateChange::Swap(Box::new(NewGameplay::default()));
-                    }
-                    Event::KillEntity { entity } => {
-                        // self.enemies.remove(id);
-                        // if self.enemies.is_empty() {
-                        //     Events::write_delayed(2.0, Event::WinGame);
-                        // }
-                        let _ = self.world.despawn(*entity);
-                    }
-                    Event::KillItem { id } => {
-                        // self.items.remove(id);
-                    }
-                    Event::WinGame => {
-                        *context.state_change =
-                            GameStateChange::Swap(Box::new(NewGameplay::default()));
-                    }
-                    _ => {}
-                }
-            }
-        });
-    }
-
-    fn update_ambient_music(&mut self) {
-        // let player_position = self
-        //     .player
-        //     .state
-        //     .read()
-        //     .unwrap()
-        //     .sprite
-        //     .transform
-        //     .position
-        //     .xy();
-        // let factor = self
-        //     .enemies
-        //     .values()
-        //     .map(|enemy| {
-        //         enemy
-        //             .state
-        //             .read()
-        //             .unwrap()
-        //             .sprite
-        //             .transform
-        //             .position
-        //             .xy()
-        //             .distance(player_position)
-        //     })
-        //     .min_by(|a, b| a.partial_cmp(b).unwrap())
-        //     .unwrap_or(INFINITY)
-        //     .min(300.0) as f64
-        //     / 300.0;
-        // let _ = self
-        //     .music_forest
-        //     .set_volume(factor * 2.0, Default::default());
-        // let _ = self
-        //     .music_battle
-        //     .set_volume((1.0 - factor) * 2.0, Default::default());
-    }
-
-    // fn resolve_collisions(&mut self) {
-    //     let space = Space::read();
-    //     let space = space.read().unwrap();
-
-    //     for object_item in space.iter() {
-    //         if let SpaceObjectId::Item(item_id) = object_item.id {
-    //             if let Some(item) = self.items.get(&item_id) {
-    //                 for object in space.collisions(object_item, true) {
-    //                     match object.id {
-    //                         SpaceObjectId::Player => {
-    //                             self.player.state.write().unwrap().consume_item(item);
-    //                             Events::write(Event::KillItem { id: item_id });
-    //                             let _ = Audio::write().write().unwrap().play("collect");
-    //                         }
-    //                         SpaceObjectId::Enemy(enemy_id) => {
-    //                             if let Some(enemy) = self.enemies.get_mut(&enemy_id) {
-    //                                 enemy.state.write().unwrap().consume_item(item);
-    //                                 Events::write(Event::KillItem { id: item_id });
-    //                             }
-    //                         }
-    //                         _ => {}
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
+    // fn update_ambient_music(&mut self) {
+    //     // let player_position = self
+    //     //     .player
+    //     //     .state
+    //     //     .read()
+    //     //     .unwrap()
+    //     //     .sprite
+    //     //     .transform
+    //     //     .position
+    //     //     .xy();
+    //     // let factor = self
+    //     //     .enemies
+    //     //     .values()
+    //     //     .map(|enemy| {
+    //     //         enemy
+    //     //             .state
+    //     //             .read()
+    //     //             .unwrap()
+    //     //             .sprite
+    //     //             .transform
+    //     //             .position
+    //     //             .xy()
+    //     //             .distance(player_position)
+    //     //     })
+    //     //     .min_by(|a, b| a.partial_cmp(b).unwrap())
+    //     //     .unwrap_or(INFINITY)
+    //     //     .min(300.0) as f64
+    //     //     / 300.0;
+    //     // let _ = self
+    //     //     .music_forest
+    //     //     .set_volume(factor * 2.0, Default::default());
+    //     // let _ = self
+    //     //     .music_battle
+    //     //     .set_volume((1.0 - factor) * 2.0, Default::default());
     // }
 }

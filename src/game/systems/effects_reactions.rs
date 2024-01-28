@@ -8,7 +8,7 @@ use crate::game::{
         particle::Particle,
         speed::Speed,
     },
-    utils::{magic::spell_tag::SpellTagEffect, space::Space},
+    utils::space::Space,
 };
 use hecs::{Entity, World};
 use micro_games_kit::third_party::vek::{Transform, Vec2};

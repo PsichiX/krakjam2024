@@ -1,5 +1,4 @@
 use super::new_gameplay::NewGameplay;
-use crate::game::utils::audio::Audio;
 use micro_games_kit::{
     context::GameContext,
     game::{GameState, GameStateChange},
@@ -14,27 +13,6 @@ use micro_games_kit::{
         windowing::event::MouseButton,
     },
 };
-
-macro_rules! load_texture_series {
-    (
-        $context:expr,
-        $id:literal,
-        [$($index:literal),+]
-    ) => {
-        $(
-            load_texture(
-                $context.draw,
-                $context.graphics,
-                concat!($id, "/", $index),
-                include_bytes!(concat!(
-                    "../../../assets/images/", $id, "-", $index, ".png"),
-                ),
-                1,
-                1,
-            );
-        )+
-    };
-}
 
 pub struct Preloader;
 
@@ -73,27 +51,6 @@ impl Preloader {
             Shader::TEXT_VERTEX,
             Shader::TEXT_FRAGMENT,
         );
-        load_shader(
-            context.draw,
-            context.graphics,
-            "character",
-            Shader::TEXTURED_VERTEX_2D,
-            include_str!("../../../assets/shaders/character.glsl"),
-        );
-        // load_shader(
-        //     context.draw,
-        //     context.graphics,
-        //     "sphere-light",
-        //     Shader::TEXTURED_VERTEX_2D,
-        //     include_str!("../../../assets/shaders/sphere_light.glsl"),
-        // );
-        // load_shader(
-        //     context.draw,
-        //     context.graphics,
-        //     "lighting",
-        //     Shader::TEXTURED_VERTEX_2D,
-        //     include_str!("../../../assets/shaders/lighting.glsl"),
-        // );
     }
 
     fn load_fonts(context: &mut GameContext) {
@@ -134,40 +91,6 @@ impl Preloader {
             1,
             1,
         );
-
-        // items
-        load_texture(
-            context.draw,
-            context.graphics,
-            "item/apple",
-            include_bytes!("../../../assets/images/item/apple.png"),
-            1,
-            1,
-        );
-        load_texture(
-            context.draw,
-            context.graphics,
-            "item/banana",
-            include_bytes!("../../../assets/images/item/banana.png"),
-            1,
-            1,
-        );
-        // load_texture(
-        //     context.draw,
-        //     context.graphics,
-        //     "item/orange",
-        //     include_bytes!("../../../assets/images/item/orange.png"),
-        //     1,
-        //     1,
-        // );
-        // load_texture(
-        //     context.draw,
-        //     context.graphics,
-        //     "item/torch",
-        //     include_bytes!("../../../assets/images/item/torch.png"),
-        //     1,
-        //     1,
-        // );
 
         // particles
         load_texture(
@@ -260,54 +183,30 @@ impl Preloader {
             1,
             1,
         );
-        // load_texture(
-        //     context.draw,
-        //     context.graphics,
-        //     "ui/button/idle",
-        //     include_bytes!("../../../assets/images/ui/button-idle.png"),
-        //     1,
-        //     1,
-        // );
-        // load_texture(
-        //     context.draw,
-        //     context.graphics,
-        //     "ui/button/select",
-        //     include_bytes!("../../../assets/images/ui/button-select.png"),
-        //     1,
-        //     1,
-        // );
-        // load_texture(
-        //     context.draw,
-        //     context.graphics,
-        //     "ui/button/trigger",
-        //     include_bytes!("../../../assets/images/ui/button-trigger.png"),
-        //     1,
-        //     1,
-        // );
-        // load_texture(
-        //     context.draw,
-        //     context.graphics,
-        //     "ui/cover",
-        //     include_bytes!("../../../assets/images/ui/cover.png"),
-        //     1,
-        //     1,
-        // );
-        // load_texture(
-        //     context.draw,
-        //     context.graphics,
-        //     "ui/won",
-        //     include_bytes!("../../../assets/images/ui/won.png"),
-        //     1,
-        //     1,
-        // );
-        // load_texture(
-        //     context.draw,
-        //     context.graphics,
-        //     "ui/lost",
-        //     include_bytes!("../../../assets/images/ui/lost.png"),
-        //     1,
-        //     1,
-        // );
+        load_texture(
+            context.draw,
+            context.graphics,
+            "ui/button/idle",
+            include_bytes!("../../../assets/images/ui/button-idle.png"),
+            1,
+            1,
+        );
+        load_texture(
+            context.draw,
+            context.graphics,
+            "ui/button/select",
+            include_bytes!("../../../assets/images/ui/button-select.png"),
+            1,
+            1,
+        );
+        load_texture(
+            context.draw,
+            context.graphics,
+            "ui/button/trigger",
+            include_bytes!("../../../assets/images/ui/button-trigger.png"),
+            1,
+            1,
+        );
     }
 
     fn load_sounds_and_music() {
