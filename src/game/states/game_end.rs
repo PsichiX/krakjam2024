@@ -7,8 +7,9 @@ use micro_games_kit::{
         raui_immediate_widgets::{
             core::{
                 containers::{horizontal_box, nav_vertical_box},
-                image_box, FlexBoxItemLayout, ImageBoxAspectRatio, ImageBoxImage, ImageBoxMaterial,
-                ImageBoxProps, TextBoxVerticalAlign,
+                image_box, text_box, Color, FlexBoxItemLayout, ImageBoxAspectRatio, ImageBoxImage,
+                ImageBoxMaterial, ImageBoxProps, TextBoxFont, TextBoxHorizontalAlign, TextBoxProps,
+                TextBoxVerticalAlign, Transform, Vec2,
             },
             material::{text_paper, TextPaperProps},
         },
@@ -35,14 +36,14 @@ impl ToString for GameEndReason {
 }
 
 pub struct GameEnd {
-    reason: GameEndReason,
+    time: f32,
     restart: Option<InputActionRef>,
 }
 
 impl GameEnd {
-    pub fn new(reason: GameEndReason) -> Self {
+    pub fn new(time: f32) -> Self {
         Self {
-            reason,
+            time,
             restart: None,
         }
     }
@@ -81,13 +82,33 @@ impl GameState for GameEnd {
                     outside: false,
                 }),
                 material: ImageBoxMaterial::Image(ImageBoxImage {
-                    id: match self.reason {
-                        GameEndReason::Lost => "ui/lost".to_owned(),
-                        GameEndReason::Won => "ui/won".to_owned(),
-                    },
+                    id: "ui/lost".to_owned(),
                     ..Default::default()
                 }),
                 ..Default::default()
+            });
+
+            nav_vertical_box((), || {
+                text_box(TextBoxProps {
+                    text: format!("Survived: {:.2}", self.time),
+                    horizontal_align: TextBoxHorizontalAlign::Center,
+                    vertical_align: TextBoxVerticalAlign::Top,
+                    font: TextBoxFont {
+                        name: "roboto".to_owned(),
+                        size: 100.0,
+                    },
+                    transform: Transform {
+                        translation: Vec2 { x: 0.0, y: 100.0 },
+                        ..Default::default()
+                    },
+                    color: Color {
+                        r: 0.1,
+                        g: 0.1,
+                        b: 0.9,
+                        a: 1.0,
+                    },
+                    ..Default::default()
+                });
             });
         });
     }

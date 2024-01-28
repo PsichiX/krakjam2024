@@ -434,7 +434,7 @@ impl GameState for NewGameplay {
 
         if self.world.query::<&Player>().iter().next().is_none() {
             *context.state_change =
-                GameStateChange::Swap(Box::new(GameEnd::new(GameEndReason::Lost)));
+                GameStateChange::Swap(Box::new(GameEnd::new(self.alive_time_seconds)));
         }
 
         // self.update_ambient_music();
