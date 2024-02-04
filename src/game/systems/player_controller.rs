@@ -128,7 +128,8 @@ impl PlayerController {
                         player_moved_vector = Some(player_moved_vector.unwrap() * 0.5);
                     }
 
-                    movement.velocity = player_moved_vector.unwrap();
+                    movement.static_friction = 1.0;
+                    movement.velocity += player_moved_vector.unwrap();
 
                     if let Some(named_animation) = animation.animation.as_ref() {
                         if named_animation.id != self.run_animation.id {
@@ -234,6 +235,7 @@ impl PlayerController {
                 Movement::new(
                     Particle::generate_velocity(10.0..=20.0, 20.0f32.to_radians()),
                     Default::default(),
+                    0.0,
                 ),
             ));
         }

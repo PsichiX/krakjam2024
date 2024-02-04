@@ -490,7 +490,7 @@ impl GameState for NewGameplay {
             delta_time,
             &self.word_to_spell_tag_database,
         );
-        MovementController::run(&self.world, &mut context, delta_time);
+        MovementController::run(&self.world, delta_time);
         EnemyController::run(&mut self.world, delta_time);
         AnimationController::run(&self.world, delta_time);
         ProjectileController::run(&mut self.world, delta_time);

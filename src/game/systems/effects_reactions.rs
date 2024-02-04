@@ -5,8 +5,8 @@ use crate::game::{
         enemy::Enemy,
         health::Health,
         ignore_entity::IgnoreEntity,
-        immobility::Immobility,
-        movement::Movement,
+        immobility::{self, Immobility},
+        movement::{self, Movement},
         particle::Particle,
         speed::Speed,
     },
@@ -49,16 +49,17 @@ impl EffectsReactions {
                     Option<&mut Health>,
                     Option<&mut Immobility>,
                     Option<&mut Transform<f32, f32, f32>>,
+                    Option<&mut Movement>,
                     Option<&mut Speed>,
                     Option<&mut Enemy>,
                 )>();
                 let mut view = query.view();
                 let [entity_a_query, entity_b_query] = view.get_mut_n([entity_a, entity_b]);
 
-                if let Some((effect_a, mut health_a, immobility_a, mut transform_a, ..)) =
+                if let Some((effect_a, mut health_a, mut immobility_a, mut transform_a, mut movement_a, ..)) =
                     entity_a_query
                 {
-                    if let Some((effect_b, mut health_b, immobility_b, mut transform_b, ..)) =
+                    if let Some((effect_b, mut health_b, mut immobility_b, mut transform_b, mut movement_b, ..)) =
                         entity_b_query
                     {
                         reaction = effect_a.react(effect_b);
@@ -71,27 +72,43 @@ impl EffectsReactions {
                         if let Some(health) = health_b.as_mut() {
                             health.value = (health.value - damage).max(0.0);
                         }
-                        if let Some(immobility) = immobility_a {
+                        if let Some(immobility) = immobility_a.as_mut() {
                             if immobility.time_left <= 0.0 {
                                 immobility.time_left = immobile_time;
                             }
                         }
-                        if let Some(immobility) = immobility_b {
+                        if let Some(immobility) = immobility_b.as_mut() {
                             if immobility.time_left <= 0.0 {
                                 immobility.time_left = immobile_time;
                             }
                         }
-                        if let (Some(transform_a), Some(transform_b)) =
-                            (transform_a.as_mut(), transform_b.as_mut())
-                        {
-                            let direction_ab = (transform_b.position.xy()
-                                - transform_a.position.xy())
-                            .try_normalized()
-                            .unwrap_or_default();
-                            transform_a.position -= direction_ab * push_distance;
-                            transform_b.position += direction_ab * push_distance;
-
+                        if let (Some(transform_a), Some(transform_b)) = (transform_a.as_mut(), transform_b.as_mut()) {
                             reaction_transform = transform_a.clone();
+                        }
+                        if push_distance > 0.001 {
+                            if let (Some(transform_a), Some(transform_b), Some(movement_a), Some(movement_b)) =
+                                (transform_a.as_mut(), transform_b.as_mut(), movement_a.as_mut(), movement_b.as_mut())
+                            {
+                                let direction_ab = (transform_b.position.xy()
+                                    - transform_a.position.xy())
+                                .try_normalized()
+                                .unwrap_or_default();
+
+                                // transform_a.position -= direction_ab * push_distance;
+                                // transform_b.position += direction_ab * push_distance;
+
+                                if let Some(immobility_a) = immobility_a {
+                                    immobility_a.time_left = 2.0;
+                                    movement_a.static_friction = 0.05;
+                                    movement_a.apply_force(direction_ab * -push_distance * 200.0);
+                                }
+
+                                if let Some(immobility_b) = immobility_b {
+                                    immobility_b.time_left = 2.0;
+                                    movement_b.static_friction = 0.05;
+                                    movement_b.apply_force(direction_ab * push_distance * 200.0);
+                                }
+                            }
                         }
                         // if let Some(speed) = speed_a.as_mut() {
                         //     if let Some(enemy) = enemy_a.as_mut() {
@@ -132,6 +149,7 @@ impl EffectsReactions {
                                         180.0f32.to_radians(),
                                     ),
                                     Default::default(),
+                                    0.0,
                                 ),
                             ));
                         }
@@ -145,6 +163,7 @@ impl EffectsReactions {
                                 Movement::new(
                                     Particle::generate_velocity(40.0..=80.0, 180.0f32.to_radians()),
                                     Default::default(),
+                                    0.0,
                                 ),
                             ));
                         }
@@ -161,6 +180,7 @@ impl EffectsReactions {
                                         180.0f32.to_radians(),
                                     ),
                                     Default::default(),
+                                    0.0,
                                 ),
                             ));
                         }

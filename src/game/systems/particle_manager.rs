@@ -60,6 +60,7 @@ impl ParticleManager {
                             velocity
                                 + Particle::generate_velocity(100.0..=200.0, 180.0f32.to_radians()),
                             Default::default(),
+                            0.0,
                         ),
                     ));
                 }

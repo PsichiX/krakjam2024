@@ -48,18 +48,23 @@ impl EnemyController {
                 enemy.direction += to_player_direction.rotated_z(enemy.direction_rotation);
                 enemy.direction.normalize();
 
-                movement.velocity = enemy.direction * speed.value;
+                let mut immobile = false;
 
                 if let Some(immobility) = immobility {
                     if immobility.time_left > 0.0 {
-                        movement.velocity = Vec2::<f32>::zero();
+                        immobile = true;
                     }
                 }
 
-                if movement.velocity.x >= 0.0 {
-                    transform.scale.x = transform.scale.x.abs();
-                } else {
-                    transform.scale.x = -transform.scale.x.abs();
+                if !immobile {
+                    movement.static_friction = 1.0;
+                    movement.velocity += enemy.direction * speed.value;
+
+                    if movement.velocity.x >= 0.0 {
+                        transform.scale.x = transform.scale.x.abs();
+                    } else {
+                        transform.scale.x = -transform.scale.x.abs();
+                    }
                 }
 
                 speed.value =
