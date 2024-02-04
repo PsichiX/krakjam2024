@@ -8,41 +8,39 @@ use micro_games_kit::third_party::{
 
 pub struct Particle {
     pub texture: Cow<'static, str>,
-    pub position: Vec2<f32>,
-    pub velocity: Vec2<f32>,
     pub lifetime: f32,
     pub lifetime_max: f32,
     pub scale: f32,
 }
 
 impl Particle {
+    pub fn generate_velocity(speed: RangeInclusive<f32>, angle_range: f32) -> Vec2<f32> {
+        let mut rng = thread_rng();
+        let speed = rng.gen_range(speed);
+        let angle = rng.gen_range((-angle_range)..=angle_range);
+        let (vx, vy) = angle.sin_cos();
+
+        Vec2 { x: vx, y: -vy } * speed
+    }
+
     pub fn new(
         texture: Cow<'static, str>,
-        position: Vec2<f32>,
-        velocity: Vec2<f32>,
-        angle_range: f32,
-        speed: RangeInclusive<f32>,
         lifetime_max: RangeInclusive<f32>,
         scale: RangeInclusive<f32>,
     ) -> Self {
         let mut rng = thread_rng();
-        let angle = rng.gen_range((-angle_range)..=angle_range);
-        let speed = rng.gen_range(speed);
         let lifetime_max = rng.gen_range(lifetime_max);
         let scale = rng.gen_range(scale);
-        let (vx, vy) = angle.sin_cos();
 
         Self {
             texture,
-            position,
-            velocity: velocity + Vec2 { x: vx, y: -vy } * speed,
             lifetime: lifetime_max,
             lifetime_max,
             scale,
         }
     }
 
-    pub fn emit(&self) -> Option<ParticleInstance> {
+    pub fn emit(&self, transform: &Transform<f32, f32, f32>) -> Option<ParticleInstance> {
         let alpha = self.lifetime / self.lifetime_max;
         if alpha > 0.0 {
             Some(ParticleInstance {
@@ -52,10 +50,7 @@ impl Particle {
                     b: 1.0,
                     a: alpha,
                 },
-                transform: Transform {
-                    position: self.position.into(),
-                    ..Default::default()
-                },
+                transform: transform.clone(),
                 size: Vec2 {
                     x: 60.0 * self.scale,
                     y: 60.0 * self.scale,

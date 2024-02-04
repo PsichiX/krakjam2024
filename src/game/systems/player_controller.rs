@@ -1,8 +1,8 @@
 use crate::game::{
     components::{
         animation::Animation, effect::Effect, follow_player::FollowPlayer,
-        ignore_entity::IgnoreEntity, immobility::Immobility, particle::Particle, player::Player,
-        spell::Spell,
+        ignore_entity::IgnoreEntity, immobility::Immobility, movement::Movement,
+        particle::Particle, player::Player, spell::Spell,
     },
     states::new_gameplay::NewGameplay,
     utils::magic::{database::WordToSpellTagDatabase, spell_tag::SpellTagEffect},
@@ -99,16 +99,17 @@ impl PlayerController {
         }
 
         let mut cast_action: Option<(Entity, PlayerCastAction)> = None;
-        let mut particles = Vec::<Particle>::new();
+        let mut particles = Vec::<(Transform<f32, f32, f32>, Particle)>::new();
         let mut player_moved_vector: Option<Vec2<f32>> = None;
 
-        for (entity, (player, transform, animation, immobility, effect)) in world
+        for (entity, (player, transform, animation, immobility, effect, movement)) in world
             .query::<(
                 &mut Player,
                 &mut Transform<f32, f32, f32>,
                 &mut Animation,
                 &Immobility,
                 &Effect,
+                &mut Movement,
             )>()
             .iter()
         {
@@ -116,18 +117,18 @@ impl PlayerController {
                 let mouse_pos = Vec2::new(input.mouse_x.get().0, input.mouse_y.get().0);
                 let diff = (mouse_pos - context.graphics.main_camera.screen_size / 2.0) / 200.0;
                 let length = diff.magnitude().min(1.0);
-                let movement = diff.try_normalized().unwrap_or_default() * length;
+                let player_movement = diff.try_normalized().unwrap_or_default() * length;
 
-                transform.scale.x = if movement.x > 0.0 { -1.0 } else { 1.0 };
+                transform.scale.x = if player_movement.x > 0.0 { -1.0 } else { 1.0 };
 
-                if movement.magnitude() > 0.5 {
-                    player_moved_vector = Some(movement * delta_time * 190.0);
+                if player_movement.magnitude() > 0.5 {
+                    player_moved_vector = Some(player_movement * delta_time * 190.0 * 40.0);
 
                     if immobility.time_left > 0.0 {
                         player_moved_vector = Some(player_moved_vector.unwrap() * 0.5);
                     }
 
-                    transform.position += player_moved_vector.unwrap();
+                    movement.velocity = player_moved_vector.unwrap();
 
                     if let Some(named_animation) = animation.animation.as_ref() {
                         if named_animation.id != self.run_animation.id {
@@ -137,6 +138,8 @@ impl PlayerController {
                         animation.animation = Some(self.run_animation.clone());
                     }
                 } else {
+                    movement.velocity = Vec2::<f32>::zero();
+
                     if let Some(named_animation) = animation.animation.as_ref() {
                         if named_animation.id != self.idle_animation.id {
                             animation.animation = Some(self.idle_animation.clone());
@@ -153,11 +156,11 @@ impl PlayerController {
                         entity,
                         PlayerCastAction {
                             position: (transform.position
-                                + movement.normalized()
+                                + player_movement.normalized()
                                     * basic_spell.direction.multiplier()
                                     * 15.0)
                                 .into(),
-                            direction: movement.normalized(),
+                            direction: player_movement.normalized(),
                             spell: basic_spell,
                         },
                     ));
@@ -168,9 +171,11 @@ impl PlayerController {
                         entity,
                         PlayerCastAction {
                             position: (transform.position
-                                + movement.normalized() * spell.direction.multiplier() * 15.0)
+                                + player_movement.normalized()
+                                    * spell.direction.multiplier()
+                                    * 15.0)
                                 .into(),
-                            direction: movement.normalized(),
+                            direction: player_movement.normalized(),
                             spell: spell.clone(),
                         },
                     ));
@@ -193,30 +198,44 @@ impl PlayerController {
             while player.current_effect_particle_accumulator > player.current_effect_particle_time
                 && effect.to_effect_tag() != SpellTagEffect::None
             {
+                let mut particle_transform = Transform::<f32, f32, f32>::default();
+                particle_transform.position =
+                    (transform.position.xy() + Vec2::<f32>::new(0.0, -50.0)).into();
+
                 player.current_effect_particle_accumulator = 0.0;
 
-                particles.push(Particle::new(
-                    effect.to_effect_tag().texture().into(),
-                    transform.position.xy() + Vec2::<f32>::new(0.0, -50.0),
-                    Vec2::<f32>::zero(),
-                    20.0f32.to_radians(),
-                    10.0..=20.0,
-                    1.0..=2.0,
-                    0.4..=1.0,
+                particles.push((
+                    particle_transform,
+                    Particle::new(
+                        effect.to_effect_tag().texture().into(),
+                        1.0..=2.0,
+                        0.4..=1.0,
+                    ),
                 ));
             }
 
             context.graphics.main_camera.transform.position = transform.position;
         }
 
-        for (_, (particle, _)) in world.query::<(&mut Particle, &FollowPlayer)>().iter() {
+        for (_, (transform, _, _)) in world
+            .query::<(&mut Transform<f32, f32, f32>, &Particle, &FollowPlayer)>()
+            .iter()
+        {
             if let Some(v) = player_moved_vector {
-                particle.position += v;
+                transform.position += v * delta_time;
             }
         }
 
         for particle in particles {
-            world.spawn((particle, FollowPlayer));
+            world.spawn((
+                particle.0,
+                particle.1,
+                FollowPlayer,
+                Movement::new(
+                    Particle::generate_velocity(10.0..=20.0, 20.0f32.to_radians()),
+                    Default::default(),
+                ),
+            ));
         }
 
         if let Some(cast) = cast_action {

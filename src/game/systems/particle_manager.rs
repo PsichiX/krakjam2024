@@ -8,18 +8,19 @@ use micro_games_kit::{
             utils::{Drawable, ShaderRef, TextureRef},
         },
         spitfire_glow::renderer::GlowTextureFiltering,
-        vek::{Transform, Vec2},
+        vek::{transform, Transform, Vec2},
     },
 };
 
 use crate::game::components::{
-    particle::Particle, particle_generator::ParticleGenerator, projectile::Projectile, spell::Spell,
+    movement::Movement, particle::Particle, particle_generator::ParticleGenerator,
+    projectile::Projectile, spell::Spell,
 };
 pub struct ParticleManager {}
 
 impl ParticleManager {
     pub fn process(&mut self, world: &mut World, delta_time: f32) {
-        let mut particles = Vec::<Particle>::new();
+        let mut particles = Vec::<(Transform<f32, f32, f32>, Particle, Movement)>::new();
 
         for (_, (generator, transform, projectile, spell)) in world
             .query::<(
@@ -46,31 +47,36 @@ impl ParticleManager {
                 generator.emmission_accumulator = 0.0;
 
                 for _ in 0..generator.batch_size {
-                    particles.push(Particle::new(
-                        generator.texture.clone(),
-                        transform.position.xy(),
-                        velocity,
-                        180.0f32.to_radians(),
-                        100.0..=200.0,
-                        0.1..=0.5,
-                        (0.8 + scale_offset)..=(1.5 + scale_offset),
+                    let mut particle_transform = Transform::<f32, f32, f32>::default();
+                    particle_transform.position = transform.position;
+
+                    particles.push((
+                        particle_transform,
+                        Particle::new(
+                            generator.texture.clone(),
+                            0.1..=0.5,
+                            (0.8 + scale_offset)..=(1.5 + scale_offset),
+                        ),
+                        Movement::new(
+                            velocity
+                                + Particle::generate_velocity(100.0..=200.0, 180.0f32.to_radians()),
+                            Default::default(),
+                        ),
                     ));
                 }
             }
         }
 
         for particle in particles {
-            world.spawn((particle,));
+            world.spawn(particle);
         }
 
         let mut entities_to_remove = Vec::<Entity>::new();
 
-        for (entity, (data,)) in world.query::<(&mut Particle,)>().iter() {
-            data.lifetime -= delta_time;
+        for (entity, (particle,)) in world.query::<(&mut Particle,)>().iter() {
+            particle.lifetime -= delta_time;
 
-            if data.lifetime >= 0.0 {
-                data.position += data.velocity * delta_time;
-            } else {
+            if particle.lifetime <= 0.0 {
                 entities_to_remove.push(entity);
             }
         }
@@ -81,14 +87,17 @@ impl ParticleManager {
     }
 
     pub fn draw(&self, world: &World, context: &mut GameContext) {
-        for (_, (particle,)) in world.query::<(&Particle,)>().iter() {
+        for (_, (transform, particle)) in world
+            .query::<(&Transform<f32, f32, f32>, &Particle)>()
+            .iter()
+        {
             ParticleEmitter::single(SpriteTexture {
                 sampler: "u_image".into(),
                 texture: TextureRef::name(particle.texture.clone()),
                 filtering: GlowTextureFiltering::Linear,
             })
             .shader(ShaderRef::name("image"))
-            .emit(particle.emit())
+            .emit(particle.emit(transform))
             .draw(context.draw, context.graphics);
         }
     }

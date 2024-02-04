@@ -7,6 +7,7 @@ pub mod follow_player;
 pub mod health;
 pub mod ignore_entity;
 pub mod immobility;
+pub mod movement;
 pub mod particle;
 pub mod particle_generator;
 pub mod player;

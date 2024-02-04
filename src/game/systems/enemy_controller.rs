@@ -1,8 +1,8 @@
 use super::player_controller::PlayerCastAction;
 use crate::game::{
     components::{
-        effect::Effect, enemy::Enemy, immobility::Immobility, player::Player, speed::Speed,
-        spell::Spell,
+        effect::Effect, enemy::Enemy, immobility::Immobility, movement::Movement, player::Player,
+        speed::Speed, spell::Spell,
     },
     states::new_gameplay::NewGameplay,
     utils::magic::spell_tag::{
@@ -30,11 +30,12 @@ impl EnemyController {
             .next()
             .map(|(_, transform)| transform.position.xy())
         {
-            for (entity, (enemy, speed, transform, immobility, effect)) in world
+            for (entity, (enemy, speed, transform, movement, immobility, effect)) in world
                 .query::<(
                     &mut Enemy,
                     &mut Speed,
                     &mut Transform<f32, f32, f32>,
+                    &mut Movement,
                     Option<&Immobility>,
                     Option<&Effect>,
                 )>()
@@ -47,20 +48,20 @@ impl EnemyController {
                 enemy.direction += to_player_direction.rotated_z(enemy.direction_rotation);
                 enemy.direction.normalize();
 
-                let mut velocity = enemy.direction * speed.value * delta_time;
+                movement.velocity = enemy.direction * speed.value;
 
                 if let Some(immobility) = immobility {
                     if immobility.time_left > 0.0 {
-                        velocity = Vec2::<f32>::zero();
+                        movement.velocity = Vec2::<f32>::zero();
                     }
                 }
 
-                if velocity.x >= 0.0 {
+                if movement.velocity.x >= 0.0 {
                     transform.scale.x = transform.scale.x.abs();
                 } else {
                     transform.scale.x = -transform.scale.x.abs();
                 }
-                transform.position += velocity;
+
                 speed.value =
                     (speed.value + enemy.acceleration * delta_time).min(enemy.speed_limit);
 

@@ -6,6 +6,7 @@ use crate::game::{
         health::Health,
         ignore_entity::IgnoreEntity,
         immobility::Immobility,
+        movement::Movement,
         particle::Particle,
         speed::Speed,
     },
@@ -119,37 +120,49 @@ impl EffectsReactions {
                     match reaction {
                         EffectReaction::None => {}
                         EffectReaction::Explode => {
-                            world.spawn((Particle::new(
-                                "particle/explosion".into(),
-                                reaction_transform.position.into(),
-                                Vec2::<f32>::zero(),
-                                180.0f32.to_radians(),
-                                100.0..=200.0,
-                                0.5..=2.0,
-                                2.0..=4.0,
-                            ),));
+                            let mut transform = Transform::<f32, f32, f32>::default();
+                            transform.position = reaction_transform.position;
+
+                            world.spawn((
+                                transform,
+                                Particle::new("particle/explosion".into(), 0.5..=2.0, 2.0..=4.0),
+                                Movement::new(
+                                    Particle::generate_velocity(
+                                        100.0..=200.0,
+                                        180.0f32.to_radians(),
+                                    ),
+                                    Default::default(),
+                                ),
+                            ));
                         }
                         EffectReaction::Paralize => {
-                            world.spawn((Particle::new(
-                                "particle/paralized".into(),
-                                reaction_transform.position.into(),
-                                Vec2::<f32>::zero(),
-                                180.0f32.to_radians(),
-                                40.0..=80.0,
-                                0.5..=1.5,
-                                0.4..=1.2,
-                            ),));
+                            let mut transform = Transform::<f32, f32, f32>::default();
+                            transform.position = reaction_transform.position;
+
+                            world.spawn((
+                                transform,
+                                Particle::new("particle/paralized".into(), 0.5..=1.5, 0.4..=1.2),
+                                Movement::new(
+                                    Particle::generate_velocity(40.0..=80.0, 180.0f32.to_radians()),
+                                    Default::default(),
+                                ),
+                            ));
                         }
                         EffectReaction::Steam => {
-                            world.spawn((Particle::new(
-                                "particle/steam".into(),
-                                reaction_transform.position.into(),
-                                Vec2::<f32>::zero(),
-                                180.0f32.to_radians(),
-                                60.0..=100.0,
-                                0.5..=1.0,
-                                1.0..=2.0,
-                            ),));
+                            let mut transform = Transform::<f32, f32, f32>::default();
+                            transform.position = reaction_transform.position;
+
+                            world.spawn((
+                                transform,
+                                Particle::new("particle/steam".into(), 0.5..=1.0, 1.0..=2.0),
+                                Movement::new(
+                                    Particle::generate_velocity(
+                                        60.0..=100.0,
+                                        180.0f32.to_radians(),
+                                    ),
+                                    Default::default(),
+                                ),
+                            ));
                         }
                     };
                 }

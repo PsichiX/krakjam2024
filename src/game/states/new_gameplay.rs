@@ -8,6 +8,7 @@ use crate::game::{
         health::Health,
         ignore_entity::IgnoreEntity,
         immobility::Immobility,
+        movement::Movement,
         particle_generator::ParticleGenerator,
         sprite_data::SpriteData,
     },
@@ -16,8 +17,9 @@ use crate::game::{
         damage_dealer::DamageDealer, death::Death, effects_reactions::EffectsReactions,
         enemy_controller::EnemyController, enemy_jump_animation::EnemyJumpAnimation,
         enemy_spawn::EnemySpawn, immobility_controller::ImmobilityController,
-        particle_manager::ParticleManager, player_controller::PlayerCastAction,
-        slime_color::SlimeColor, spell_controller::SpellController,
+        movement_controller::MovementController, particle_manager::ParticleManager,
+        player_controller::PlayerCastAction, slime_color::SlimeColor,
+        spell_controller::SpellController,
     },
     ui::{health_bar::health_bar, world_to_screen_content_layout},
     utils::{
@@ -459,6 +461,7 @@ impl GameState for NewGameplay {
                 ..Default::default()
             },
             Immobility { time_left: 0.0 },
+            Movement::default(),
         ));
     }
 
@@ -487,6 +490,7 @@ impl GameState for NewGameplay {
             delta_time,
             &self.word_to_spell_tag_database,
         );
+        MovementController::run(&self.world, &mut context, delta_time);
         EnemyController::run(&mut self.world, delta_time);
         AnimationController::run(&self.world, delta_time);
         ProjectileController::run(&mut self.world, delta_time);

@@ -7,6 +7,7 @@ use crate::game::{
         enemy::Enemy,
         health::Health,
         immobility::Immobility,
+        movement::Movement,
         player::Player,
         speed::Speed,
         sprite_data::SpriteData,
@@ -118,6 +119,7 @@ impl EnemySpawn {
                 },
                 Speed::new(40.0..=100.0),
                 Immobility { time_left: 0.0 },
+                Movement::default(),
             ));
         }
     }
