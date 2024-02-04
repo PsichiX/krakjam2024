@@ -795,6 +795,7 @@ impl NewGameplay {
                 cast.direction,
                 cast.spell.duration.time(),
             ),
+            Movement::default(),
             Collidable {
                 space_object: Some(SpaceObject {
                     entity: None,

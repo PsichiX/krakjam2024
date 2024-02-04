@@ -8,13 +8,12 @@ use micro_games_kit::{
             utils::{Drawable, ShaderRef, TextureRef},
         },
         spitfire_glow::renderer::GlowTextureFiltering,
-        vek::{transform, Transform, Vec2},
+        vek::{Transform, Vec2},
     },
 };
 
 use crate::game::components::{
-    movement::Movement, particle::Particle, particle_generator::ParticleGenerator,
-    projectile::Projectile, spell::Spell,
+    movement::Movement, particle::Particle, particle_generator::ParticleGenerator, spell::Spell,
 };
 pub struct ParticleManager {}
 
@@ -22,18 +21,18 @@ impl ParticleManager {
     pub fn process(&mut self, world: &mut World, delta_time: f32) {
         let mut particles = Vec::<(Transform<f32, f32, f32>, Particle, Movement)>::new();
 
-        for (_, (generator, transform, projectile, spell)) in world
+        for (_, (generator, transform, movement, spell)) in world
             .query::<(
                 &mut ParticleGenerator,
                 &Transform<f32, f32, f32>,
-                Option<&Projectile>,
+                Option<&Movement>,
                 Option<&Spell>,
             )>()
             .iter()
         {
             generator.emmission_accumulator += delta_time;
 
-            let velocity = match projectile {
+            let velocity = match movement {
                 None => Vec2::<f32>::default(),
                 Some(p) => p.velocity,
             };

@@ -3,7 +3,6 @@ use crate::game::{
     utils::space::Space,
 };
 use hecs::{Entity, World};
-use micro_games_kit::third_party::vek::Transform;
 
 pub struct ProjectileController;
 
@@ -11,13 +10,9 @@ impl ProjectileController {
     pub fn run(world: &mut World, delta_time: f32) {
         let mut to_despawn = Vec::<Entity>::new();
 
-        for (entity, (projectile, transform)) in world
-            .query::<(&mut Projectile, &mut Transform<f32, f32, f32>)>()
-            .iter()
-        {
+        for (entity, (projectile,)) in world.query::<(&mut Projectile,)>().iter() {
             projectile.alive_time += delta_time;
             projectile.ttl -= delta_time;
-            transform.position += projectile.velocity * delta_time;
 
             if projectile.ttl <= 0.0 {
                 to_despawn.push(entity);

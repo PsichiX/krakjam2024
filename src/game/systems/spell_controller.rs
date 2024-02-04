@@ -2,7 +2,9 @@ use hecs::World;
 use micro_games_kit::third_party::vek::{Transform, Vec2};
 
 use crate::game::{
-    components::{collidable::Collidable, projectile::Projectile, spell::Spell},
+    components::{
+        collidable::Collidable, movement::Movement, projectile::Projectile, spell::Spell,
+    },
     utils::magic::spell_tag::{SpellTagDirection, SpellTagSpeed, SpellTagTrajectory},
 };
 
@@ -11,7 +13,9 @@ pub struct SpellController;
 impl SpellController {
     pub fn run(world: &mut World) {
         // Velocity calculation
-        for (_, (projectile, spell)) in world.query::<(&mut Projectile, &Spell)>().iter() {
+        for (_, (movement, projectile, spell)) in
+            world.query::<(&mut Movement, &Projectile, &Spell)>().iter()
+        {
             let time_divider = match spell.speed {
                 SpellTagSpeed::Fast => 0.5,
                 SpellTagSpeed::Medium => 1.0,
@@ -20,7 +24,7 @@ impl SpellController {
 
             match spell.trajectory {
                 SpellTagTrajectory::Straight => {
-                    projectile.velocity = projectile.direction * projectile.speed;
+                    movement.velocity = projectile.direction * projectile.speed;
                 }
                 SpellTagTrajectory::Circle => {
                     let circle_direction = Vec2::new(
@@ -28,14 +32,14 @@ impl SpellController {
                         (projectile.alive_time / time_divider * std::f32::consts::PI).sin(),
                     );
 
-                    projectile.velocity =
+                    movement.velocity =
                         projectile.direction * projectile.speed * 1.5 * circle_direction;
                 }
                 SpellTagTrajectory::Sinus => {
                     let perpendicular_direction =
                         Vec2::new(projectile.direction.y, -projectile.direction.x);
 
-                    projectile.velocity = projectile.direction * projectile.speed
+                    movement.velocity = projectile.direction * projectile.speed
                         + projectile.speed
                             * 1.5
                             * (projectile.alive_time / time_divider * 2.0 * std::f32::consts::PI)
@@ -46,10 +50,10 @@ impl SpellController {
 
             match spell.direction {
                 SpellTagDirection::Backward => {
-                    projectile.velocity *= -1.0;
+                    movement.velocity *= -1.0;
                 }
                 SpellTagDirection::Forward => {}
-                SpellTagDirection::Down => projectile.velocity = Vec2::zero(),
+                SpellTagDirection::Down => movement.velocity = Vec2::zero(),
             }
         }
 
